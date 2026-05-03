@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+:root {
+  --background: #F8F5F0;
+  --foreground: #3B2F2F;
+  --ivory: #F8F5F0;
+  --espresso: #3B2F2F;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-lora);
+  --font-serif: var(--font-playfair);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--ivory);
+  color: var(--espresso);
+  font-family: var(--font-lora), serif;
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-playfair), serif;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+button {
+  font-family: var(--font-lora), serif;
+}
+
+input {
+  font-family: var(--font-lora), serif;
+}
