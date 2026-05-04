@@ -34,8 +34,7 @@ export default function RootLayout({
       lang="en"
       className={`${playfair.variable} ${lora.variable} h-full antialiased`}
     >
-      <body className="min-h-screen bg-ivory text-espresso antialiased">
-        {children}
+      <body>{children}
       </body>
     </html>
   );
