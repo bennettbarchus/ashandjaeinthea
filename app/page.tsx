@@ -1,241 +1,201 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
-const CORRECT_PASSWORD = "celebrate2026";
-const PASSWORD_STORAGE_KEY = "wedding_hub_access";
+const PASSWORD = "celebrate2026";
 
-interface Hotel {
-  id: string;
-  name: string;
-  priceLevel: "$" | "$$" | "$$$";
-  description: string;
-  distance: string;
-  amenities: string[];
-  url: string;
-}
-
-const hotels: Hotel[] = [
+const hotels = [
   {
-    id: "luxury",
-    name: "The Forth Hotel",
-    priceLevel: "$$$",
-    description: "Ultra-luxury downtown hotel with impeccable service and sophisticated elegance",
-    distance: "The wedding venue",
-    amenities: ["Concierge Service", "Michelin-Starred Restaurant", "Spa & Pool"],
-    url: "https://forthatlanta.com/hotel",
+    tier: "$$$",
+    label: "Elevated",
+    name: "Hotel Name One",
+    time: "15 min",
+    description: "A refined stay for guests who want the full weekend experience.",
+    href: "https://google.com/",
   },
   {
-    id: "upscale",
-    name: "Kimpton Hotel Palomar",
-    priceLevel: "$$",
-    description: "Boutique luxury hotel with modern design and personalized amenities",
-    distance: "12 min from venue",
-    amenities: ["Pet-Friendly", "Wine Hour", "Rooftop Bar"],
-    url: "https://www.hotelpalomar-atlanta.com/",
+    tier: "$$",
+    label: "Balanced",
+    name: "Hotel Name Two",
+    time: "12 min",
+    description: "Stylish, convenient, and easy for the wedding weekend.",
+    href: "https://google.com/",
   },
   {
-    id: "comfort",
-    name: "The Georgian Terrace",
-    priceLevel: "$",
-    description: "Historic charm with comfortable accommodations and great value in Midtown",
-    distance: "10 min from venue",
-    amenities: ["Historic Property", "Restaurant & Bar", "Accessible Rooms"],
-    url: "https://www.thegeorgianterrace.com/",
+    tier: "$",
+    label: "Accessible",
+    name: "Hotel Name Three",
+    time: "10 min",
+    description: "A comfortable option close to the celebration.",
+    href: "https://google.com/",
   },
 ];
 
 export default function Home() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [hasAccess, setHasAccess] = useState<boolean | null>(null);
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
-    const stored = localStorage.getItem(PASSWORD_STORAGE_KEY);
-    if (stored === "true") {
-      setIsAuthenticated(true);
-    }
+    setHasAccess(localStorage.getItem("weddingAccess") === "true");
   }, []);
 
-  const handlePasswordSubmit = (e: React.FormEvent) => {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (password === CORRECT_PASSWORD) {
-      setIsAuthenticated(true);
-      localStorage.setItem(PASSWORD_STORAGE_KEY, "true");
+
+    if (password.trim() === PASSWORD) {
+      localStorage.setItem("weddingAccess", "true");
+      setHasAccess(true);
       setError("");
-      setPassword("");
     } else {
-      setError("Incorrect password. Please try again.");
-      setPassword("");
+      setError("Please check the password and try again.");
     }
-  };
-
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    localStorage.removeItem(PASSWORD_STORAGE_KEY);
-  };
-
-  if (!mounted) {
-    return null;
   }
 
-  if (!isAuthenticated) {
+  if (hasAccess === null) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4 bg-ivory">
-        <div className="w-full max-w-md">
-          <div className="text-center mb-12">
-            <h1 className="font-playfair text-5xl mb-4 text-espresso font-600">
-              Ashley & Jared
-            </h1>
-            <p className="font-lora text-lg text-espresso mb-2">November 14th, 2026</p>
-            <p className="font-lora text-sm text-espresso opacity-75">
-              Atlanta, Georgia
-            </p>
-          </div>
+      <main className="flex min-h-screen items-center justify-center bg-[#F8F5F0] text-[#3B2F2F]">
+        <p className="text-sm opacity-60">Loading…</p>
+      </main>
+    );
+  }
 
-          <form onSubmit={handlePasswordSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="password" className="block font-lora text-sm mb-3 text-espresso">
-                Enter password to continue
-              </label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full px-4 py-3 border border-espresso/30 bg-white text-espresso placeholder-espresso/50 focus:outline-none focus:border-espresso transition-colors"
-              />
-            </div>
+  if (!hasAccess) {
+    return (
+      <main className="relative min-h-screen overflow-hidden bg-[#F8F5F0] px-6 py-10 text-[#3B2F2F]">
+        <div className="absolute left-1/2 top-0 h-[420px] w-[420px] -translate-x-1/2 rounded-full bg-[#D8B98A]/20 blur-3xl" />
 
-            {error && (
-              <p className="text-sm text-red-600 font-lora">{error}</p>
-            )}
+        <div className="relative mx-auto flex min-h-[85vh] max-w-md flex-col items-center justify-center text-center">
+          <p className="mb-8 text-[11px] uppercase tracking-[0.45em] opacity-70">
+            Ashley + Jared
+          </p>
+
+          <h1 className="mb-6 font-serif text-[64px] leading-[0.9] tracking-[-0.04em]">
+            Welcome
+          </h1>
+
+          <p className="mb-10 max-w-sm text-[15px] leading-7 opacity-80">
+            Enter the password from your save the date to view wedding details.
+          </p>
+
+          <form onSubmit={handleSubmit} className="w-full space-y-4">
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setError("");
+              }}
+              placeholder="Password"
+              className="h-14 w-full rounded-full border border-[#3B2F2F]/20 bg-white/35 px-6 text-center text-base outline-none backdrop-blur placeholder:text-[#3B2F2F]/40 focus:border-[#3B2F2F]"
+            />
+
+            {error && <p className="text-sm opacity-80">{error}</p>}
 
             <button
               type="submit"
-              className="w-full bg-espresso text-ivory py-3 font-lora tracking-wide hover:bg-espresso/90 transition-colors"
+              className="h-14 w-full rounded-full bg-[#3B2F2F] px-6 text-sm font-medium uppercase tracking-[0.12em] text-[#F8F5F0] shadow-[0_14px_30px_rgba(59,47,47,0.18)]"
             >
-              Unlock
+              Enter
             </button>
           </form>
-
-          <p className="text-center text-xs text-espresso/60 font-lora mt-8">
-            We can't wait to celebrate with you
-          </p>
         </div>
-      </div>
+      </main>
     );
   }
 
   return (
-    <div className="min-h-screen bg-ivory text-espresso">
-      {/* Header */}
-      <header className="bg-ivory border-b border-espresso/10 sticky top-0 z-10">
-        <div className="max-w-2xl mx-auto px-6 py-6 sm:px-8">
+    <main className="relative min-h-screen overflow-hidden bg-[#F8F5F0] px-5 py-8 text-[#3B2F2F]">
+      <div className="absolute left-[-120px] top-[-120px] h-[360px] w-[360px] rounded-full bg-[#D8B98A]/20 blur-3xl" />
+      <div className="absolute bottom-[-160px] right-[-140px] h-[420px] w-[420px] rounded-full bg-[#A56A43]/10 blur-3xl" />
+
+      <section className="relative mx-auto max-w-md">
+        <div className="rounded-[36px] border border-[#3B2F2F]/10 bg-white/35 px-6 py-10 shadow-[0_24px_80px_rgba(59,47,47,0.08)] backdrop-blur">
           <div className="text-center">
-            <h1 className="font-playfair text-4xl sm:text-5xl font-600 mb-2">
-              Ashley & Jared
+            <p className="mb-8 text-[11px] uppercase tracking-[0.45em] opacity-70">
+              Atlanta, Georgia
+            </p>
+
+            <h1 className="font-serif text-[76px] leading-[0.86] tracking-[-0.045em]">
+              Ashley
+              <span className="my-3 block text-2xl italic tracking-normal opacity-50">
+                &
+              </span>
+              Jared
             </h1>
-            <p className="font-lora text-espresso/80">November 14th, 2026</p>
+
+            <div className="mx-auto my-10 h-px w-16 bg-[#3B2F2F]/25" />
+
+            <p className="text-xs uppercase tracking-[0.28em] opacity-65">
+              Wedding Weekend
+            </p>
+
+            <p className="mt-3 font-serif text-3xl">Date Coming Soon</p>
+
+            <p className="mt-4 text-xs uppercase tracking-[0.22em] opacity-55">
+              Details will be shared soon
+            </p>
           </div>
         </div>
-      </header>
 
-      {/* Hero Section */}
-      <section className="max-w-2xl mx-auto px-6 sm:px-8 py-16 sm:py-20 text-center border-b border-espresso/10">
-        <div className="mb-12">
-          <p className="font-lora text-lg mb-2 text-espresso/70">Celebrating Our Love</p>
-          <h2 className="font-playfair text-3xl sm:text-4xl font-600 mb-6">
-            A Wedding Weekend in Atlanta
-          </h2>
-          <p className="font-lora text-base sm:text-lg text-espresso/80 max-w-lg mx-auto leading-relaxed">
-            Join us as we celebrate with family and friends in the heart of Georgia.
-            We've curated essential information to help you plan your visit.
-          </p>
-        </div>
-
-        <div className="flex justify-center gap-12 pt-8">
-          <div>
-            <p className="font-playfair text-3xl font-600 mb-1">Atlanta</p>
-            <p className="font-lora text-sm text-espresso/70">Georgia</p>
+        <div className="px-3">
+          <div className="my-12 text-center text-[15px] leading-7 opacity-85">
+            <p>We can’t wait to celebrate with you in Atlanta.</p>
+            <p className="mt-3">
+              To make planning easy, we’ve curated a few recommended places to
+              stay below.
+            </p>
           </div>
-        </div>
-      </section>
 
-      {/* Hotels Section */}
-      <section className="max-w-2xl mx-auto px-6 sm:px-8 py-16 sm:py-20">
-        <div className="mb-12">
-          <h2 className="font-playfair text-3xl font-600 mb-3">Accommodation</h2>
-          <p className="font-lora text-espresso/70">
-            Handpicked hotels in Atlanta for your stay
-          </p>
-        </div>
+          <div className="mb-8 text-center">
+            <p className="text-[11px] uppercase tracking-[0.35em] opacity-60">
+              Stay
+            </p>
+            <h2 className="mt-3 font-serif text-4xl tracking-[-0.02em]">
+              Recommended Hotels
+            </h2>
+            <p className="mt-3 text-sm leading-6 opacity-65">
+              Choose the option that fits your weekend best.
+            </p>
+          </div>
 
-        <div className="space-y-6">
-          {hotels.map((hotel) => (
-            <a
-              key={hotel.id}
-              href={hotel.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block border border-espresso/20 p-6 sm:p-8 hover:border-espresso/60 hover:shadow-lg transition-all cursor-pointer group"
-            >
-              <div className="flex justify-between items-start mb-4">
-                <div className="flex-1">
-                  <h3 className="font-playfair text-xl sm:text-2xl font-600 mb-1 group-hover:text-espresso transition-colors">
-                    {hotel.name}
-                  </h3>
-                  <p className="font-lora text-sm text-espresso/70 mb-2">
-                    {hotel.distance}
+          <div className="space-y-4 pb-8">
+            {hotels.map((hotel) => (
+              <a
+                key={hotel.name}
+                href={hotel.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group block rounded-[30px] border border-[#3B2F2F]/10 bg-white/55 p-5 shadow-[0_12px_40px_rgba(59,47,47,0.06)] backdrop-blur transition hover:-translate-y-0.5 hover:border-[#3B2F2F]/25"
+              >
+                <div className="mb-5 flex items-start justify-between gap-4">
+                  <div>
+                    <p className="mb-2 text-[11px] uppercase tracking-[0.25em] opacity-60">
+                      {hotel.tier} · {hotel.label}
+                    </p>
+                    <h3 className="font-serif text-[28px] leading-[1.05] tracking-[-0.02em]">
+                      {hotel.name}
+                    </h3>
+                  </div>
+
+                  <p className="rounded-full border border-[#3B2F2F]/10 px-3 py-1 text-xs opacity-70">
+                    {hotel.time}
                   </p>
                 </div>
-                <div className="font-playfair text-2xl font-600 text-espresso/80 ml-4 flex-shrink-0">
-                  {hotel.priceLevel}
+
+                <p className="mb-5 text-sm leading-6 opacity-75">
+                  {hotel.description}
+                </p>
+
+                <div className="flex h-12 items-center justify-center rounded-full bg-[#3B2F2F] text-xs font-medium uppercase tracking-[0.14em] text-[#F8F5F0] shadow-[0_12px_26px_rgba(59,47,47,0.16)] transition group-hover:bg-[#2D2424]">
+                  Book Your Stay
                 </div>
-              </div>
-
-              <p className="font-lora text-espresso/80 mb-4 leading-relaxed">
-                {hotel.description}
-              </p>
-
-              <div className="flex flex-wrap gap-2">
-                {hotel.amenities.map((amenity, idx) => (
-                  <span
-                    key={idx}
-                    className="font-lora text-xs px-3 py-1 bg-espresso/5 text-espresso/70"
-                  >
-                    {amenity}
-                  </span>
-                ))}
-              </div>
-
-              <div className="mt-4 flex items-center gap-2 font-lora text-sm text-espresso/60 group-hover:text-espresso transition-colors">
-                <span>Learn more</span>
-                <span className="text-lg">→</span>
-              </div>
-            </a>
-          ))}
+              </a>
+            ))}
+          </div>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="max-w-2xl mx-auto px-6 sm:px-8 py-12 sm:py-16 border-t border-espresso/10 text-center">
-        <p className="font-lora text-sm text-espresso/60 mb-4">
-          See you soon in Atlanta
-        </p>
-        <p className="font-playfair text-2xl font-600 text-espresso/80 mb-6">
-          with love,<br />Ashley & Jared
-        </p>
-        <button
-          onClick={handleLogout}
-          className="font-lora text-xs text-espresso/40 hover:text-espresso/60 transition-colors underline"
-        >
-          Logout (for testing)
-        </button>
-      </footer>
-    </div>
+    </main>
   );
 }
+
