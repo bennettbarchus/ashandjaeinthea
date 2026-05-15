@@ -96,28 +96,40 @@ function ImageSection({
 
 function ParallaxHeroSection({ children }: { children: ReactNode }) {
   return (
-    <section className="relative flex min-h-screen items-center overflow-hidden px-5 py-12 text-[#3B2F2F] md:px-10 md:py-20">
-      <div
-        className="absolute inset-0 bg-cover bg-[center_12%] bg-no-repeat opacity-[0.9] saturate-[0.98] contrast-[1.04] md:bg-[center_14%] md:opacity-[0.86]"
-        style={{
-          backgroundImage: "url('/images/wedding-weekend-bg.png')",
-          backgroundAttachment: "fixed",
-        }}
-        aria-hidden="true"
-      />
+    <section className="relative overflow-hidden bg-[#F8F5F0] text-[#3B2F2F]">
+      <div className="absolute inset-0 h-full">
+        <div className="sticky top-0 h-screen overflow-hidden">
+          <img
+            src="/images/wedding-weekend-bg.png"
+            alt=""
+            aria-hidden="true"
+            className="h-full w-full object-cover object-[center_12%] opacity-[0.98] saturate-[1.02] contrast-[1.04] md:object-[center_14%]"
+          />
 
-      <div
-        className="absolute inset-0 bg-[#F8F5F0]/24 backdrop-blur-[0.25px] md:bg-[#F8F5F0]/28"
-        aria-hidden="true"
-      />
+          <div
+            className="absolute inset-0 bg-[linear-gradient(180deg,_rgba(0,0,0,0.04)_0%,_rgba(0,0,0,0)_38%,_rgba(0,0,0,0.18)_100%)]"
+            aria-hidden="true"
+          />
 
-      <div
-        className="absolute inset-0 bg-[linear-gradient(180deg,_rgba(248,245,240,0.72)_0%,_rgba(248,245,240,0.36)_32%,_rgba(248,245,240,0.5)_70%,_rgba(248,245,240,0.9)_100%)]"
-        aria-hidden="true"
-      />
+          <div
+            className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0)_0%,_rgba(0,0,0,0.04)_62%,_rgba(0,0,0,0.18)_100%)]"
+            aria-hidden="true"
+          />
+        </div>
+      </div>
 
-      <div className="relative z-10 mx-auto w-full max-w-[780px]">
-        {children}
+      <div className="relative z-10">
+        <div className="flex min-h-screen items-end justify-center px-5 pb-10 pt-10 md:px-10 md:pb-14">
+          <div className="rounded-full border border-white/25 bg-[#3B2F2F]/22 px-5 py-3 text-center text-[#F8F5F0] shadow-[0_18px_46px_rgba(0,0,0,0.18)] backdrop-blur-md">
+            <p className="font-sans text-[9px] font-semibold uppercase tracking-[0.26em]">
+              Scroll to enter
+            </p>
+          </div>
+        </div>
+
+        <div className="flex min-h-screen items-center px-5 py-14 md:px-10 md:py-20">
+          <div className="mx-auto w-full max-w-[780px]">{children}</div>
+        </div>
       </div>
     </section>
   );
@@ -400,7 +412,7 @@ export default function Home() {
             </p>
 
             <p className="mt-12 font-serif text-[34px] leading-tight tracking-[-0.03em] md:text-[42px]">
-              Ashley and Jared 2026
+              Ashley & Jared 2026
             </p>
 
             <div className="mx-auto mt-8 max-w-[260px] rounded-[28px] border border-[#3B2F2F]/10 bg-white/72 px-6 py-6 shadow-[0_18px_42px_rgba(59,47,47,0.08)] backdrop-blur-md">
