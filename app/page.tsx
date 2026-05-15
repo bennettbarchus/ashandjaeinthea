@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import type { FormEvent, ReactNode } from "react";
 
 const PASSWORD = "celebrate2026";
+const WEDDING_DATE = new Date("2026-11-14T00:00:00");
 
 const hotels = [
   {
@@ -15,6 +16,9 @@ const hotels = [
       "The most seamless option for guests who want to stay where the big day unfolds.",
     originalRate: "$599",
     blockRate: "$339",
+    address: "800 Rankin St NE, Atlanta, GA 30308",
+    phone: "(470) 470-8010",
+    phoneHref: "tel:+14704708010",
     href: "https://google.com/",
   },
   {
@@ -26,9 +30,25 @@ const hotels = [
       "A chic, social option in Midtown Atlanta with easy access to the wedding and the afterparty.",
     originalRate: "$250",
     blockRate: "$139",
+    address: "48 13th St NE, Atlanta, GA 30309",
+    phone: "(404) 249-9446",
+    phoneHref: "tel:+14042499446",
     href: "https://google.com/",
   },
 ];
+
+function getDaysUntilWedding() {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const target = new Date(
+    WEDDING_DATE.getFullYear(),
+    WEDDING_DATE.getMonth(),
+    WEDDING_DATE.getDate()
+  );
+
+  const diff = target.getTime() - today.getTime();
+  return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+}
 
 function Monogram() {
   return (
@@ -44,26 +64,30 @@ function ImageSection({
   image,
   children,
   className = "",
-  overlay = "bg-[#F8F5F0]/72",
-  gradient = "bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.58),_rgba(248,245,240,0.76)_56%,_rgba(248,245,240,0.94)_100%)]",
+  imageClassName = "",
+  overlay = "bg-[#F8F5F0]/38",
+  gradient = "bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.34),_rgba(248,245,240,0.48)_56%,_rgba(248,245,240,0.76)_100%)]",
 }: {
   image: string;
   children: ReactNode;
   className?: string;
+  imageClassName?: string;
   overlay?: string;
   gradient?: string;
 }) {
   return (
     <section className={`relative overflow-hidden ${className}`}>
-      <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-[0.42] saturate-[0.9] contrast-[0.96]"
-        style={{
-          backgroundImage: `url('${image}')`,
-        }}
+      <img
+        src={image}
+        alt=""
         aria-hidden="true"
+        className={`absolute inset-0 h-full w-full object-cover opacity-[0.74] saturate-[0.95] contrast-[1.02] ${imageClassName}`}
       />
 
-      <div className={`absolute inset-0 backdrop-blur-[0.5px] ${overlay}`} aria-hidden="true" />
+      <div
+        className={`absolute inset-0 backdrop-blur-[0.25px] ${overlay}`}
+        aria-hidden="true"
+      />
 
       <div className={`absolute inset-0 ${gradient}`} aria-hidden="true" />
 
@@ -76,9 +100,11 @@ export default function Home() {
   const [hasAccess, setHasAccess] = useState<boolean | null>(null);
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [daysUntilWedding, setDaysUntilWedding] = useState<number | null>(null);
 
   useEffect(() => {
     setHasAccess(localStorage.getItem("weddingAccess") === "true");
+    setDaysUntilWedding(getDaysUntilWedding());
   }, []);
 
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
@@ -108,16 +134,16 @@ export default function Home() {
           src="/images/forth-skyline-sm.png"
           alt=""
           aria-hidden="true"
-          className="absolute inset-0 h-full w-full object-cover object-[center_34%] opacity-[0.84] saturate-[0.9] contrast-[0.98] md:object-center md:opacity-[0.74]"
+          className="absolute inset-0 h-full w-full object-cover object-[center_34%] opacity-[0.86] saturate-[0.95] contrast-[1.02] md:object-center md:opacity-[0.78]"
         />
 
         <div
-          className="absolute inset-0 bg-[#F8F5F0]/30 backdrop-blur-[0.5px] md:bg-[#F8F5F0]/36"
+          className="absolute inset-0 bg-[#F8F5F0]/24 backdrop-blur-[0.25px] md:bg-[#F8F5F0]/30"
           aria-hidden="true"
         />
 
         <div
-          className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.42),_rgba(248,245,240,0.58)_54%,_rgba(248,245,240,0.82)_100%)]"
+          className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.34),_rgba(248,245,240,0.48)_54%,_rgba(248,245,240,0.76)_100%)]"
           aria-hidden="true"
         />
 
@@ -165,8 +191,9 @@ export default function Home() {
       <ImageSection
         image="/images/wedding-weekend-bg.png"
         className="px-5 py-12 md:px-10 md:py-20"
-        overlay="bg-[#F8F5F0]/74 md:bg-[#F8F5F0]/70"
-        gradient="bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.66),_rgba(248,245,240,0.82)_58%,_rgba(248,245,240,0.96)_100%)]"
+        imageClassName="object-[center_22%] md:object-[center_24%]"
+        overlay="bg-[#F8F5F0]/34 md:bg-[#F8F5F0]/30"
+        gradient="bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.34),_rgba(248,245,240,0.48)_58%,_rgba(248,245,240,0.78)_100%)]"
       >
         <div className="mx-auto w-full max-w-[720px]">
           <header className="text-center">
@@ -227,8 +254,9 @@ export default function Home() {
       <ImageSection
         image="/images/hotels-bg.png"
         className="px-5 py-20 md:px-10 md:py-28"
-        overlay="bg-[#F8F5F0]/68 md:bg-[#F8F5F0]/64"
-        gradient="bg-[linear-gradient(180deg,_rgba(248,245,240,0.94)_0%,_rgba(248,245,240,0.7)_24%,_rgba(248,245,240,0.72)_78%,_rgba(248,245,240,0.96)_100%)]"
+        imageClassName="object-center"
+        overlay="bg-[#F8F5F0]/30 md:bg-[#F8F5F0]/28"
+        gradient="bg-[linear-gradient(180deg,_rgba(248,245,240,0.74)_0%,_rgba(248,245,240,0.44)_24%,_rgba(248,245,240,0.46)_78%,_rgba(248,245,240,0.82)_100%)]"
       >
         <div className="mx-auto w-full max-w-[760px]">
           <div className="mb-10 text-center md:mb-12">
@@ -240,9 +268,10 @@ export default function Home() {
               Recommended Hotels
             </h2>
 
-            <p className="mx-auto mt-5 max-w-[420px] font-sans text-[13px] leading-6 opacity-60 md:text-sm">
+            <p className="mx-auto mt-5 max-w-[430px] font-sans text-[13px] leading-6 opacity-65 md:text-sm">
               We secured preferred room block rates for our guests. Availability
-              is limited, so we recommend booking early.
+              is limited, so we recommend booking early and asking for the
+              Ashley & Jared Wedding Block.
             </p>
           </div>
 
@@ -253,7 +282,7 @@ export default function Home() {
                 href={hotel.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group block rounded-[28px] border border-[#3B2F2F]/10 bg-white/88 p-6 text-left shadow-[0_18px_46px_rgba(59,47,47,0.09)] backdrop-blur-md transition duration-200 hover:-translate-y-0.5 hover:border-[#3B2F2F]/20 hover:bg-white/94 md:rounded-[34px] md:p-8"
+                className="group block rounded-[28px] border border-[#3B2F2F]/10 bg-white/90 p-6 text-left shadow-[0_18px_46px_rgba(59,47,47,0.09)] backdrop-blur-md transition duration-200 hover:-translate-y-0.5 hover:border-[#3B2F2F]/20 hover:bg-white/95 md:rounded-[34px] md:p-8"
               >
                 <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
                   <div className="min-w-0 flex-1">
@@ -276,6 +305,28 @@ export default function Home() {
                 <p className="mt-5 w-full font-sans text-[13px] leading-6 text-[#4f433e] md:text-[14px]">
                   {hotel.description}
                 </p>
+
+                <div className="mt-5 grid gap-2 rounded-[20px] border border-[#3B2F2F]/10 bg-white/48 p-4 font-sans text-[12px] leading-5 text-[#4f433e] md:grid-cols-[1fr_auto] md:gap-x-6 md:p-5 md:text-[13px]">
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#3B2F2F]/45">
+                      Address
+                    </p>
+                    <p className="mt-1">{hotel.address}</p>
+                  </div>
+
+                  <div className="md:text-right">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#3B2F2F]/45">
+                      Phone
+                    </p>
+                    <p className="mt-1">{hotel.phone}</p>
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <p className="mt-2 rounded-full bg-[#F8F5F0]/90 px-4 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-[#3B2F2F]/62">
+                      When booking, ask for the Ashley & Jared Wedding Block.
+                    </p>
+                  </div>
+                </div>
 
                 <div className="mt-6 rounded-[22px] border border-[#3B2F2F]/10 bg-[#F8F5F0]/74 p-4 md:mt-7 md:flex md:items-center md:justify-between md:gap-6 md:p-5">
                   <div>
@@ -316,19 +367,39 @@ export default function Home() {
       <ImageSection
         image="/images/more-details-bg.png"
         className="px-5 py-20 md:px-10 md:py-28"
-        overlay="bg-[#F8F5F0]/70 md:bg-[#F8F5F0]/66"
-        gradient="bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.62),_rgba(248,245,240,0.78)_58%,_rgba(248,245,240,0.96)_100%)]"
+        imageClassName="object-center"
+        overlay="bg-[#F8F5F0]/32 md:bg-[#F8F5F0]/30"
+        gradient="bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.38),_rgba(248,245,240,0.52)_58%,_rgba(248,245,240,0.8)_100%)]"
       >
-        <footer className="mx-auto max-w-[430px] text-center">
+        <footer className="mx-auto max-w-[460px] text-center">
           <div className="mx-auto mb-8 h-px w-14 bg-[#3B2F2F]/18" />
 
           <p className="font-serif text-[34px] leading-tight tracking-[-0.02em] md:text-[42px]">
             More details to come.
           </p>
 
-          <p className="mt-5 font-sans text-[13px] leading-6 opacity-60 md:text-sm">
+          <p className="mt-5 font-sans text-[13px] leading-6 opacity-65 md:text-sm">
             For now, book your stay and save the weekend. We’ll share additional
             wedding details soon.
+          </p>
+
+          <p className="mt-12 font-serif text-[34px] leading-tight tracking-[-0.03em] md:text-[42px]">
+            Ashley and Jared
+          </p>
+
+          <div className="mx-auto mt-8 max-w-[260px] rounded-[28px] border border-[#3B2F2F]/10 bg-white/72 px-6 py-6 shadow-[0_18px_42px_rgba(59,47,47,0.08)] backdrop-blur-md">
+            <p className="font-serif text-[56px] leading-none tracking-[-0.05em] md:text-[68px]">
+              {daysUntilWedding ?? "—"}
+            </p>
+
+            <p className="mt-3 font-sans text-[10px] font-semibold uppercase tracking-[0.22em] text-[#3B2F2F]/50">
+              Days until the wedding
+            </p>
+          </div>
+
+          <p className="mx-auto mt-12 max-w-[360px] font-sans text-[10px] uppercase leading-6 tracking-[0.18em] text-[#3B2F2F]/45">
+            Ash & Jae in The A * Ashley & Jared Wedding Weekend 2026 * November
+            13 - 14, 2026 * Atlanta, GA
           </p>
         </footer>
       </ImageSection>
