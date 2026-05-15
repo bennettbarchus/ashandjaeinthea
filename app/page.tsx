@@ -58,9 +58,10 @@ function Monogram() {
   );
 }
 
-function ParallaxSection({
+function StackedParallaxSection({
   image,
   children,
+  zIndex,
   className = "",
   contentClassName = "",
   imageClassName = "",
@@ -70,6 +71,7 @@ function ParallaxSection({
 }: {
   image: string;
   children: ReactNode;
+  zIndex: string;
   className?: string;
   contentClassName?: string;
   imageClassName?: string;
@@ -78,23 +80,23 @@ function ParallaxSection({
   gradient?: string;
 }) {
   return (
-    <section className={`relative overflow-hidden ${className}`}>
-      <div className="pointer-events-none absolute inset-0 h-full">
-        <div className="sticky top-0 h-screen overflow-hidden">
-          <img
-            src={image}
-            alt=""
-            aria-hidden="true"
-            className={`h-full w-full object-cover saturate-[1.02] contrast-[1.04] ${imageOpacity} ${imageClassName}`}
-          />
+    <section
+      className={`sticky top-0 min-h-screen overflow-hidden bg-[#F8F5F0] ${zIndex} ${className}`}
+    >
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <img
+          src={image}
+          alt=""
+          aria-hidden="true"
+          className={`h-full w-full scale-[1.06] object-cover saturate-[1.02] contrast-[1.04] ${imageOpacity} ${imageClassName}`}
+        />
 
-          <div
-            className={`absolute inset-0 backdrop-blur-[0.2px] ${overlay}`}
-            aria-hidden="true"
-          />
+        <div
+          className={`absolute inset-0 backdrop-blur-[0.2px] ${overlay}`}
+          aria-hidden="true"
+        />
 
-          <div className={`absolute inset-0 ${gradient}`} aria-hidden="true" />
-        </div>
+        <div className={`absolute inset-0 ${gradient}`} aria-hidden="true" />
       </div>
 
       <div className={`relative z-10 ${contentClassName}`}>{children}</div>
@@ -193,34 +195,36 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen w-full bg-[#F8F5F0] text-[#3B2F2F]">
-      <ParallaxSection
+    <main className="relative min-h-screen w-full bg-[#F8F5F0] text-[#3B2F2F]">
+      <StackedParallaxSection
         image="/images/wedding-weekend-bg.png"
-        className="min-h-[125vh]"
-        contentClassName="flex min-h-[125vh] items-end justify-center px-5 pb-10 pt-10 md:px-10 md:pb-14"
+        zIndex="z-10"
+        className="min-h-screen"
+        contentClassName="flex min-h-screen items-end justify-center px-5 pb-10 pt-10 md:px-10 md:pb-14"
         imageClassName="object-[center_12%] md:object-[center_14%]"
-        imageOpacity="opacity-[0.98]"
+        imageOpacity="opacity-[1]"
         overlay="bg-transparent"
-        gradient="bg-[linear-gradient(180deg,_rgba(0,0,0,0.04)_0%,_rgba(0,0,0,0)_38%,_rgba(0,0,0,0.2)_100%)]"
+        gradient="bg-[linear-gradient(180deg,_rgba(0,0,0,0.03)_0%,_rgba(0,0,0,0)_38%,_rgba(0,0,0,0.24)_100%)]"
       >
-        <div className="rounded-full border border-white/25 bg-[#3B2F2F]/22 px-5 py-3 text-center text-[#F8F5F0] shadow-[0_18px_46px_rgba(0,0,0,0.18)] backdrop-blur-md">
+        <div className="rounded-full border border-white/25 bg-[#3B2F2F]/24 px-5 py-3 text-center text-[#F8F5F0] shadow-[0_18px_46px_rgba(0,0,0,0.2)] backdrop-blur-md">
           <p className="font-sans text-[9px] font-semibold uppercase tracking-[0.26em]">
             Scroll to enter
           </p>
         </div>
-      </ParallaxSection>
+      </StackedParallaxSection>
 
-      <ParallaxSection
+      <StackedParallaxSection
         image="/images/ashley-jared-bg.png"
+        zIndex="z-20"
         className="min-h-screen"
         contentClassName="flex min-h-screen items-center px-5 py-14 md:px-10 md:py-20"
         imageClassName="object-center"
-        imageOpacity="opacity-[0.32]"
+        imageOpacity="opacity-[0.26]"
         overlay="bg-[#F8F5F0]/62 md:bg-[#F8F5F0]/58"
-        gradient="bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.62),_rgba(248,245,240,0.78)_58%,_rgba(248,245,240,0.94)_100%)]"
+        gradient="bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.66),_rgba(248,245,240,0.82)_58%,_rgba(248,245,240,0.96)_100%)]"
       >
         <div className="mx-auto w-full max-w-[780px]">
-          <div className="rounded-[42px] border border-[#3B2F2F]/10 bg-[#F8F5F0]/76 px-6 py-10 text-center shadow-[0_34px_90px_rgba(59,47,47,0.13)] backdrop-blur-md md:rounded-[52px] md:px-12 md:py-14">
+          <div className="rounded-[42px] border border-[#3B2F2F]/10 bg-[#F8F5F0]/78 px-6 py-10 text-center shadow-[0_34px_90px_rgba(59,47,47,0.13)] backdrop-blur-md md:rounded-[52px] md:px-12 md:py-14">
             <header>
               <Monogram />
 
@@ -275,26 +279,28 @@ export default function Home() {
             </section>
           </div>
         </div>
-      </ParallaxSection>
+      </StackedParallaxSection>
 
-      <ParallaxSection
+      <StackedParallaxSection
         image="/images/editorial-bg.png"
-        className="min-h-[118vh]"
-        contentClassName="flex min-h-[118vh] items-end justify-center px-5 pb-10 pt-10 md:px-10 md:pb-14"
+        zIndex="z-30"
+        className="min-h-screen"
+        contentClassName="flex min-h-screen items-end justify-center px-5 pb-10 pt-10 md:px-10 md:pb-14"
         imageClassName="object-center"
-        imageOpacity="opacity-[0.96]"
-        overlay="bg-[#000000]/8"
-        gradient="bg-[linear-gradient(180deg,_rgba(0,0,0,0.08)_0%,_rgba(0,0,0,0)_40%,_rgba(0,0,0,0.28)_100%)]"
+        imageOpacity="opacity-[0.98]"
+        overlay="bg-[#000000]/5"
+        gradient="bg-[linear-gradient(180deg,_rgba(0,0,0,0.06)_0%,_rgba(0,0,0,0)_40%,_rgba(0,0,0,0.3)_100%)]"
       >
-        <div className="rounded-full border border-white/25 bg-[#3B2F2F]/24 px-5 py-3 text-center text-[#F8F5F0] shadow-[0_18px_46px_rgba(0,0,0,0.18)] backdrop-blur-md">
+        <div className="rounded-full border border-white/25 bg-[#3B2F2F]/24 px-5 py-3 text-center text-[#F8F5F0] shadow-[0_18px_46px_rgba(0,0,0,0.2)] backdrop-blur-md">
           <p className="font-sans text-[9px] font-semibold uppercase tracking-[0.26em]">
             The weekend begins in Atlanta
           </p>
         </div>
-      </ParallaxSection>
+      </StackedParallaxSection>
 
-      <ParallaxSection
+      <StackedParallaxSection
         image="/images/hotels-bg.png"
+        zIndex="z-40"
         className="min-h-screen"
         contentClassName="px-5 py-20 md:px-10 md:py-28"
         imageClassName="object-center"
@@ -400,10 +406,11 @@ export default function Home() {
             ))}
           </div>
         </div>
-      </ParallaxSection>
+      </StackedParallaxSection>
 
-      <ParallaxSection
+      <StackedParallaxSection
         image="/images/more-details-bg.png"
+        zIndex="z-50"
         className="min-h-screen"
         contentClassName="px-5 py-20 md:px-10 md:py-28"
         imageClassName="object-center"
@@ -451,7 +458,7 @@ export default function Home() {
             </p>
           </div>
         </footer>
-      </ParallaxSection>
+      </StackedParallaxSection>
     </main>
   );
 }
