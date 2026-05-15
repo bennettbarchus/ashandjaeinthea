@@ -163,7 +163,7 @@ export default function Home() {
   return (
     <main className="min-h-screen w-full bg-[#F8F5F0] text-[#3B2F2F]">
       <ImageSection
-        image="/images/wedding-weekend-bg.jpg"
+        image="/images/wedding-weekend-bg.png"
         className="px-5 py-12 md:px-10 md:py-20"
         overlay="bg-[#F8F5F0]/74 md:bg-[#F8F5F0]/70"
         gradient="bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.66),_rgba(248,245,240,0.82)_58%,_rgba(248,245,240,0.96)_100%)]"
@@ -225,7 +225,7 @@ export default function Home() {
       </ImageSection>
 
       <ImageSection
-        image="/images/hotels-bg.jpg"
+        image="/images/hotels-bg.png"
         className="px-5 py-20 md:px-10 md:py-28"
         overlay="bg-[#F8F5F0]/68 md:bg-[#F8F5F0]/64"
         gradient="bg-[linear-gradient(180deg,_rgba(248,245,240,0.94)_0%,_rgba(248,245,240,0.7)_24%,_rgba(248,245,240,0.72)_78%,_rgba(248,245,240,0.96)_100%)]"
@@ -314,7 +314,7 @@ export default function Home() {
       </ImageSection>
 
       <ImageSection
-        image="/images/more-details-bg.jpg"
+        image="/images/more-details-bg.png"
         className="px-5 py-20 md:px-10 md:py-28"
         overlay="bg-[#F8F5F0]/70 md:bg-[#F8F5F0]/66"
         gradient="bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.62),_rgba(248,245,240,0.78)_58%,_rgba(248,245,240,0.96)_100%)]"
