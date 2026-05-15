@@ -312,7 +312,7 @@ export default function Home() {
 
             <section className="mx-auto mt-[4.5rem] max-w-[540px] text-center md:mt-20">
               <p className="font-serif text-[31px] leading-[1.08] tracking-[-0.025em] text-[#5E3E2B] md:text-[44px]">
-                We can’t wait to celebrate with you in Atlanta.
+                We can’t wait to celebrate with you in Atlanta!
               </p>
 
               <p className="mx-auto mt-6 max-w-[460px] font-sans text-[14px] leading-7 text-[#5E3E2B]/76 md:text-[15px]">
@@ -332,7 +332,7 @@ export default function Home() {
       >
         <div className="rounded-full border border-[#F8F5F0]/35 bg-[#5E3E2B]/26 px-5 py-3 text-center text-[#F8F5F0] shadow-[0_18px_46px_rgba(94,62,43,0.24)] backdrop-blur-md">
           <p className="font-sans text-[9px] font-semibold uppercase tracking-[0.26em]">
-            The weekend begins in Atlanta
+            Celebrate with us in Atlanta
           </p>
         </div>
       </PinnedImageScrollSection>
@@ -413,8 +413,8 @@ export default function Home() {
                     </p>
 
                     <p className="mt-2 font-sans text-[12px] leading-5 text-[#5E3E2B]/76 md:text-[13px]">
-                      Ask for the Ashley & Jared Wedding Block to access this
-                      rate while rooms remain available.
+                      Book now using the Ashley & Jared Wedding Block to access this
+                      rate while rooms are available.
                     </p>
                   </div>
 
