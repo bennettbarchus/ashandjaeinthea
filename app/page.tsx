@@ -1,35 +1,27 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { FormEvent } from "react";
 
 const PASSWORD = "celebrate2026";
 
 const hotels = [
   {
     tier: "$$$",
-    label: "Venue Stay",
+    label: "Premium Stay",
     name: "The Forth Hotel",
-    time: "Wedding venue",
+    time: "Wedding Venue",
     description:
-      "The most seamless option for guests who want to stay where the weekend unfolds.",
+      "The most seamless option for guests who want to stay where the big day unfolds.",
     href: "https://google.com/",
   },
   {
     tier: "$$",
     label: "Midtown Social",
-    name: "Hotel Two",
+    name: "Moxy Atlanta Midtown",
     time: "Nearby",
     description:
-      "A chic, social Midtown Atlanta option with easy access to the celebration.",
-    href: "https://google.com/",
-  },
-  {
-    tier: "$",
-    label: "Downtown Easy",
-    name: "Hotel Three",
-    time: "Easy access",
-    description:
-      "An affordable and convenient downtown option for a smooth wedding weekend.",
+      "A chic, social option in Midtown Atlanta with easy access to the wedding and the afterparty.",
     href: "https://google.com/",
   },
 ];
@@ -53,7 +45,7 @@ export default function Home() {
     setHasAccess(localStorage.getItem("weddingAccess") === "true");
   }, []);
 
-  function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
     if (password.trim() === PASSWORD) {
@@ -75,8 +67,26 @@ export default function Home() {
 
   if (!hasAccess) {
     return (
-      <main className="min-h-screen w-full bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.92),_rgba(248,245,240,1)_55%)] px-6 py-12 text-[#3B2F2F] md:flex md:items-center md:justify-center md:px-10 md:py-16">
-        <section className="mx-auto w-full max-w-[480px] rounded-[38px] border border-[#3B2F2F]/10 bg-white/95 p-8 shadow-[0_30px_80px_rgba(59,47,47,0.08)] backdrop-blur-sm text-center md:p-12">
+      <main className="relative min-h-screen w-full overflow-hidden bg-[#F8F5F0] px-6 py-12 text-[#3B2F2F] md:flex md:items-center md:justify-center md:px-10 md:py-16">
+        <div
+          className="absolute inset-0 bg-cover bg-[center_34%] bg-no-repeat opacity-[0.34] md:bg-center md:opacity-[0.3]"
+          style={{
+            backgroundImage: "url('/images/forth-skyline-sm.png')",
+          }}
+          aria-hidden="true"
+        />
+
+        <div
+          className="absolute inset-0 bg-[#F8F5F0]/72 backdrop-blur-[1px] md:bg-[#F8F5F0]/68"
+          aria-hidden="true"
+        />
+
+        <div
+          className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.72),_rgba(248,245,240,0.82)_52%,_rgba(248,245,240,0.96)_100%)]"
+          aria-hidden="true"
+        />
+
+        <section className="relative z-10 mx-auto w-full max-w-[480px] rounded-[38px] border border-[#3B2F2F]/10 bg-white/82 p-8 text-center shadow-[0_30px_80px_rgba(59,47,47,0.1)] backdrop-blur-md md:p-12">
           <Monogram />
 
           <p className="mt-8 font-sans text-[10px] uppercase tracking-[0.38em] opacity-60">
@@ -101,7 +111,7 @@ export default function Home() {
                 setError("");
               }}
               placeholder="Password"
-              className="h-14 w-full rounded-full border border-[#3B2F2F]/10 bg-[#f5f1ed] px-6 text-center font-sans text-sm text-[#3B2F2F] outline-none placeholder:text-[#3B2F2F]/40 focus:border-[#3B2F2F]/30 focus:ring-2 focus:ring-[#3B2F2F]/10"
+              className="h-14 w-full rounded-full border border-[#3B2F2F]/10 bg-[#f5f1ed]/92 px-6 text-center font-sans text-sm text-[#3B2F2F] outline-none placeholder:text-[#3B2F2F]/40 focus:border-[#3B2F2F]/30 focus:ring-2 focus:ring-[#3B2F2F]/10"
             />
 
             {error && <p className="text-sm text-[#8c6f62]">{error}</p>}
@@ -223,3 +233,4 @@ export default function Home() {
     </main>
   );
 }
+
