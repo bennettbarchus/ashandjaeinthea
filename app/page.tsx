@@ -69,14 +69,13 @@ function PaletteDivider() {
   );
 }
 
-function RevealScrollSection({
+function PinnedReveal({
   image,
   label,
   children,
   imageClassName = "",
   primaryImageClassName = "",
   gradient = "bg-[linear-gradient(180deg,_rgba(94,62,43,0.04)_0%,_rgba(0,0,0,0)_42%,_rgba(94,62,43,0.3)_100%)]",
-  panelOverlap = "-mt-[18svh] md:-mt-[22svh]",
 }: {
   image: string;
   label: string;
@@ -84,11 +83,10 @@ function RevealScrollSection({
   imageClassName?: string;
   primaryImageClassName?: string;
   gradient?: string;
-  panelOverlap?: string;
 }) {
   return (
-    <section className="relative isolate overflow-visible bg-[#F8F5F0]">
-      <div className="sticky top-0 h-[100svh] overflow-hidden">
+    <section className="relative isolate bg-[#F8F5F0]">
+      <div className="sticky top-0 z-0 h-[100svh] overflow-hidden">
         <img
           src={image}
           alt=""
@@ -114,7 +112,7 @@ function RevealScrollSection({
         </div>
       </div>
 
-      <div className={`relative z-20 ${panelOverlap}`}>{children}</div>
+      <div className="relative z-20 -mt-px">{children}</div>
     </section>
   );
 }
@@ -253,7 +251,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen w-full overflow-x-hidden bg-[#F8F5F0] text-[#5E3E2B]">
-      <RevealScrollSection
+      <PinnedReveal
         image="/images/wedding-weekend-bg.png"
         label="Scroll to enter"
         primaryImageClassName="object-[center_8%] md:object-contain md:p-8 lg:p-12"
@@ -325,9 +323,9 @@ export default function Home() {
             </div>
           </div>
         </section>
-      </RevealScrollSection>
+      </PinnedReveal>
 
-      <RevealScrollSection
+      <PinnedReveal
         image="/images/editorial-bg.png"
         label="Celebrate with us in Atlanta"
         primaryImageClassName="object-[center_28%] md:object-[center_14%]"
@@ -438,7 +436,7 @@ export default function Home() {
             </div>
           </div>
         </ImageBackgroundSection>
-      </RevealScrollSection>
+      </PinnedReveal>
 
       <ImageBackgroundSection
         image="/images/more-details-bg.png"
