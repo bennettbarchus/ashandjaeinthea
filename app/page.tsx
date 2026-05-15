@@ -18,7 +18,6 @@ const hotels = [
     blockRate: "$339",
     address: "800 Rankin St NE, Atlanta, GA 30308",
     phone: "(470) 470-8010",
-    phoneHref: "tel:+14704708010",
     href: "https://google.com/",
   },
   {
@@ -32,7 +31,6 @@ const hotels = [
     blockRate: "$139",
     address: "48 13th St NE, Atlanta, GA 30309",
     phone: "(404) 249-9446",
-    phoneHref: "tel:+14042499446",
     href: "https://google.com/",
   },
 ];
@@ -65,7 +63,7 @@ function ImageSection({
   children,
   className = "",
   imageClassName = "",
-  overlay = "bg-[#F8F5F0]/38",
+  overlay = "bg-[#F8F5F0]/32",
   gradient = "bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.34),_rgba(248,245,240,0.48)_56%,_rgba(248,245,240,0.76)_100%)]",
 }: {
   image: string;
@@ -81,7 +79,7 @@ function ImageSection({
         src={image}
         alt=""
         aria-hidden="true"
-        className={`absolute inset-0 h-full w-full object-cover opacity-[0.74] saturate-[0.95] contrast-[1.02] ${imageClassName}`}
+        className={`absolute inset-0 h-full w-full object-cover opacity-[0.76] saturate-[0.96] contrast-[1.03] ${imageClassName}`}
       />
 
       <div
@@ -92,6 +90,35 @@ function ImageSection({
       <div className={`absolute inset-0 ${gradient}`} aria-hidden="true" />
 
       <div className="relative z-10">{children}</div>
+    </section>
+  );
+}
+
+function ParallaxHeroSection({ children }: { children: ReactNode }) {
+  return (
+    <section className="relative flex min-h-screen items-center overflow-hidden px-5 py-12 text-[#3B2F2F] md:px-10 md:py-20">
+      <div
+        className="absolute inset-0 bg-cover bg-[center_12%] bg-no-repeat opacity-[0.9] saturate-[0.98] contrast-[1.04] md:bg-[center_14%] md:opacity-[0.86]"
+        style={{
+          backgroundImage: "url('/images/wedding-weekend-bg.png')",
+          backgroundAttachment: "fixed",
+        }}
+        aria-hidden="true"
+      />
+
+      <div
+        className="absolute inset-0 bg-[#F8F5F0]/24 backdrop-blur-[0.25px] md:bg-[#F8F5F0]/28"
+        aria-hidden="true"
+      />
+
+      <div
+        className="absolute inset-0 bg-[linear-gradient(180deg,_rgba(248,245,240,0.72)_0%,_rgba(248,245,240,0.36)_32%,_rgba(248,245,240,0.5)_70%,_rgba(248,245,240,0.9)_100%)]"
+        aria-hidden="true"
+      />
+
+      <div className="relative z-10 mx-auto w-full max-w-[780px]">
+        {children}
+      </div>
     </section>
   );
 }
@@ -188,15 +215,9 @@ export default function Home() {
 
   return (
     <main className="min-h-screen w-full bg-[#F8F5F0] text-[#3B2F2F]">
-      <ImageSection
-        image="/images/wedding-weekend-bg.png"
-        className="px-5 py-12 md:px-10 md:py-20"
-        imageClassName="object-[center_22%] md:object-[center_24%]"
-        overlay="bg-[#F8F5F0]/34 md:bg-[#F8F5F0]/30"
-        gradient="bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.34),_rgba(248,245,240,0.48)_58%,_rgba(248,245,240,0.78)_100%)]"
-      >
-        <div className="mx-auto w-full max-w-[720px]">
-          <header className="text-center">
+      <ParallaxHeroSection>
+        <div className="rounded-[42px] border border-[#3B2F2F]/10 bg-[#F8F5F0]/74 px-6 py-10 text-center shadow-[0_34px_90px_rgba(59,47,47,0.13)] backdrop-blur-md md:rounded-[52px] md:px-12 md:py-14">
+          <header>
             <Monogram />
 
             <p className="mt-10 font-sans text-[10px] uppercase tracking-[0.42em] opacity-[0.55]">
@@ -238,7 +259,7 @@ export default function Home() {
             </div>
           </header>
 
-          <section className="mx-auto mt-[4.5rem] max-w-[540px] text-center md:mt-24">
+          <section className="mx-auto mt-[4.5rem] max-w-[540px] text-center md:mt-20">
             <p className="font-serif text-[31px] leading-[1.08] tracking-[-0.025em] md:text-[44px]">
               We can’t wait to celebrate with you in Atlanta.
             </p>
@@ -249,7 +270,7 @@ export default function Home() {
             </p>
           </section>
         </div>
-      </ImageSection>
+      </ParallaxHeroSection>
 
       <ImageSection
         image="/images/hotels-bg.png"
@@ -320,12 +341,6 @@ export default function Home() {
                     </p>
                     <p className="mt-1">{hotel.phone}</p>
                   </div>
-
-                  <div className="md:col-span-2">
-                    <p className="mt-2 rounded-full bg-[#F8F5F0]/90 px-4 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-[#3B2F2F]/62">
-                      When booking, ask for the Ashley & Jared Wedding Block.
-                    </p>
-                  </div>
                 </div>
 
                 <div className="mt-6 rounded-[22px] border border-[#3B2F2F]/10 bg-[#F8F5F0]/74 p-4 md:mt-7 md:flex md:items-center md:justify-between md:gap-6 md:p-5">
@@ -335,8 +350,8 @@ export default function Home() {
                     </p>
 
                     <p className="mt-2 font-sans text-[12px] leading-5 text-[#4f433e]/80 md:text-[13px]">
-                      Special pricing for our guests while the block is
-                      available.
+                      Ask for the Ashley & Jared Wedding Block to access this
+                      rate while rooms remain available.
                     </p>
                   </div>
 
@@ -371,36 +386,45 @@ export default function Home() {
         overlay="bg-[#F8F5F0]/32 md:bg-[#F8F5F0]/30"
         gradient="bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.38),_rgba(248,245,240,0.52)_58%,_rgba(248,245,240,0.8)_100%)]"
       >
-        <footer className="mx-auto max-w-[460px] text-center">
-          <div className="mx-auto mb-8 h-px w-14 bg-[#3B2F2F]/18" />
+        <footer className="mx-auto flex min-h-[560px] w-full max-w-[1120px] flex-col justify-between text-center">
+          <div className="mx-auto max-w-[460px]">
+            <div className="mx-auto mb-8 h-px w-14 bg-[#3B2F2F]/18" />
 
-          <p className="font-serif text-[34px] leading-tight tracking-[-0.02em] md:text-[42px]">
-            More details to come.
-          </p>
-
-          <p className="mt-5 font-sans text-[13px] leading-6 opacity-65 md:text-sm">
-            For now, book your stay and save the weekend. We’ll share additional
-            wedding details soon.
-          </p>
-
-          <p className="mt-12 font-serif text-[34px] leading-tight tracking-[-0.03em] md:text-[42px]">
-            Ashley and Jared
-          </p>
-
-          <div className="mx-auto mt-8 max-w-[260px] rounded-[28px] border border-[#3B2F2F]/10 bg-white/72 px-6 py-6 shadow-[0_18px_42px_rgba(59,47,47,0.08)] backdrop-blur-md">
-            <p className="font-serif text-[56px] leading-none tracking-[-0.05em] md:text-[68px]">
-              {daysUntilWedding ?? "—"}
+            <p className="font-serif text-[34px] leading-tight tracking-[-0.02em] md:text-[42px]">
+              More details to come.
             </p>
 
-            <p className="mt-3 font-sans text-[10px] font-semibold uppercase tracking-[0.22em] text-[#3B2F2F]/50">
-              Days until the wedding
+            <p className="mt-5 font-sans text-[13px] leading-6 opacity-65 md:text-sm">
+              For now, book your stay and save the weekend. We’ll share
+              additional wedding details soon.
             </p>
+
+            <p className="mt-12 font-serif text-[34px] leading-tight tracking-[-0.03em] md:text-[42px]">
+              Ashley and Jared 2026
+            </p>
+
+            <div className="mx-auto mt-8 max-w-[260px] rounded-[28px] border border-[#3B2F2F]/10 bg-white/72 px-6 py-6 shadow-[0_18px_42px_rgba(59,47,47,0.08)] backdrop-blur-md">
+              <p className="font-serif text-[56px] leading-none tracking-[-0.05em] md:text-[68px]">
+                {daysUntilWedding ?? "—"}
+              </p>
+
+              <p className="mt-3 font-sans text-[10px] font-semibold uppercase tracking-[0.22em] text-[#3B2F2F]/50">
+                Days until the wedding
+              </p>
+            </div>
           </div>
 
-          <p className="mx-auto mt-12 max-w-[360px] font-sans text-[10px] uppercase leading-6 tracking-[0.18em] text-[#3B2F2F]/45">
-            Ash & Jae in The A * Ashley & Jared Wedding Weekend 2026 * November
-            13 - 14, 2026 * Atlanta, GA
-          </p>
+          <div className="mt-20 border-t border-[#3B2F2F]/10 pt-6">
+            <p className="mx-auto flex max-w-[1040px] flex-wrap items-center justify-center gap-x-4 gap-y-2 font-sans text-[9px] uppercase leading-6 tracking-[0.2em] text-[#3B2F2F]/46 md:justify-between md:text-[10px]">
+              <span>Ash & Jae in The A</span>
+              <span className="hidden text-[#3B2F2F]/28 md:inline">◇</span>
+              <span>Ashley & Jared Wedding Weekend 2026</span>
+              <span className="hidden text-[#3B2F2F]/28 md:inline">◇</span>
+              <span>November 13 - 14, 2026</span>
+              <span className="hidden text-[#3B2F2F]/28 md:inline">◇</span>
+              <span>Atlanta, GA</span>
+            </p>
+          </div>
         </footer>
       </ImageSection>
     </main>
