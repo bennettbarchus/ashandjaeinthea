@@ -50,7 +50,7 @@ function Monogram() {
   return (
     <div className="mx-auto flex h-[82px] w-[82px] items-center justify-center rounded-full border border-[#BFA58A]/45 bg-[#F8F5F0]/80 shadow-[0_18px_50px_rgba(94,62,43,0.1)] backdrop-blur-md">
       <img
-        src="/images/aj-monogram-1.png"
+        src="/images/aj-monogram.svg"
         alt="Ashley and Jared monogram"
         draggable={false}
         className="h-[62px] w-[62px] object-contain"
