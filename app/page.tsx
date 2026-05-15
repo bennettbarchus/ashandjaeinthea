@@ -11,7 +11,6 @@ const hotels = [
     tier: "$$$",
     label: "Premium Stay",
     name: "The Forth Hotel",
-    time: "Wedding Venue",
     description:
       "The most seamless option for guests who want to stay where the big day unfolds.",
     originalRate: "$599",
@@ -24,7 +23,6 @@ const hotels = [
     tier: "$$",
     label: "Midtown Social",
     name: "Moxy Atlanta Midtown",
-    time: "Nearby",
     description:
       "A chic, social option in Midtown Atlanta with easy access to the wedding and the afterparty.",
     originalRate: "$250",
@@ -50,10 +48,13 @@ function getDaysUntilWedding() {
 
 function Monogram() {
   return (
-    <div className="mx-auto flex h-[72px] w-[72px] items-center justify-center rounded-full border border-[#BFA58A]/45 bg-[#F3C7C3]/28 shadow-[0_18px_50px_rgba(94,62,43,0.08)] backdrop-blur-md">
-      <span className="font-serif text-[28px] leading-none tracking-[-0.04em] text-[#5E3E2B]">
-        A<span className="mx-1 text-[18px] italic text-[#F1A96A]">&</span>J
-      </span>
+    <div className="mx-auto flex h-[82px] w-[82px] items-center justify-center rounded-full border border-[#BFA58A]/45 bg-[#F8F5F0]/80 shadow-[0_18px_50px_rgba(94,62,43,0.1)] backdrop-blur-md">
+      <img
+        src="/images/aj-monogram-1.png"
+        alt="Ashley and Jared monogram"
+        draggable={false}
+        className="h-[62px] w-[62px] object-contain"
+      />
     </div>
   );
 }
@@ -86,7 +87,7 @@ function PinnedImageScrollSection({
   gradient?: string;
 }) {
   return (
-    <section className={`relative h-[172vh] bg-[#F8F5F0] ${className}`}>
+    <section className={`relative h-[172vh] max-w-full overflow-hidden bg-[#F8F5F0] ${className}`}>
       <div className="sticky top-0 h-screen overflow-hidden">
         <img
           src={image}
@@ -133,7 +134,7 @@ function ImageBackgroundSection({
   gradient?: string;
 }) {
   return (
-    <section className={`relative overflow-hidden bg-[#F8F5F0] ${className}`}>
+    <section className={`relative max-w-full overflow-hidden bg-[#F8F5F0] ${className}`}>
       <img
         src={image}
         alt=""
@@ -141,7 +142,10 @@ function ImageBackgroundSection({
         className={`absolute inset-0 h-full w-full object-cover saturate-[1.02] contrast-[1.04] ${imageOpacity} ${imageClassName}`}
       />
 
-      <div className={`absolute inset-0 backdrop-blur-[0.2px] ${overlay}`} aria-hidden="true" />
+      <div
+        className={`absolute inset-0 backdrop-blur-[0.2px] ${overlay}`}
+        aria-hidden="true"
+      />
       <div className={`absolute inset-0 ${gradient}`} aria-hidden="true" />
 
       <div className={`relative z-10 ${contentClassName}`}>{children}</div>
@@ -174,7 +178,7 @@ export default function Home() {
 
   if (hasAccess === null) {
     return (
-      <main className="flex min-h-screen w-full items-center justify-center bg-[#F8F5F0] text-[#5E3E2B]">
+      <main className="flex min-h-screen w-full items-center justify-center overflow-x-hidden bg-[#F8F5F0] text-[#5E3E2B]">
         <p className="font-sans text-sm opacity-60">Loading…</p>
       </main>
     );
@@ -182,7 +186,7 @@ export default function Home() {
 
   if (!hasAccess) {
     return (
-      <main className="relative min-h-screen w-full overflow-hidden bg-[#F8F5F0] px-6 py-12 text-[#5E3E2B] md:flex md:items-center md:justify-center md:px-10 md:py-16">
+      <main className="relative min-h-screen w-full overflow-x-hidden overflow-y-hidden bg-[#F8F5F0] px-6 py-12 text-[#5E3E2B] md:flex md:items-center md:justify-center md:px-10 md:py-16">
         <img
           src="/images/forth-skyline-sm.png"
           alt=""
@@ -240,7 +244,7 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen w-full bg-[#F8F5F0] text-[#5E3E2B]">
+    <main className="min-h-screen w-full overflow-x-hidden bg-[#F8F5F0] text-[#5E3E2B]">
       <PinnedImageScrollSection
         image="/images/wedding-weekend-bg.png"
         primaryImageClassName="object-[center_8%] md:object-contain md:p-8 lg:p-12"
@@ -254,17 +258,14 @@ export default function Home() {
         </div>
       </PinnedImageScrollSection>
 
-      <ImageBackgroundSection
-        image="/images/ashley-jared-bg.png"
-        className="min-h-screen"
-        contentClassName="flex min-h-screen items-center px-5 py-14 md:px-10 md:py-20"
-        imageClassName="object-center"
-        imageOpacity="opacity-[0.24]"
-        overlay="bg-[#F8F5F0]/62 md:bg-[#F8F5F0]/58"
-        gradient="bg-[radial-gradient(circle_at_center,_rgba(243,199,195,0.34),_rgba(248,245,240,0.82)_54%,_rgba(201,182,201,0.24)_100%)]"
-      >
-        <div className="mx-auto w-full max-w-[780px]">
-          <div className="rounded-[42px] border border-[#BFA58A]/24 bg-[#F8F5F0]/80 px-6 py-10 text-center shadow-[0_34px_90px_rgba(94,62,43,0.12)] backdrop-blur-md md:rounded-[52px] md:px-12 md:py-14">
+      <section className="relative min-h-screen w-full overflow-hidden bg-[#F8F5F0] px-5 py-14 text-[#5E3E2B] md:flex md:items-center md:px-10 md:py-20">
+        <div
+          className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(243,199,195,0.24),_rgba(248,245,240,1)_44%,_rgba(201,182,201,0.18)_100%)]"
+          aria-hidden="true"
+        />
+
+        <div className="relative z-10 mx-auto w-full max-w-[780px]">
+          <div className="rounded-[42px] border border-[#BFA58A]/24 bg-[#F8F5F0]/90 px-6 py-10 text-center shadow-[0_34px_90px_rgba(94,62,43,0.1)] backdrop-blur-md md:rounded-[52px] md:px-12 md:py-14">
             <header>
               <Monogram />
 
@@ -321,7 +322,7 @@ export default function Home() {
             </section>
           </div>
         </div>
-      </ImageBackgroundSection>
+      </section>
 
       <PinnedImageScrollSection
         image="/images/editorial-bg.png"
@@ -371,26 +372,18 @@ export default function Home() {
                 rel="noopener noreferrer"
                 className="group block rounded-[28px] border border-[#BFA58A]/24 bg-[#F8F5F0]/88 p-6 text-left shadow-[0_18px_46px_rgba(94,62,43,0.1)] backdrop-blur-md transition duration-200 hover:-translate-y-0.5 hover:border-[#F1A96A]/45 hover:bg-[#F8F5F0]/95 md:rounded-[34px] md:p-8"
               >
-                <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
-                  <div className="min-w-0 flex-1">
-                    <p
-                      className={`mb-3 font-sans text-[10px] uppercase tracking-[0.24em] ${
-                        index === 0 ? "text-[#BFA58A]" : "text-[#7E877A]"
-                      }`}
-                    >
-                      {hotel.tier} · {hotel.label}
-                    </p>
+                <div className="min-w-0">
+                  <p
+                    className={`mb-3 font-sans text-[10px] uppercase tracking-[0.24em] ${
+                      index === 0 ? "text-[#BFA58A]" : "text-[#7E877A]"
+                    }`}
+                  >
+                    {hotel.tier} · {hotel.label}
+                  </p>
 
-                    <h3 className="font-serif text-[30px] leading-[1.02] tracking-[-0.025em] text-[#5E3E2B] md:text-[38px]">
-                      {hotel.name}
-                    </h3>
-                  </div>
-
-                  <div className="flex shrink-0 items-center gap-2 md:justify-end">
-                    <p className="rounded-full border border-[#BFA58A]/28 bg-[#F3C7C3]/18 px-3 py-1 font-sans text-[11px] text-[#5E3E2B]/68">
-                      {hotel.time}
-                    </p>
-                  </div>
+                  <h3 className="font-serif text-[30px] leading-[1.02] tracking-[-0.025em] text-[#5E3E2B] md:text-[38px]">
+                    {hotel.name}
+                  </h3>
                 </div>
 
                 <p className="mt-5 w-full font-sans text-[13px] leading-6 text-[#5E3E2B]/76 md:text-[14px]">
@@ -487,7 +480,7 @@ export default function Home() {
           </div>
 
           <div className="mt-20 border-t border-[#BFA58A]/24 pt-6">
-            <p className="mx-auto flex max-w-[1040px] flex-wrap items-center justify-center gap-x-4 gap-y-2 font-sans text-[9px] uppercase leading-6 tracking-[0.2em] text-[#5E3E2B]/50 md:justify-between md:text-[10px]">
+            <p className="mx-auto flex max-w-[1040px] flex-col items-center justify-center gap-y-2 font-sans text-[9px] uppercase leading-6 tracking-[0.18em] text-[#5E3E2B]/50 md:flex-row md:flex-wrap md:justify-between md:gap-x-4 md:text-[10px]">
               <span>Ash & Jae in The A</span>
               <span className="hidden text-[#F1A96A]/70 md:inline">◇</span>
               <span>Ashley & Jared Wedding Weekend 2026</span>
