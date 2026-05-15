@@ -69,13 +69,14 @@ function PaletteDivider() {
   );
 }
 
-function PinnedImageIntro({
+function RevealScrollSection({
   image,
   label,
   children,
   imageClassName = "",
   primaryImageClassName = "",
   gradient = "bg-[linear-gradient(180deg,_rgba(94,62,43,0.04)_0%,_rgba(0,0,0,0)_42%,_rgba(94,62,43,0.3)_100%)]",
+  panelOverlap = "-mt-[18svh] md:-mt-[22svh]",
 }: {
   image: string;
   label: string;
@@ -83,6 +84,7 @@ function PinnedImageIntro({
   imageClassName?: string;
   primaryImageClassName?: string;
   gradient?: string;
+  panelOverlap?: string;
 }) {
   return (
     <section className="relative isolate overflow-visible bg-[#F8F5F0]">
@@ -112,7 +114,7 @@ function PinnedImageIntro({
         </div>
       </div>
 
-      {children}
+      <div className={`relative z-20 ${panelOverlap}`}>{children}</div>
     </section>
   );
 }
@@ -151,6 +153,7 @@ function ImageBackgroundSection({
         className={`absolute inset-0 backdrop-blur-[0.2px] ${overlay}`}
         aria-hidden="true"
       />
+
       <div className={`absolute inset-0 ${gradient}`} aria-hidden="true" />
 
       <div className={`relative z-10 ${contentClassName}`}>{children}</div>
@@ -250,14 +253,14 @@ export default function Home() {
 
   return (
     <main className="min-h-screen w-full overflow-x-hidden bg-[#F8F5F0] text-[#5E3E2B]">
-      <PinnedImageIntro
+      <RevealScrollSection
         image="/images/wedding-weekend-bg.png"
         label="Scroll to enter"
         primaryImageClassName="object-[center_8%] md:object-contain md:p-8 lg:p-12"
         imageClassName="object-[center_8%] md:object-center"
         gradient="bg-[linear-gradient(180deg,_rgba(94,62,43,0.03)_0%,_rgba(0,0,0,0)_42%,_rgba(94,62,43,0.28)_100%)]"
       >
-        <section className="relative z-20 -mt-[18svh] w-full overflow-hidden rounded-t-[42px] bg-[#F8F5F0] px-5 py-16 text-[#5E3E2B] shadow-[0_-34px_90px_rgba(94,62,43,0.16)] md:-mt-[22svh] md:rounded-t-[56px] md:px-10 md:py-24">
+        <section className="w-full overflow-hidden rounded-t-[42px] bg-[#F8F5F0] px-5 py-16 text-[#5E3E2B] shadow-[0_-34px_90px_rgba(94,62,43,0.16)] md:rounded-t-[56px] md:px-10 md:py-24">
           <div
             className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(243,199,195,0.24),_rgba(248,245,240,1)_44%,_rgba(201,182,201,0.18)_100%)]"
             aria-hidden="true"
@@ -322,9 +325,9 @@ export default function Home() {
             </div>
           </div>
         </section>
-      </PinnedImageIntro>
+      </RevealScrollSection>
 
-      <PinnedImageIntro
+      <RevealScrollSection
         image="/images/editorial-bg.png"
         label="Celebrate with us in Atlanta"
         primaryImageClassName="object-[center_28%] md:object-[center_14%]"
@@ -333,7 +336,7 @@ export default function Home() {
       >
         <ImageBackgroundSection
           image="/images/hotels-bg.png"
-          className="relative z-20 -mt-[18svh] rounded-t-[42px] shadow-[0_-34px_90px_rgba(94,62,43,0.16)] md:-mt-[22svh] md:rounded-t-[56px]"
+          className="rounded-t-[42px] shadow-[0_-34px_90px_rgba(94,62,43,0.16)] md:rounded-t-[56px]"
           contentClassName="px-5 py-20 md:px-10 md:py-28"
           imageClassName="object-center"
           imageOpacity="opacity-[0.78]"
@@ -435,7 +438,7 @@ export default function Home() {
             </div>
           </div>
         </ImageBackgroundSection>
-      </PinnedImageIntro>
+      </RevealScrollSection>
 
       <ImageBackgroundSection
         image="/images/more-details-bg.png"
