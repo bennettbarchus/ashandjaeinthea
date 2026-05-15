@@ -58,20 +58,63 @@ function Monogram() {
   );
 }
 
-function StackedParallaxSection({
+function PinnedImageScrollSection({
   image,
   children,
-  zIndex,
   className = "",
-  contentClassName = "",
   imageClassName = "",
-  imageOpacity = "opacity-[0.78]",
-  overlay = "bg-[#F8F5F0]/32",
-  gradient = "bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.34),_rgba(248,245,240,0.48)_56%,_rgba(248,245,240,0.76)_100%)]",
+  primaryImageClassName = "",
+  overlay = "bg-black/0",
+  gradient = "bg-[linear-gradient(180deg,_rgba(0,0,0,0.04)_0%,_rgba(0,0,0,0)_42%,_rgba(0,0,0,0.28)_100%)]",
 }: {
   image: string;
   children: ReactNode;
-  zIndex: string;
+  className?: string;
+  imageClassName?: string;
+  primaryImageClassName?: string;
+  overlay?: string;
+  gradient?: string;
+}) {
+  return (
+    <section className={`relative h-[172vh] bg-[#F8F5F0] ${className}`}>
+      <div className="sticky top-0 h-screen overflow-hidden">
+        <img
+          src={image}
+          alt=""
+          aria-hidden="true"
+          className={`absolute inset-0 h-full w-full scale-[1.08] object-cover opacity-70 blur-xl saturate-[1.05] contrast-[1.04] ${imageClassName}`}
+        />
+
+        <img
+          src={image}
+          alt=""
+          aria-hidden="true"
+          className={`absolute inset-0 h-full w-full object-cover opacity-100 saturate-[1.02] contrast-[1.04] ${primaryImageClassName}`}
+        />
+
+        <div className={`absolute inset-0 ${overlay}`} aria-hidden="true" />
+        <div className={`absolute inset-0 ${gradient}`} aria-hidden="true" />
+
+        <div className="relative z-10 flex h-full items-end justify-center px-5 pb-10 md:px-10 md:pb-14">
+          {children}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ImageBackgroundSection({
+  image,
+  children,
+  className = "",
+  contentClassName = "",
+  imageClassName = "",
+  imageOpacity = "opacity-[0.72]",
+  overlay = "bg-[#F8F5F0]/34",
+  gradient = "bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.38),_rgba(248,245,240,0.52)_58%,_rgba(248,245,240,0.82)_100%)]",
+}: {
+  image: string;
+  children: ReactNode;
   className?: string;
   contentClassName?: string;
   imageClassName?: string;
@@ -80,24 +123,16 @@ function StackedParallaxSection({
   gradient?: string;
 }) {
   return (
-    <section
-      className={`sticky top-0 min-h-screen overflow-hidden bg-[#F8F5F0] ${zIndex} ${className}`}
-    >
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <img
-          src={image}
-          alt=""
-          aria-hidden="true"
-          className={`h-full w-full scale-[1.06] object-cover saturate-[1.02] contrast-[1.04] ${imageOpacity} ${imageClassName}`}
-        />
+    <section className={`relative overflow-hidden bg-[#F8F5F0] ${className}`}>
+      <img
+        src={image}
+        alt=""
+        aria-hidden="true"
+        className={`absolute inset-0 h-full w-full object-cover saturate-[1.02] contrast-[1.04] ${imageOpacity} ${imageClassName}`}
+      />
 
-        <div
-          className={`absolute inset-0 backdrop-blur-[0.2px] ${overlay}`}
-          aria-hidden="true"
-        />
-
-        <div className={`absolute inset-0 ${gradient}`} aria-hidden="true" />
-      </div>
+      <div className={`absolute inset-0 backdrop-blur-[0.2px] ${overlay}`} aria-hidden="true" />
+      <div className={`absolute inset-0 ${gradient}`} aria-hidden="true" />
 
       <div className={`relative z-10 ${contentClassName}`}>{children}</div>
     </section>
@@ -195,32 +230,27 @@ export default function Home() {
   }
 
   return (
-    <main className="relative min-h-screen w-full bg-[#F8F5F0] text-[#3B2F2F]">
-      <StackedParallaxSection
+    <main className="min-h-screen w-full bg-[#F8F5F0] text-[#3B2F2F]">
+      <PinnedImageScrollSection
         image="/images/wedding-weekend-bg.png"
-        zIndex="z-10"
-        className="min-h-screen"
-        contentClassName="flex min-h-screen items-end justify-center px-5 pb-10 pt-10 md:px-10 md:pb-14"
-        imageClassName="object-[center_12%] md:object-[center_14%]"
-        imageOpacity="opacity-[1]"
-        overlay="bg-transparent"
-        gradient="bg-[linear-gradient(180deg,_rgba(0,0,0,0.03)_0%,_rgba(0,0,0,0)_38%,_rgba(0,0,0,0.24)_100%)]"
+        primaryImageClassName="object-[center_8%] md:object-contain md:p-8 lg:p-12"
+        imageClassName="object-[center_8%] md:object-center"
+        gradient="bg-[linear-gradient(180deg,_rgba(0,0,0,0.02)_0%,_rgba(0,0,0,0)_42%,_rgba(0,0,0,0.26)_100%)]"
       >
         <div className="rounded-full border border-white/25 bg-[#3B2F2F]/24 px-5 py-3 text-center text-[#F8F5F0] shadow-[0_18px_46px_rgba(0,0,0,0.2)] backdrop-blur-md">
           <p className="font-sans text-[9px] font-semibold uppercase tracking-[0.26em]">
             Scroll to enter
           </p>
         </div>
-      </StackedParallaxSection>
+      </PinnedImageScrollSection>
 
-      <StackedParallaxSection
+      <ImageBackgroundSection
         image="/images/ashley-jared-bg.png"
-        zIndex="z-20"
         className="min-h-screen"
         contentClassName="flex min-h-screen items-center px-5 py-14 md:px-10 md:py-20"
         imageClassName="object-center"
-        imageOpacity="opacity-[0.26]"
-        overlay="bg-[#F8F5F0]/62 md:bg-[#F8F5F0]/58"
+        imageOpacity="opacity-[0.24]"
+        overlay="bg-[#F8F5F0]/64 md:bg-[#F8F5F0]/60"
         gradient="bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.66),_rgba(248,245,240,0.82)_58%,_rgba(248,245,240,0.96)_100%)]"
       >
         <div className="mx-auto w-full max-w-[780px]">
@@ -279,28 +309,23 @@ export default function Home() {
             </section>
           </div>
         </div>
-      </StackedParallaxSection>
+      </ImageBackgroundSection>
 
-      <StackedParallaxSection
+      <PinnedImageScrollSection
         image="/images/editorial-bg.png"
-        zIndex="z-30"
-        className="min-h-screen"
-        contentClassName="flex min-h-screen items-end justify-center px-5 pb-10 pt-10 md:px-10 md:pb-14"
-        imageClassName="object-center"
-        imageOpacity="opacity-[0.98]"
-        overlay="bg-[#000000]/5"
-        gradient="bg-[linear-gradient(180deg,_rgba(0,0,0,0.06)_0%,_rgba(0,0,0,0)_40%,_rgba(0,0,0,0.3)_100%)]"
+        primaryImageClassName="object-[center_28%] md:object-[center_20%]"
+        imageClassName="object-[center_28%] md:object-[center_20%]"
+        gradient="bg-[linear-gradient(180deg,_rgba(0,0,0,0.06)_0%,_rgba(0,0,0,0)_42%,_rgba(0,0,0,0.3)_100%)]"
       >
         <div className="rounded-full border border-white/25 bg-[#3B2F2F]/24 px-5 py-3 text-center text-[#F8F5F0] shadow-[0_18px_46px_rgba(0,0,0,0.2)] backdrop-blur-md">
           <p className="font-sans text-[9px] font-semibold uppercase tracking-[0.26em]">
             The weekend begins in Atlanta
           </p>
         </div>
-      </StackedParallaxSection>
+      </PinnedImageScrollSection>
 
-      <StackedParallaxSection
+      <ImageBackgroundSection
         image="/images/hotels-bg.png"
-        zIndex="z-40"
         className="min-h-screen"
         contentClassName="px-5 py-20 md:px-10 md:py-28"
         imageClassName="object-center"
@@ -406,11 +431,10 @@ export default function Home() {
             ))}
           </div>
         </div>
-      </StackedParallaxSection>
+      </ImageBackgroundSection>
 
-      <StackedParallaxSection
+      <ImageBackgroundSection
         image="/images/more-details-bg.png"
-        zIndex="z-50"
         className="min-h-screen"
         contentClassName="px-5 py-20 md:px-10 md:py-28"
         imageClassName="object-center"
@@ -432,7 +456,7 @@ export default function Home() {
             </p>
 
             <p className="mt-12 font-serif text-[34px] leading-tight tracking-[-0.03em] md:text-[42px]">
-              Ashley and Jared
+              Ashley & Jared 2026
             </p>
 
             <div className="mx-auto mt-8 max-w-[260px] rounded-[28px] border border-[#3B2F2F]/10 bg-white/72 px-6 py-6 shadow-[0_18px_42px_rgba(59,47,47,0.08)] backdrop-blur-md">
@@ -458,7 +482,7 @@ export default function Home() {
             </p>
           </div>
         </footer>
-      </StackedParallaxSection>
+      </ImageBackgroundSection>
     </main>
   );
 }
