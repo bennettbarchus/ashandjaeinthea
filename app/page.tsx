@@ -1,3 +1,4 @@
+Use this full replacement for app/page.tsx. I used your latest code as the base, kept the working design choices, and changed the scroll architecture so the next section starts rolling over the pinned image before the image releases. That should remove the white gaps and bring back the premium editorial scroll reveal.
 "use client";
 
 import { useEffect, useState } from "react";
@@ -88,14 +89,14 @@ function PinnedImageScrollSection({
 }) {
   return (
     <section
-      className={`relative h-[150svh] max-w-full overflow-hidden bg-[#F8F5F0] ${className}`}
+      className={`relative h-[162svh] max-w-full overflow-hidden bg-[#F8F5F0] md:h-[172svh] ${className}`}
     >
       <div className="sticky top-0 h-[100svh] overflow-hidden">
         <img
           src={image}
           alt=""
           aria-hidden="true"
-          className={`absolute inset-0 h-full w-full scale-[1.08] object-cover opacity-70 blur-xl saturate-[1.05] contrast-[1.04] ${imageClassName}`}
+          className={`absolute inset-0 h-full w-full scale-[1.08] object-cover opacity-75 blur-xl saturate-[1.05] contrast-[1.04] ${imageClassName}`}
         />
 
         <img
@@ -262,7 +263,7 @@ export default function Home() {
         </div>
       </PinnedImageScrollSection>
 
-      <section className="relative z-20 -mt-[16svh] min-h-screen w-full overflow-hidden rounded-t-[42px] bg-[#F8F5F0] px-5 pb-16 pt-[calc(16svh+3.5rem)] text-[#5E3E2B] shadow-[0_-34px_90px_rgba(94,62,43,0.14)] md:-mt-[18svh] md:flex md:items-center md:rounded-t-[56px] md:px-10 md:pb-20 md:pt-[calc(18svh+5rem)]">
+      <section className="relative z-20 -mt-[64svh] min-h-screen w-full overflow-hidden rounded-t-[42px] bg-[#F8F5F0] px-5 pb-16 pt-[calc(64svh+3.5rem)] text-[#5E3E2B] shadow-[0_-34px_90px_rgba(94,62,43,0.16)] md:-mt-[74svh] md:flex md:items-center md:rounded-t-[56px] md:px-10 md:pb-20 md:pt-[calc(74svh+5rem)]">
         <div
           className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(243,199,195,0.24),_rgba(248,245,240,1)_44%,_rgba(201,182,201,0.18)_100%)]"
           aria-hidden="true"
@@ -331,8 +332,8 @@ export default function Home() {
       <PinnedImageScrollSection
         image="/images/editorial-bg.png"
         className="-mt-px"
-        primaryImageClassName="object-[center_28%] md:object-[center_18%]"
-        imageClassName="object-[center_28%] md:object-[center_18%]"
+        primaryImageClassName="object-[center_28%] md:object-[center_14%]"
+        imageClassName="object-[center_28%] md:object-[center_14%]"
         gradient="bg-[linear-gradient(180deg,_rgba(94,62,43,0.06)_0%,_rgba(0,0,0,0)_42%,_rgba(94,62,43,0.32)_100%)]"
       >
         <div className="rounded-full border border-[#F8F5F0]/35 bg-[#5E3E2B]/26 px-5 py-3 text-center text-[#F8F5F0] shadow-[0_18px_46px_rgba(94,62,43,0.24)] backdrop-blur-md">
@@ -344,8 +345,8 @@ export default function Home() {
 
       <ImageBackgroundSection
         image="/images/hotels-bg.png"
-        className="relative z-30 -mt-[16svh] min-h-screen rounded-t-[42px] shadow-[0_-34px_90px_rgba(94,62,43,0.14)] md:-mt-[18svh] md:rounded-t-[56px]"
-        contentClassName="px-5 pb-20 pt-[calc(16svh+5rem)] md:px-10 md:pb-28 md:pt-[calc(18svh+6rem)]"
+        className="relative z-30 -mt-[64svh] min-h-screen rounded-t-[42px] shadow-[0_-34px_90px_rgba(94,62,43,0.16)] md:-mt-[74svh] md:rounded-t-[56px]"
+        contentClassName="px-5 pb-20 pt-[calc(64svh+5rem)] md:px-10 md:pb-28 md:pt-[calc(74svh+6rem)]"
         imageClassName="object-center"
         imageOpacity="opacity-[0.78]"
         overlay="bg-[#F8F5F0]/28 md:bg-[#F8F5F0]/26"
@@ -500,4 +501,5 @@ export default function Home() {
     </main>
   );
 }
+
 
