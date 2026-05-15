@@ -68,21 +68,20 @@ export default function Home() {
   if (!hasAccess) {
     return (
       <main className="relative min-h-screen w-full overflow-hidden bg-[#F8F5F0] px-6 py-12 text-[#3B2F2F] md:flex md:items-center md:justify-center md:px-10 md:py-16">
+        <img
+          src="/images/forth-skyline-sm.png"
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 h-full w-full object-cover object-[center_34%] opacity-[0.72] saturate-[0.85] contrast-[0.95] md:object-center md:opacity-[0.62]"
+        />
+
         <div
-          className="absolute inset-0 bg-cover bg-[center_34%] bg-no-repeat opacity-[0.34] md:bg-center md:opacity-[0.3]"
-          style={{
-            backgroundImage: "url('/images/forth-skyline-sm.png')",
-          }}
+          className="absolute inset-0 bg-[#F8F5F0]/38 backdrop-blur-[0.5px] md:bg-[#F8F5F0]/44"
           aria-hidden="true"
         />
 
         <div
-          className="absolute inset-0 bg-[#F8F5F0]/72 backdrop-blur-[1px] md:bg-[#F8F5F0]/68"
-          aria-hidden="true"
-        />
-
-        <div
-          className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.72),_rgba(248,245,240,0.82)_52%,_rgba(248,245,240,0.96)_100%)]"
+          className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.5),_rgba(248,245,240,0.64)_54%,_rgba(248,245,240,0.88)_100%)]"
           aria-hidden="true"
         />
 
