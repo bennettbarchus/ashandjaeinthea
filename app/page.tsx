@@ -58,79 +58,46 @@ function Monogram() {
   );
 }
 
-function ImageSection({
+function ParallaxSection({
   image,
   children,
   className = "",
+  contentClassName = "",
   imageClassName = "",
+  imageOpacity = "opacity-[0.78]",
   overlay = "bg-[#F8F5F0]/32",
   gradient = "bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.34),_rgba(248,245,240,0.48)_56%,_rgba(248,245,240,0.76)_100%)]",
 }: {
   image: string;
   children: ReactNode;
   className?: string;
+  contentClassName?: string;
   imageClassName?: string;
+  imageOpacity?: string;
   overlay?: string;
   gradient?: string;
 }) {
   return (
     <section className={`relative overflow-hidden ${className}`}>
-      <img
-        src={image}
-        alt=""
-        aria-hidden="true"
-        className={`absolute inset-0 h-full w-full object-cover opacity-[0.76] saturate-[0.96] contrast-[1.03] ${imageClassName}`}
-      />
-
-      <div
-        className={`absolute inset-0 backdrop-blur-[0.25px] ${overlay}`}
-        aria-hidden="true"
-      />
-
-      <div className={`absolute inset-0 ${gradient}`} aria-hidden="true" />
-
-      <div className="relative z-10">{children}</div>
-    </section>
-  );
-}
-
-function ParallaxHeroSection({ children }: { children: ReactNode }) {
-  return (
-    <section className="relative overflow-hidden bg-[#F8F5F0] text-[#3B2F2F]">
-      <div className="absolute inset-0 h-full">
+      <div className="pointer-events-none absolute inset-0 h-full">
         <div className="sticky top-0 h-screen overflow-hidden">
           <img
-            src="/images/wedding-weekend-bg.png"
+            src={image}
             alt=""
             aria-hidden="true"
-            className="h-full w-full object-cover object-[center_12%] opacity-[0.98] saturate-[1.02] contrast-[1.04] md:object-[center_14%]"
+            className={`h-full w-full object-cover saturate-[1.02] contrast-[1.04] ${imageOpacity} ${imageClassName}`}
           />
 
           <div
-            className="absolute inset-0 bg-[linear-gradient(180deg,_rgba(0,0,0,0.04)_0%,_rgba(0,0,0,0)_38%,_rgba(0,0,0,0.18)_100%)]"
+            className={`absolute inset-0 backdrop-blur-[0.2px] ${overlay}`}
             aria-hidden="true"
           />
 
-          <div
-            className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0)_0%,_rgba(0,0,0,0.04)_62%,_rgba(0,0,0,0.18)_100%)]"
-            aria-hidden="true"
-          />
+          <div className={`absolute inset-0 ${gradient}`} aria-hidden="true" />
         </div>
       </div>
 
-      <div className="relative z-10">
-        <div className="flex min-h-screen items-end justify-center px-5 pb-10 pt-10 md:px-10 md:pb-14">
-          <div className="rounded-full border border-white/25 bg-[#3B2F2F]/22 px-5 py-3 text-center text-[#F8F5F0] shadow-[0_18px_46px_rgba(0,0,0,0.18)] backdrop-blur-md">
-            <p className="font-sans text-[9px] font-semibold uppercase tracking-[0.26em]">
-              Scroll to enter
-            </p>
-          </div>
-        </div>
-
-        <div className="flex min-h-screen items-center px-5 py-14 md:px-10 md:py-20">
-          <div className="mx-auto w-full max-w-[780px]">{children}</div>
-        </div>
-      </div>
+      <div className={`relative z-10 ${contentClassName}`}>{children}</div>
     </section>
   );
 }
@@ -227,67 +194,111 @@ export default function Home() {
 
   return (
     <main className="min-h-screen w-full bg-[#F8F5F0] text-[#3B2F2F]">
-      <ParallaxHeroSection>
-        <div className="rounded-[42px] border border-[#3B2F2F]/10 bg-[#F8F5F0]/74 px-6 py-10 text-center shadow-[0_34px_90px_rgba(59,47,47,0.13)] backdrop-blur-md md:rounded-[52px] md:px-12 md:py-14">
-          <header>
-            <Monogram />
-
-            <p className="mt-10 font-sans text-[10px] uppercase tracking-[0.42em] opacity-[0.55]">
-              Atlanta, Georgia
-            </p>
-
-            <h1 className="mt-6 font-serif text-[64px] leading-[0.88] tracking-[-0.045em] md:text-[92px]">
-              Ashley
-              <span className="my-2 block text-[24px] italic leading-none tracking-normal opacity-[0.45] md:text-[30px]">
-                &
-              </span>
-              Jared
-            </h1>
-
-            <div className="mx-auto my-9 h-px w-14 bg-[#3B2F2F]/18 md:my-12" />
-
-            <p className="font-sans text-[10px] uppercase tracking-[0.32em] opacity-[0.55]">
-              Wedding Weekend
-            </p>
-
-            <div className="mx-auto mt-5 max-w-[620px] space-y-4">
-              <p className="font-serif text-[28px] leading-tight tracking-[-0.02em] md:text-[40px]">
-                Friday, November 13, 2026
-              </p>
-
-              <p className="font-sans text-[11px] font-semibold uppercase tracking-[0.22em] text-[#3B2F2F]/58 md:text-xs">
-                Welcome Party
-              </p>
-
-              <div className="mx-auto h-px w-10 bg-[#3B2F2F]/14" />
-
-              <p className="font-serif text-[28px] leading-tight tracking-[-0.02em] md:text-[40px]">
-                Saturday, November 14, 2026
-              </p>
-
-              <p className="font-sans text-[11px] font-semibold uppercase tracking-[0.22em] text-[#3B2F2F]/58 md:text-xs">
-                Black Tie Ceremony & Reception
-              </p>
-            </div>
-          </header>
-
-          <section className="mx-auto mt-[4.5rem] max-w-[540px] text-center md:mt-20">
-            <p className="font-serif text-[31px] leading-[1.08] tracking-[-0.025em] md:text-[44px]">
-              We can’t wait to celebrate with you in Atlanta.
-            </p>
-
-            <p className="mx-auto mt-6 max-w-[460px] font-sans text-[14px] leading-7 text-[#4f433e] md:text-[15px]">
-              To make planning easy, we’ve curated a few recommended places to
-              stay for the weekend.
-            </p>
-          </section>
+      <ParallaxSection
+        image="/images/wedding-weekend-bg.png"
+        className="min-h-[125vh]"
+        contentClassName="flex min-h-[125vh] items-end justify-center px-5 pb-10 pt-10 md:px-10 md:pb-14"
+        imageClassName="object-[center_12%] md:object-[center_14%]"
+        imageOpacity="opacity-[0.98]"
+        overlay="bg-transparent"
+        gradient="bg-[linear-gradient(180deg,_rgba(0,0,0,0.04)_0%,_rgba(0,0,0,0)_38%,_rgba(0,0,0,0.2)_100%)]"
+      >
+        <div className="rounded-full border border-white/25 bg-[#3B2F2F]/22 px-5 py-3 text-center text-[#F8F5F0] shadow-[0_18px_46px_rgba(0,0,0,0.18)] backdrop-blur-md">
+          <p className="font-sans text-[9px] font-semibold uppercase tracking-[0.26em]">
+            Scroll to enter
+          </p>
         </div>
-      </ParallaxHeroSection>
+      </ParallaxSection>
 
-      <ImageSection
-        image="/images/hotels-bg.png"
-        className="px-5 py-20 md:px-10 md:py-28"
+      <ParallaxSection
+        image="/images/ashley-jared-bg.png"
+        className="min-h-screen"
+        contentClassName="flex min-h-screen items-center px-5 py-14 md:px-10 md:py-20"
         imageClassName="object-center"
+        imageOpacity="opacity-[0.32]"
+        overlay="bg-[#F8F5F0]/62 md:bg-[#F8F5F0]/58"
+        gradient="bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.62),_rgba(248,245,240,0.78)_58%,_rgba(248,245,240,0.94)_100%)]"
+      >
+        <div className="mx-auto w-full max-w-[780px]">
+          <div className="rounded-[42px] border border-[#3B2F2F]/10 bg-[#F8F5F0]/76 px-6 py-10 text-center shadow-[0_34px_90px_rgba(59,47,47,0.13)] backdrop-blur-md md:rounded-[52px] md:px-12 md:py-14">
+            <header>
+              <Monogram />
+
+              <p className="mt-10 font-sans text-[10px] uppercase tracking-[0.42em] opacity-[0.55]">
+                Atlanta, Georgia
+              </p>
+
+              <h1 className="mt-6 font-serif text-[64px] leading-[0.88] tracking-[-0.045em] md:text-[92px]">
+                Ashley
+                <span className="my-2 block text-[24px] italic leading-none tracking-normal opacity-[0.45] md:text-[30px]">
+                  &
+                </span>
+                Jared
+              </h1>
+
+              <div className="mx-auto my-9 h-px w-14 bg-[#3B2F2F]/18 md:my-12" />
+
+              <p className="font-sans text-[10px] uppercase tracking-[0.32em] opacity-[0.55]">
+                Wedding Weekend
+              </p>
+
+              <div className="mx-auto mt-5 max-w-[620px] space-y-4">
+                <p className="font-serif text-[28px] leading-tight tracking-[-0.02em] md:text-[40px]">
+                  Friday, November 13, 2026
+                </p>
+
+                <p className="font-sans text-[11px] font-semibold uppercase tracking-[0.22em] text-[#3B2F2F]/58 md:text-xs">
+                  Welcome Party
+                </p>
+
+                <div className="mx-auto h-px w-10 bg-[#3B2F2F]/14" />
+
+                <p className="font-serif text-[28px] leading-tight tracking-[-0.02em] md:text-[40px]">
+                  Saturday, November 14, 2026
+                </p>
+
+                <p className="font-sans text-[11px] font-semibold uppercase tracking-[0.22em] text-[#3B2F2F]/58 md:text-xs">
+                  Black Tie Ceremony & Reception
+                </p>
+              </div>
+            </header>
+
+            <section className="mx-auto mt-[4.5rem] max-w-[540px] text-center md:mt-20">
+              <p className="font-serif text-[31px] leading-[1.08] tracking-[-0.025em] md:text-[44px]">
+                We can’t wait to celebrate with you in Atlanta.
+              </p>
+
+              <p className="mx-auto mt-6 max-w-[460px] font-sans text-[14px] leading-7 text-[#4f433e] md:text-[15px]">
+                To make planning easy, we’ve curated a few recommended places to
+                stay for the weekend.
+              </p>
+            </section>
+          </div>
+        </div>
+      </ParallaxSection>
+
+      <ParallaxSection
+        image="/images/editorial-bg.png"
+        className="min-h-[118vh]"
+        contentClassName="flex min-h-[118vh] items-end justify-center px-5 pb-10 pt-10 md:px-10 md:pb-14"
+        imageClassName="object-center"
+        imageOpacity="opacity-[0.96]"
+        overlay="bg-[#000000]/8"
+        gradient="bg-[linear-gradient(180deg,_rgba(0,0,0,0.08)_0%,_rgba(0,0,0,0)_40%,_rgba(0,0,0,0.28)_100%)]"
+      >
+        <div className="rounded-full border border-white/25 bg-[#3B2F2F]/24 px-5 py-3 text-center text-[#F8F5F0] shadow-[0_18px_46px_rgba(0,0,0,0.18)] backdrop-blur-md">
+          <p className="font-sans text-[9px] font-semibold uppercase tracking-[0.26em]">
+            The weekend begins in Atlanta
+          </p>
+        </div>
+      </ParallaxSection>
+
+      <ParallaxSection
+        image="/images/hotels-bg.png"
+        className="min-h-screen"
+        contentClassName="px-5 py-20 md:px-10 md:py-28"
+        imageClassName="object-center"
+        imageOpacity="opacity-[0.78]"
         overlay="bg-[#F8F5F0]/30 md:bg-[#F8F5F0]/28"
         gradient="bg-[linear-gradient(180deg,_rgba(248,245,240,0.74)_0%,_rgba(248,245,240,0.44)_24%,_rgba(248,245,240,0.46)_78%,_rgba(248,245,240,0.82)_100%)]"
       >
@@ -389,12 +400,14 @@ export default function Home() {
             ))}
           </div>
         </div>
-      </ImageSection>
+      </ParallaxSection>
 
-      <ImageSection
+      <ParallaxSection
         image="/images/more-details-bg.png"
-        className="px-5 py-20 md:px-10 md:py-28"
+        className="min-h-screen"
+        contentClassName="px-5 py-20 md:px-10 md:py-28"
         imageClassName="object-center"
+        imageOpacity="opacity-[0.78]"
         overlay="bg-[#F8F5F0]/32 md:bg-[#F8F5F0]/30"
         gradient="bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.38),_rgba(248,245,240,0.52)_58%,_rgba(248,245,240,0.8)_100%)]"
       >
@@ -412,7 +425,7 @@ export default function Home() {
             </p>
 
             <p className="mt-12 font-serif text-[34px] leading-tight tracking-[-0.03em] md:text-[42px]">
-              Ashley & Jared 2026
+              Ashley and Jared
             </p>
 
             <div className="mx-auto mt-8 max-w-[260px] rounded-[28px] border border-[#3B2F2F]/10 bg-white/72 px-6 py-6 shadow-[0_18px_42px_rgba(59,47,47,0.08)] backdrop-blur-md">
@@ -438,7 +451,7 @@ export default function Home() {
             </p>
           </div>
         </footer>
-      </ImageSection>
+      </ParallaxSection>
     </main>
   );
 }
