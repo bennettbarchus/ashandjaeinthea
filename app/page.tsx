@@ -496,6 +496,15 @@ export default function SaveTheDatePage() {
       opacity: 0.6;
       margin-top: 48px;
     }
+    .footer-credit {
+      font-family: 'Cinzel', serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--mocha);
+      opacity: 0.35;
+      margin-top: 20px;
+    }
 
     .fade-in {
       opacity: 0;
@@ -675,6 +684,7 @@ export default function SaveTheDatePage() {
             Ashley &amp; Jared &nbsp;&middot;&nbsp; November 14, 2026 &nbsp;&middot;&nbsp; Atlanta, Georgia
           </p>
           <img className="footer-logo" src={LOGO} alt="AJ" />
+          <p className="footer-credit">Crafted with love by Ashley &amp; Jared &nbsp;&middot;&nbsp; 2026</p>
         </div>
 
       </div>
