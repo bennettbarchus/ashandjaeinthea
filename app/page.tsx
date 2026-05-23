@@ -6,6 +6,7 @@ const LOGO = "/images/aj-monogram-1.png";
 const FORTH = "/images/forth-skyline-sm.png";
 const SKYLINE = "/images/hotels-bg.png";
 const COUPLE = "/images/IMG_1787.png";
+const LOGO_NO_DATE = "/images/No_Date_Wedding_Logo.png";
 
 const PASSWORD = "14november26";
 
@@ -272,8 +273,8 @@ export default function SaveTheDatePage() {
     }
     .wedding-date {
       font-family: 'Cinzel', serif;
-      font-size: clamp(0.8rem, 2vw, 1rem);
-      letter-spacing: 0.25em;
+      font-size: clamp(0.62rem, 2vw, 1rem);
+      letter-spacing: 0.2em;
       color: var(--mocha);
       opacity: 0.9;
       text-transform: uppercase;
@@ -293,7 +294,7 @@ export default function SaveTheDatePage() {
     }
     .section-title {
       font-family: 'La Belle Aurore', cursive;
-      font-size: clamp(2.8rem, 9vw, 3.8rem);
+      font-size: clamp(2.2rem, 9vw, 3.8rem);
       font-weight: 400;
       color: var(--mocha);
       text-align: center;
@@ -574,7 +575,7 @@ export default function SaveTheDatePage() {
           <p className="save-the-date fade-in">Save the Date</p>
           <h1 className="couple-names fade-in">Ashley + Jared</h1>
           <p className="wedding-date fade-in">
-            November 13 - 14, 2026 &nbsp;&middot;&nbsp; Atlanta, GA
+            November 13-14, 2026 &nbsp;&middot;&nbsp; Atlanta, GA
           </p>
           <div className="divider fade-in" />
           <div className="couple-photo-wrap fade-in">
@@ -694,7 +695,7 @@ export default function SaveTheDatePage() {
           <p className="footer-sub">
             Ashley &amp; Jared &nbsp;&middot;&nbsp; November 13-14, 2026 &nbsp;&middot;&nbsp; Atlanta, GA
           </p>
-          <img className="footer-logo" src={LOGO} alt="AJ" />
+<img className="footer-logo" src={LOGO_NO_DATE} alt="AJ" />
           <p className="footer-credit">Crafted with love by Ashley &amp; Jared &nbsp;&middot;&nbsp; 2026</p>
         </div>
 
