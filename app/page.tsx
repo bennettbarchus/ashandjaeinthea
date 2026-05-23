@@ -198,7 +198,7 @@ export default function SaveTheDatePage() {
 
     .banner {
       width: 100%;
-      height: clamp(300px, 45vw, 580px);
+      height: clamp(200px, 42vw, 580px);
       position: relative;
       overflow: hidden;
     }
@@ -229,7 +229,7 @@ export default function SaveTheDatePage() {
 
     .hero-content {
       text-align: center;
-      padding: 60px 24px 50px;
+      padding: clamp(32px, 6vw, 60px) 24px clamp(28px, 5vw, 50px);
       position: relative;
     }
     .hero-logo {
@@ -239,14 +239,14 @@ export default function SaveTheDatePage() {
       margin-bottom: 30px;
     }
     .couple-photo-wrap {
-      width: min(480px, 88vw);
-      margin: 0 auto 60px;
+      width: min(480px, 92vw);
+      margin: 0 auto 48px;
       position: relative;
     }
     .couple-photo-wrap::before {
       content: '';
       position: absolute;
-      inset: -12px;
+      inset: -8px;
       border: 1px solid rgba(191,165,138,0.4);
       pointer-events: none;
     }
@@ -263,9 +263,9 @@ export default function SaveTheDatePage() {
     }
     .couple-names {
       font-family: 'La Belle Aurore', cursive;
-      font-size: clamp(3.5rem, 9vw, 6.5rem);
+      font-size: clamp(4rem, 13vw, 6.5rem);
       font-weight: 400;
-      line-height: 1.15;
+      line-height: 1.25;
       color: var(--mocha);
       margin-bottom: 18px;
       letter-spacing: 0.03em;
@@ -287,13 +287,13 @@ export default function SaveTheDatePage() {
     }
 
     .section {
-      padding: 70px 24px;
+      padding: clamp(44px, 8vw, 70px) clamp(18px, 5vw, 24px);
       max-width: 900px;
       margin: 0 auto;
     }
     .section-title {
       font-family: 'La Belle Aurore', cursive;
-      font-size: clamp(2.4rem, 5.5vw, 3.8rem);
+      font-size: clamp(2.8rem, 9vw, 3.8rem);
       font-weight: 400;
       color: var(--mocha);
       text-align: center;
@@ -302,13 +302,13 @@ export default function SaveTheDatePage() {
     }
     .section-subtitle {
       font-family: 'Cinzel', serif;
-      font-size: 0.72rem;
+      font-size: clamp(0.68rem, 2vw, 0.72rem);
       letter-spacing: 0.35em;
       text-transform: uppercase;
       color: var(--mocha);
       opacity: 0.6;
       text-align: center;
-      margin-bottom: 48px;
+      margin-bottom: 36px;
     }
 
     .countdown-wrap {
@@ -319,7 +319,7 @@ export default function SaveTheDatePage() {
     }
     .countdown-num {
       font-family: 'Playfair Display', serif;
-      font-size: clamp(5rem, 14vw, 8rem);
+      font-size: clamp(6rem, 22vw, 8rem);
       font-weight: 700;
       color: var(--mocha);
       line-height: 1;
@@ -349,7 +349,7 @@ export default function SaveTheDatePage() {
     }
     .hotel-card {
       border: 1px solid rgba(191,165,138,0.35);
-      padding: clamp(28px, 5vw, 48px);
+      padding: clamp(20px, 5vw, 48px);
       margin-bottom: 32px;
       background: rgba(249,237,232,0.5);
       position: relative;
@@ -462,7 +462,7 @@ export default function SaveTheDatePage() {
 
     .footer-section {
       text-align: center;
-      padding: 80px 24px 70px;
+      padding: clamp(48px, 10vw, 80px) 24px clamp(40px, 8vw, 70px);
       background: linear-gradient(to bottom, transparent, rgba(243,199,195,0.2));
     }
     .footer-ornament {
@@ -514,6 +514,17 @@ export default function SaveTheDatePage() {
     .fade-in.visible {
       opacity: 1;
       transform: none;
+    }
+
+    @media (max-width: 480px) {
+      .password-input { width: 200px; }
+      .divider { margin: 20px auto; }
+      .hotel-card::before { display: none; }
+      .rate-original { font-size: 0.9rem; }
+      .rate-new { font-size: 1.2rem; }
+      .book-btn { display: block; text-align: center; }
+      .footer-logo { width: 90px; }
+      .footer-ornament { font-size: 1.5rem; }
     }
   `;
 
