@@ -247,16 +247,17 @@ export default function SaveTheDatePage() {
 
     .save-the-date {
       font-family: 'EB Garamond', serif;
-      font-size: clamp(0.65rem, 1.5vw, 0.8rem);
+      font-size: clamp(0.85rem, 1.8vw, 1rem);
       letter-spacing: 0.45em;
       text-transform: uppercase;
-      color: var(--sand);
+      color: var(--mocha);
+      opacity: 0.75;
       margin-bottom: 16px;
     }
     .couple-names {
       font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(3rem, 8vw, 5.5rem);
-      font-weight: 300;
+      font-size: clamp(3.5rem, 9vw, 6.5rem);
+      font-weight: 500;
       font-style: italic;
       line-height: 1.05;
       color: var(--mocha);
@@ -265,10 +266,10 @@ export default function SaveTheDatePage() {
     }
     .wedding-date {
       font-family: 'EB Garamond', serif;
-      font-size: clamp(0.85rem, 2vw, 1.05rem);
+      font-size: clamp(1rem, 2.2vw, 1.25rem);
       letter-spacing: 0.3em;
       color: var(--mocha);
-      opacity: 0.75;
+      opacity: 0.9;
       text-transform: uppercase;
       margin-bottom: 8px;
     }
@@ -286,8 +287,8 @@ export default function SaveTheDatePage() {
     }
     .section-title {
       font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(1.8rem, 4vw, 2.6rem);
-      font-weight: 300;
+      font-size: clamp(2.2rem, 5vw, 3.4rem);
+      font-weight: 500;
       font-style: italic;
       color: var(--mocha);
       text-align: center;
@@ -296,10 +297,11 @@ export default function SaveTheDatePage() {
     }
     .section-subtitle {
       font-family: 'EB Garamond', serif;
-      font-size: 0.72rem;
-      letter-spacing: 0.38em;
+      font-size: 0.88rem;
+      letter-spacing: 0.35em;
       text-transform: uppercase;
-      color: var(--sand);
+      color: var(--mocha);
+      opacity: 0.6;
       text-align: center;
       margin-bottom: 48px;
     }
@@ -321,20 +323,21 @@ export default function SaveTheDatePage() {
     }
     .countdown-label {
       font-family: 'EB Garamond', serif;
-      font-size: 0.72rem;
+      font-size: 1rem;
       letter-spacing: 0.45em;
       text-transform: uppercase;
-      color: var(--sand);
+      color: var(--mocha);
+      opacity: 0.65;
       display: block;
     }
 
     .accom-intro {
       font-family: 'EB Garamond', serif;
-      font-size: clamp(0.95rem, 2vw, 1.1rem);
+      font-size: clamp(1.05rem, 2.2vw, 1.25rem);
       line-height: 1.85;
       text-align: center;
       color: var(--mocha);
-      opacity: 0.85;
+      opacity: 0.95;
       max-width: 640px;
       margin: 0 auto 52px;
     }
@@ -355,8 +358,8 @@ export default function SaveTheDatePage() {
     }
     .hotel-name {
       font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(1.4rem, 3vw, 2rem);
-      font-weight: 300;
+      font-size: clamp(1.7rem, 3.5vw, 2.4rem);
+      font-weight: 500;
       font-style: italic;
       color: var(--mocha);
       margin-bottom: 6px;
@@ -364,10 +367,11 @@ export default function SaveTheDatePage() {
     .hotel-tagline {
       font-family: 'EB Garamond', serif;
       font-style: italic;
-      font-size: 0.92rem;
-      color: var(--sand);
+      font-size: 1.05rem;
+      color: var(--mocha);
+      opacity: 0.6;
       margin-bottom: 22px;
-      line-height: 1.5;
+      line-height: 1.6;
     }
     .hotel-details {
       display: grid;
@@ -377,16 +381,17 @@ export default function SaveTheDatePage() {
     }
     .hotel-detail-span {
       font-family: 'EB Garamond', serif;
-      font-size: 0.9rem;
+      font-size: 1.05rem;
       line-height: 1.6;
       color: var(--mocha);
     }
     .hotel-detail-label {
       font-family: 'EB Garamond', serif;
-      font-size: 0.68rem;
+      font-size: 0.78rem;
       letter-spacing: 0.2em;
       text-transform: uppercase;
-      color: var(--sand);
+      color: var(--mocha);
+      opacity: 0.5;
       padding-top: 3px;
       white-space: nowrap;
     }
@@ -420,20 +425,21 @@ export default function SaveTheDatePage() {
     }
     .rate-label {
       font-family: 'EB Garamond', serif;
-      font-size: 0.72rem;
+      font-size: 0.85rem;
       letter-spacing: 0.2em;
       text-transform: uppercase;
-      color: var(--sand);
+      color: var(--mocha);
+      opacity: 0.6;
       margin-top: 2px;
     }
     .hotel-block-note {
       font-family: 'EB Garamond', serif;
       font-style: italic;
-      font-size: 0.88rem;
+      font-size: 1rem;
       color: var(--mocha);
-      opacity: 0.75;
+      opacity: 0.8;
       margin-bottom: 20px;
-      line-height: 1.65;
+      line-height: 1.7;
     }
     .book-btn {
       display: inline-block;
@@ -441,10 +447,10 @@ export default function SaveTheDatePage() {
       color: var(--mocha);
       text-decoration: none;
       font-family: 'EB Garamond', serif;
-      font-size: 0.72rem;
+      font-size: 0.85rem;
       letter-spacing: 0.3em;
       text-transform: uppercase;
-      padding: 11px 32px;
+      padding: 13px 36px;
       transition: all 0.3s ease;
     }
     .book-btn:hover { background: var(--mocha); color: #FAF5F0; }
@@ -463,8 +469,8 @@ export default function SaveTheDatePage() {
     }
     .footer-message {
       font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(1.3rem, 3vw, 1.85rem);
-      font-weight: 300;
+      font-size: clamp(1.5rem, 3.5vw, 2.1rem);
+      font-weight: 500;
       font-style: italic;
       color: var(--mocha);
       line-height: 1.65;
@@ -473,10 +479,11 @@ export default function SaveTheDatePage() {
     }
     .footer-sub {
       font-family: 'EB Garamond', serif;
-      font-size: 0.8rem;
+      font-size: 0.9rem;
       letter-spacing: 0.25em;
       text-transform: uppercase;
-      color: var(--sand);
+      color: var(--mocha);
+      opacity: 0.6;
       margin-top: 10px;
     }
     .footer-logo {
@@ -544,7 +551,7 @@ export default function SaveTheDatePage() {
           <p className="save-the-date fade-in">Save the Date</p>
           <h1 className="couple-names fade-in">Ashley + Jared</h1>
           <p className="wedding-date fade-in">
-            November 14, 2026 &nbsp;&middot;&nbsp; Atlanta, GA
+            November 13 - 14, 2026 &nbsp;&middot;&nbsp; Atlanta, GA
           </p>
           <div className="divider fade-in" />
           <div className="couple-photo-wrap fade-in">
@@ -580,7 +587,7 @@ export default function SaveTheDatePage() {
           <div className="hotel-card">
             <h3 className="hotel-name">Forth Hotel</h3>
             <p className="hotel-tagline">
-              &#8220;The most seamless option for guests who want to stay where the big day unfolds.&#8221;
+              The most seamless option for guests who want to stay where the big day unfolds.
             </p>
             <div className="hotel-details">
               <span className="hotel-detail-label">Address</span>
@@ -618,7 +625,7 @@ export default function SaveTheDatePage() {
           <div className="hotel-card">
             <h3 className="hotel-name">Moxy Atlanta Midtown</h3>
             <p className="hotel-tagline">
-              &#8220;A chic, social option in Midtown Atlanta with easy access to the wedding venue and afterparty.&#8221;
+              A chic, social option in Midtown Atlanta with easy access to the wedding venue and afterparty.
             </p>
             <div className="hotel-details">
               <span className="hotel-detail-label">Address</span>
