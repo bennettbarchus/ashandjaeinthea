@@ -608,7 +608,7 @@ export default function SaveTheDatePage() {
               </div>
             </div>
             <p className="hotel-block-note">
-              Book now with the <em>&lsquo;Pandit &amp; Bennett-Barchus&rsquo;</em> wedding room
+              Book now with the <em>&lsquo;Pandit &amp; Bennett Barchus&rsquo;</em> wedding room
               block to access a limited number of rooms at this discounted rate.
             </p>
             
