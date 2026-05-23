@@ -16,9 +16,16 @@ export default function SaveTheDatePage() {
   const [daysLeft, setDaysLeft] = useState<string>("--");
   const observerRef = useRef<IntersectionObserver | null>(null);
 
+  useEffect(() => {
+    if (localStorage.getItem("aj_unlocked") === "true") {
+      setUnlocked(true);
+    }
+  }, []);
+
   const handleUnlock = () => {
     if (pw.trim().toLowerCase() === PASSWORD) {
       setUnlocked(true);
+      localStorage.setItem("aj_unlocked", "true");
       window.scrollTo({ top: 0, behavior: "instant" });
     } else {
       setError(true);
@@ -552,7 +559,7 @@ export default function SaveTheDatePage() {
           <p className="save-the-date fade-in">Save the Date</p>
           <h1 className="couple-names fade-in">Ashley + Jared</h1>
           <p className="wedding-date fade-in">
-            November 14, 2026 &nbsp;&middot;&nbsp; Atlanta, GA
+            November 13 - 14, 2026 &nbsp;&middot;&nbsp; Atlanta, GA
           </p>
           <div className="divider fade-in" />
           <div className="couple-photo-wrap fade-in">
@@ -588,7 +595,7 @@ export default function SaveTheDatePage() {
           <div className="hotel-card">
             <h3 className="hotel-name">Forth Hotel</h3>
             <p className="hotel-tagline">
-              &#8220;The most seamless option for guests who want to stay where the big day unfolds.&#8221;
+              The most seamless option for guests who want to stay where the big day unfolds.
             </p>
             <div className="hotel-details">
               <span className="hotel-detail-label">Address</span>
@@ -626,7 +633,7 @@ export default function SaveTheDatePage() {
           <div className="hotel-card">
             <h3 className="hotel-name">Moxy Atlanta Midtown</h3>
             <p className="hotel-tagline">
-              &#8220;A chic, social option in Midtown Atlanta with easy access to the wedding venue and afterparty.&#8221;
+              A chic, social option in Midtown Atlanta with easy access to the wedding venue and afterparty.
             </p>
             <div className="hotel-details">
               <span className="hotel-detail-label">Address</span>
