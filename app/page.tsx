@@ -65,449 +65,441 @@ export default function SaveTheDatePage() {
     };
   }, [unlocked]);
 
+  const styles = `
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
+
+    :root {
+      --blush: #F3C7C3;
+      --peach: #F1A96A;
+      --lavender: #C9B6C9;
+      --sand: #BFA58A;
+      --mocha: #5E3B2B;
+      --sage: #7E877A;
+      --cream: #FAF5F0;
+      --parchment: #F7EEE8;
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'EB Garamond', Georgia, serif;
+      background: var(--parchment);
+      color: var(--mocha);
+      overflow-x: hidden;
+    }
+
+    .landing {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: linear-gradient(135deg, #F9EDE8 0%, #F5E4DD 30%, #EDD8D0 60%, #F3C7C3 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      transition: opacity 1.2s ease, visibility 1.2s ease;
+    }
+    .landing.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .landing-logo {
+      width: min(380px, 75vw);
+      animation: logoFadeIn 1.8s ease forwards;
+      opacity: 0;
+      mix-blend-mode: multiply;
+    }
+    @keyframes logoFadeIn {
+      0% { opacity: 0; transform: scale(0.94) translateY(10px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .password-form {
+      margin-top: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      animation: fadeUp 1.8s ease 0.5s forwards;
+      opacity: 0;
+    }
+    @keyframes fadeUp {
+      0% { opacity: 0; transform: translateY(20px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    .password-label {
+      font-family: 'EB Garamond', serif;
+      font-style: italic;
+      font-size: 0.95rem;
+      color: var(--mocha);
+      letter-spacing: 0.12em;
+      opacity: 0.7;
+      text-transform: uppercase;
+    }
+    .password-input {
+      border: none;
+      border-bottom: 1px solid rgba(94, 59, 43, 0.35);
+      background: transparent;
+      text-align: center;
+      font-family: 'EB Garamond', serif;
+      font-size: 1.05rem;
+      letter-spacing: 0.25em;
+      color: var(--mocha);
+      padding: 8px 20px;
+      width: 240px;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+    .password-input::placeholder {
+      color: rgba(94,59,43,0.3);
+      letter-spacing: 0.15em;
+      font-style: italic;
+    }
+    .password-input:focus { border-bottom-color: var(--mocha); }
+    .password-btn {
+      margin-top: 8px;
+      background: transparent;
+      border: 1px solid var(--mocha);
+      color: var(--mocha);
+      font-family: 'EB Garamond', serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      padding: 10px 36px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .password-btn:hover { background: var(--mocha); color: #FAF5F0; }
+    .password-error {
+      font-family: 'EB Garamond', serif;
+      font-style: italic;
+      color: #b05050;
+      font-size: 0.85rem;
+      height: 20px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .password-error.show { opacity: 1; }
+
+    .main-site {
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 1.2s ease 0.3s;
+    }
+    .main-site.visible { opacity: 1; visibility: visible; }
+
+    .banner {
+      width: 100%;
+      height: clamp(300px, 45vw, 580px);
+      position: relative;
+      overflow: hidden;
+    }
+    .banner img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center top;
+      display: block;
+    }
+    .banner::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 30%;
+      background: linear-gradient(to bottom, transparent, #F7EEE8);
+    }
+
+    .skyline-bg {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-size: cover;
+      background-position: center;
+      opacity: 0.18;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .hero-content {
+      text-align: center;
+      padding: 60px 24px 50px;
+      position: relative;
+    }
+    .hero-logo {
+      width: min(280px, 60vw);
+      mix-blend-mode: multiply;
+      opacity: 0.92;
+      margin-bottom: 30px;
+    }
+    .couple-photo-wrap {
+      width: min(480px, 88vw);
+      margin: 0 auto 60px;
+      position: relative;
+    }
+    .couple-photo-wrap::before {
+      content: '';
+      position: absolute;
+      inset: -12px;
+      border: 1px solid rgba(191,165,138,0.4);
+      pointer-events: none;
+    }
+    .couple-photo { width: 100%; display: block; object-fit: cover; }
+
+    .save-the-date {
+      font-family: 'EB Garamond', serif;
+      font-size: clamp(0.65rem, 1.5vw, 0.8rem);
+      letter-spacing: 0.45em;
+      text-transform: uppercase;
+      color: var(--sand);
+      margin-bottom: 16px;
+    }
+    .couple-names {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(3rem, 8vw, 5.5rem);
+      font-weight: 300;
+      font-style: italic;
+      line-height: 1.05;
+      color: var(--mocha);
+      margin-bottom: 18px;
+      letter-spacing: 0.02em;
+    }
+    .wedding-date {
+      font-family: 'EB Garamond', serif;
+      font-size: clamp(0.85rem, 2vw, 1.05rem);
+      letter-spacing: 0.3em;
+      color: var(--mocha);
+      opacity: 0.75;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .divider {
+      width: 80px;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--sand), transparent);
+      margin: 30px auto;
+    }
+
+    .section {
+      padding: 70px 24px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .section-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      font-weight: 300;
+      font-style: italic;
+      color: var(--mocha);
+      text-align: center;
+      margin-bottom: 8px;
+      letter-spacing: 0.04em;
+    }
+    .section-subtitle {
+      font-family: 'EB Garamond', serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.38em;
+      text-transform: uppercase;
+      color: var(--sand);
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .countdown-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .countdown-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(5rem, 14vw, 8rem);
+      font-weight: 300;
+      color: var(--mocha);
+      line-height: 1;
+      display: block;
+      letter-spacing: -0.02em;
+    }
+    .countdown-label {
+      font-family: 'EB Garamond', serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.45em;
+      text-transform: uppercase;
+      color: var(--sand);
+      display: block;
+    }
+
+    .accom-intro {
+      font-family: 'EB Garamond', serif;
+      font-size: clamp(0.95rem, 2vw, 1.1rem);
+      line-height: 1.85;
+      text-align: center;
+      color: var(--mocha);
+      opacity: 0.85;
+      max-width: 640px;
+      margin: 0 auto 52px;
+    }
+    .hotel-card {
+      border: 1px solid rgba(191,165,138,0.35);
+      padding: clamp(28px, 5vw, 48px);
+      margin-bottom: 32px;
+      background: rgba(249,237,232,0.5);
+      position: relative;
+    }
+    .hotel-card::before {
+      content: '';
+      position: absolute;
+      top: 12px; left: 12px;
+      right: -12px; bottom: -12px;
+      border: 1px solid rgba(191,165,138,0.15);
+      z-index: -1;
+    }
+    .hotel-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.4rem, 3vw, 2rem);
+      font-weight: 300;
+      font-style: italic;
+      color: var(--mocha);
+      margin-bottom: 6px;
+    }
+    .hotel-tagline {
+      font-family: 'EB Garamond', serif;
+      font-style: italic;
+      font-size: 0.92rem;
+      color: var(--sand);
+      margin-bottom: 22px;
+      line-height: 1.5;
+    }
+    .hotel-details {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 6px 16px;
+      margin-bottom: 22px;
+    }
+    .hotel-detail-span {
+      font-family: 'EB Garamond', serif;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      color: var(--mocha);
+    }
+    .hotel-detail-label {
+      font-family: 'EB Garamond', serif;
+      font-size: 0.68rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--sand);
+      padding-top: 3px;
+      white-space: nowrap;
+    }
+    .rate-block {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin: 18px 0 24px;
+      padding: 14px 20px;
+      background: rgba(243,199,195,0.18);
+      border-left: 2px solid var(--blush);
+    }
+    .rate-row { display: flex; align-items: center; gap: 12px; }
+    .rate-original {
+      font-family: 'EB Garamond', serif;
+      font-size: 1rem;
+      color: var(--mocha);
+      opacity: 0.5;
+      text-decoration: line-through;
+    }
+    .rate-arrow { color: var(--sand); font-size: 0.85rem; }
+    .rate-new {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.4rem;
+      font-weight: 500;
+      color: var(--mocha);
+    }
+    .rate-new-unit {
+      font-size: 0.9rem;
+      font-family: 'EB Garamond', serif;
+    }
+    .rate-label {
+      font-family: 'EB Garamond', serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--sand);
+      margin-top: 2px;
+    }
+    .hotel-block-note {
+      font-family: 'EB Garamond', serif;
+      font-style: italic;
+      font-size: 0.88rem;
+      color: var(--mocha);
+      opacity: 0.75;
+      margin-bottom: 20px;
+      line-height: 1.65;
+    }
+    .book-btn {
+      display: inline-block;
+      border: 1px solid var(--mocha);
+      color: var(--mocha);
+      text-decoration: none;
+      font-family: 'EB Garamond', serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      padding: 11px 32px;
+      transition: all 0.3s ease;
+    }
+    .book-btn:hover { background: var(--mocha); color: #FAF5F0; }
+
+    .footer-section {
+      text-align: center;
+      padding: 80px 24px 70px;
+      background: linear-gradient(to bottom, transparent, rgba(243,199,195,0.2));
+    }
+    .footer-ornament {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem;
+      color: var(--blush);
+      margin-bottom: 24px;
+      letter-spacing: 0.5em;
+    }
+    .footer-message {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.3rem, 3vw, 1.85rem);
+      font-weight: 300;
+      font-style: italic;
+      color: var(--mocha);
+      line-height: 1.65;
+      max-width: 560px;
+      margin: 0 auto 24px;
+    }
+    .footer-sub {
+      font-family: 'EB Garamond', serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--sand);
+      margin-top: 10px;
+    }
+    .footer-logo {
+      width: 120px;
+      mix-blend-mode: multiply;
+      opacity: 0.6;
+      margin-top: 48px;
+    }
+
+    .fade-in {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.9s ease, transform 0.9s ease;
+    }
+    .fade-in.visible {
+      opacity: 1;
+      transform: none;
+    }
+  `;
+
   return (
     <>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
-
-        :root {
-          --blush: #F3C7C3;
-          --peach: #F1A96A;
-          --lavender: #C9B6C9;
-          --sand: #BFA58A;
-          --mocha: #5E3B2B;
-          --sage: #7E877A;
-          --cream: #FAF5F0;
-          --parchment: #F7EEE8;
-        }
-
-        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-          font-family: 'EB Garamond', Georgia, serif;
-          background: var(--parchment);
-          color: var(--mocha);
-          overflow-x: hidden;
-        }
-
-        /* Landing */
-        .landing {
-          position: fixed;
-          top: 0; left: 0;
-          width: 100%; height: 100%;
-          background: linear-gradient(135deg, #F9EDE8 0%, #F5E4DD 30%, #EDD8D0 60%, #F3C7C3 100%);
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          z-index: 1000;
-          transition: opacity 1.2s ease, visibility 1.2s ease;
-        }
-        .landing.hidden {
-          opacity: 0;
-          visibility: hidden;
-          pointer-events: none;
-        }
-        .landing-logo {
-          width: min(380px, 75vw);
-          animation: logoFadeIn 1.8s ease forwards;
-          opacity: 0;
-          mix-blend-mode: multiply;
-        }
-        @keyframes logoFadeIn {
-          0% { opacity: 0; transform: scale(0.94) translateY(10px); }
-          100% { opacity: 1; transform: scale(1) translateY(0); }
-        }
-        .password-form {
-          margin-top: 40px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 16px;
-          animation: fadeUp 1.8s ease 0.5s forwards;
-          opacity: 0;
-        }
-        @keyframes fadeUp {
-          0% { opacity: 0; transform: translateY(20px); }
-          100% { opacity: 1; transform: translateY(0); }
-        }
-        .password-label {
-          font-family: 'EB Garamond', serif;
-          font-style: italic;
-          font-size: 0.95rem;
-          color: var(--mocha);
-          letter-spacing: 0.12em;
-          opacity: 0.7;
-          text-transform: uppercase;
-        }
-        .password-input {
-          border: none;
-          border-bottom: 1px solid rgba(94, 59, 43, 0.35);
-          background: transparent;
-          text-align: center;
-          font-family: 'EB Garamond', serif;
-          font-size: 1.05rem;
-          letter-spacing: 0.25em;
-          color: var(--mocha);
-          padding: 8px 20px;
-          width: 240px;
-          outline: none;
-          transition: border-color 0.3s;
-        }
-        .password-input::placeholder {
-          color: rgba(94,59,43,0.3);
-          letter-spacing: 0.15em;
-          font-style: italic;
-        }
-        .password-input:focus { border-bottom-color: var(--mocha); }
-        .password-btn {
-          margin-top: 8px;
-          background: transparent;
-          border: 1px solid var(--mocha);
-          color: var(--mocha);
-          font-family: 'EB Garamond', serif;
-          font-size: 0.75rem;
-          letter-spacing: 0.25em;
-          text-transform: uppercase;
-          padding: 10px 36px;
-          cursor: pointer;
-          transition: all 0.3s ease;
-        }
-        .password-btn:hover { background: var(--mocha); color: #FAF5F0; }
-        .password-error {
-          font-family: 'EB Garamond', serif;
-          font-style: italic;
-          color: #b05050;
-          font-size: 0.85rem;
-          height: 20px;
-          opacity: 0;
-          transition: opacity 0.3s;
-        }
-        .password-error.show { opacity: 1; }
-
-        /* Main site */
-        .main-site {
-          opacity: 0;
-          visibility: hidden;
-          transition: opacity 1.2s ease 0.3s;
-        }
-        .main-site.visible { opacity: 1; visibility: visible; }
-
-        /* Banner */
-        .banner {
-          width: 100%;
-          height: clamp(300px, 45vw, 580px);
-          position: relative;
-          overflow: hidden;
-        }
-        .banner img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          object-position: center top;
-          display: block;
-        }
-        .banner::after {
-          content: '';
-          position: absolute;
-          bottom: 0; left: 0; right: 0;
-          height: 30%;
-          background: linear-gradient(to bottom, transparent, #F7EEE8);
-        }
-
-        /* Skyline BG */
-        .skyline-bg {
-          position: fixed;
-          top: 0; left: 0; right: 0; bottom: 0;
-          background-size: cover;
-          background-position: center;
-          opacity: 0.18;
-          z-index: -1;
-          pointer-events: none;
-        }
-
-        /* Hero */
-        .hero-content {
-          text-align: center;
-          padding: 60px 24px 50px;
-          position: relative;
-        }
-        .hero-logo {
-          width: min(280px, 60vw);
-          mix-blend-mode: multiply;
-          opacity: 0.92;
-          margin-bottom: 30px;
-        }
-        .couple-photo-wrap {
-          width: min(480px, 88vw);
-          margin: 0 auto 60px;
-          position: relative;
-        }
-        .couple-photo-wrap::before {
-          content: '';
-          position: absolute;
-          inset: -12px;
-          border: 1px solid rgba(191,165,138,0.4);
-          pointer-events: none;
-        }
-        .couple-photo { width: 100%; display: block; object-fit: cover; }
-
-        /* Typography */
-        .save-the-date {
-          font-family: 'EB Garamond', serif;
-          font-size: clamp(0.65rem, 1.5vw, 0.8rem);
-          letter-spacing: 0.45em;
-          text-transform: uppercase;
-          color: var(--sand);
-          margin-bottom: 16px;
-        }
-        .couple-names {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: clamp(3rem, 8vw, 5.5rem);
-          font-weight: 300;
-          font-style: italic;
-          line-height: 1.05;
-          color: var(--mocha);
-          margin-bottom: 18px;
-          letter-spacing: 0.02em;
-        }
-        .wedding-date {
-          font-family: 'EB Garamond', serif;
-          font-size: clamp(0.85rem, 2vw, 1.05rem);
-          letter-spacing: 0.3em;
-          color: var(--mocha);
-          opacity: 0.75;
-          text-transform: uppercase;
-          margin-bottom: 8px;
-        }
-        .divider {
-          width: 80px;
-          height: 1px;
-          background: linear-gradient(to right, transparent, var(--sand), transparent);
-          margin: 30px auto;
-        }
-
-        /* Sections */
-        .section {
-          padding: 70px 24px;
-          max-width: 900px;
-          margin: 0 auto;
-        }
-        .section-title {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: clamp(1.8rem, 4vw, 2.6rem);
-          font-weight: 300;
-          font-style: italic;
-          color: var(--mocha);
-          text-align: center;
-          margin-bottom: 8px;
-          letter-spacing: 0.04em;
-        }
-        .section-subtitle {
-          font-family: 'EB Garamond', serif;
-          font-size: 0.72rem;
-          letter-spacing: 0.38em;
-          text-transform: uppercase;
-          color: var(--sand);
-          text-align: center;
-          margin-bottom: 48px;
-        }
-
-        /* Countdown */
-        .countdown-wrap {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 8px;
-        }
-        .countdown-num {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: clamp(5rem, 14vw, 8rem);
-          font-weight: 300;
-          color: var(--mocha);
-          line-height: 1;
-          display: block;
-          letter-spacing: -0.02em;
-        }
-        .countdown-label {
-          font-family: 'EB Garamond', serif;
-          font-size: 0.72rem;
-          letter-spacing: 0.45em;
-          text-transform: uppercase;
-          color: var(--sand);
-          display: block;
-        }
-
-        /* Hotels */
-        .accom-intro {
-          font-family: 'EB Garamond', serif;
-          font-size: clamp(0.95rem, 2vw, 1.1rem);
-          line-height: 1.85;
-          text-align: center;
-          color: var(--mocha);
-          opacity: 0.85;
-          max-width: 640px;
-          margin: 0 auto 52px;
-        }
-        .hotel-card {
-          border: 1px solid rgba(191,165,138,0.35);
-          padding: clamp(28px, 5vw, 48px);
-          margin-bottom: 32px;
-          background: rgba(249,237,232,0.5);
-          position: relative;
-        }
-        .hotel-card::before {
-          content: '';
-          position: absolute;
-          top: 12px; left: 12px;
-          right: -12px; bottom: -12px;
-          border: 1px solid rgba(191,165,138,0.15);
-          z-index: -1;
-        }
-        .hotel-name {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: clamp(1.4rem, 3vw, 2rem);
-          font-weight: 300;
-          font-style: italic;
-          color: var(--mocha);
-          margin-bottom: 6px;
-        }
-        .hotel-tagline {
-          font-family: 'EB Garamond', serif;
-          font-style: italic;
-          font-size: 0.92rem;
-          color: var(--sand);
-          margin-bottom: 22px;
-          line-height: 1.5;
-        }
-        .hotel-details {
-          display: grid;
-          grid-template-columns: auto 1fr;
-          gap: 6px 16px;
-          margin-bottom: 22px;
-        }
-        .hotel-details span {
-          font-family: 'EB Garamond', serif;
-          font-size: 0.9rem;
-          line-height: 1.6;
-          color: var(--mocha);
-        }
-        .hotel-details .label {
-          font-size: 0.68rem;
-          letter-spacing: 0.2em;
-          text-transform: uppercase;
-          color: var(--sand);
-          padding-top: 3px;
-          white-space: nowrap;
-        }
-        .rate-block {
-          display: flex;
-          align-items: center;
-          gap: 14px;
-          margin: 18px 0 24px;
-          padding: 14px 20px;
-          background: rgba(243,199,195,0.18);
-          border-left: 2px solid var(--blush);
-        }
-        .rate-row { display: flex; align-items: center; gap: 12px; }
-        .rate-original {
-          font-family: 'EB Garamond', serif;
-          font-size: 1rem;
-          color: var(--mocha);
-          opacity: 0.5;
-          text-decoration: line-through;
-        }
-        .rate-arrow { color: var(--sand); font-size: 0.85rem; }
-        .rate-new {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 1.4rem;
-          font-weight: 500;
-          color: var(--mocha);
-        }
-        .rate-new-unit {
-          font-size: 0.9rem;
-          font-family: 'EB Garamond', serif;
-        }
-        .rate-label {
-          font-family: 'EB Garamond', serif;
-          font-size: 0.72rem;
-          letter-spacing: 0.2em;
-          text-transform: uppercase;
-          color: var(--sand);
-          margin-top: 2px;
-        }
-        .hotel-block-note {
-          font-family: 'EB Garamond', serif;
-          font-style: italic;
-          font-size: 0.88rem;
-          color: var(--mocha);
-          opacity: 0.75;
-          margin-bottom: 20px;
-          line-height: 1.65;
-        }
-        .book-btn {
-          display: inline-block;
-          border: 1px solid var(--mocha);
-          color: var(--mocha);
-          text-decoration: none;
-          font-family: 'EB Garamond', serif;
-          font-size: 0.72rem;
-          letter-spacing: 0.3em;
-          text-transform: uppercase;
-          padding: 11px 32px;
-          transition: all 0.3s ease;
-        }
-        .book-btn:hover { background: var(--mocha); color: #FAF5F0; }
-
-        /* Footer */
-        .footer-section {
-          text-align: center;
-          padding: 80px 24px 70px;
-          background: linear-gradient(to bottom, transparent, rgba(243,199,195,0.2));
-        }
-        .footer-ornament {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 2rem;
-          color: var(--blush);
-          margin-bottom: 24px;
-          letter-spacing: 0.5em;
-        }
-        .footer-message {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: clamp(1.3rem, 3vw, 1.85rem);
-          font-weight: 300;
-          font-style: italic;
-          color: var(--mocha);
-          line-height: 1.65;
-          max-width: 560px;
-          margin: 0 auto 24px;
-        }
-        .footer-sub {
-          font-family: 'EB Garamond', serif;
-          font-size: 0.8rem;
-          letter-spacing: 0.25em;
-          text-transform: uppercase;
-          color: var(--sand);
-          margin-top: 10px;
-        }
-        .footer-logo {
-          width: 120px;
-          mix-blend-mode: multiply;
-          opacity: 0.6;
-          margin-top: 48px;
-        }
-
-        /* Scroll fade-in */
-        .fade-in {
-          opacity: 0;
-          transform: translateY(28px);
-          transition: opacity 0.9s ease, transform 0.9s ease;
-        }
-        .fade-in.visible {
-          opacity: 1;
-          transform: none;
-        }
-      `}</style>
+      <style dangerouslySetInnerHTML={{ __html: styles }} />
 
       {/* Landing */}
       <div className={`landing${unlocked ? " hidden" : ""}`}>
@@ -534,6 +526,7 @@ export default function SaveTheDatePage() {
 
       {/* Main Site */}
       <div className={`main-site${unlocked ? " visible" : ""}`}>
+
         {/* Fixed skyline background */}
         <div
           className="skyline-bg"
@@ -580,20 +573,20 @@ export default function SaveTheDatePage() {
           <p className="accom-intro">
             We secured preferred rates at the following hotels for our guests.
             Availability is limited, so we recommend booking early and asking for
-            the <em>&lsquo;Pandit &amp; Bennett Barchus&rsquo;</em> wedding room block.
+            the <em>&#8216;Pandit &amp; Bennett-Barchus&#8217;</em> wedding room block.
           </p>
 
           {/* Forth Hotel */}
           <div className="hotel-card">
             <h3 className="hotel-name">Forth Hotel</h3>
             <p className="hotel-tagline">
-              &ldquo;The most seamless option for guests who want to stay where the big day unfolds.&rdquo;
+              &#8220;The most seamless option for guests who want to stay where the big day unfolds.&#8221;
             </p>
             <div className="hotel-details">
-              <span className="label">Address</span>
-              <span>800 Rankin St NE, Atlanta, GA 30308</span>
-              <span className="label">Phone</span>
-              <span>(470) 470-8010</span>
+              <span className="hotel-detail-label">Address</span>
+              <span className="hotel-detail-span">800 Rankin St NE, Atlanta, GA 30308</span>
+              <span className="hotel-detail-label">Phone</span>
+              <span className="hotel-detail-span">(470) 470-8010</span>
             </div>
             <div className="rate-block">
               <div>
@@ -608,10 +601,10 @@ export default function SaveTheDatePage() {
               </div>
             </div>
             <p className="hotel-block-note">
-              Book now with the <em>&lsquo;Pandit &amp; Bennett Barchus&rsquo;</em> wedding room
+              Book now with the <em>&#8216;Pandit &amp; Bennett-Barchus&#8217;</em> wedding room
               block to access a limited number of rooms at this discounted rate.
             </p>
-            
+            <a
               className="book-btn"
               href="https://www.forthatlanta.com"
               target="_blank"
@@ -625,13 +618,13 @@ export default function SaveTheDatePage() {
           <div className="hotel-card">
             <h3 className="hotel-name">Moxy Atlanta Midtown</h3>
             <p className="hotel-tagline">
-              &ldquo;A chic, social option in Midtown Atlanta with easy access to the wedding venue and afterparty.&rdquo;
+              &#8220;A chic, social option in Midtown Atlanta with easy access to the wedding venue and afterparty.&#8221;
             </p>
             <div className="hotel-details">
-              <span className="label">Address</span>
-              <span>48 13th St NE, Atlanta, GA 30309</span>
-              <span className="label">Phone</span>
-              <span>(404) 249-9446</span>
+              <span className="hotel-detail-label">Address</span>
+              <span className="hotel-detail-span">48 13th St NE, Atlanta, GA 30309</span>
+              <span className="hotel-detail-label">Phone</span>
+              <span className="hotel-detail-span">(404) 249-9446</span>
             </div>
             <div className="rate-block">
               <div>
@@ -646,10 +639,10 @@ export default function SaveTheDatePage() {
               </div>
             </div>
             <p className="hotel-block-note">
-              Book now with the <em>&lsquo;Pandit &amp; Bennett-Barchus&rsquo;</em> wedding room
+              Book now with the <em>&#8216;Pandit &amp; Bennett-Barchus&#8217;</em> wedding room
               block to access a limited number of rooms at this discounted rate.
             </p>
-            
+            <a
               className="book-btn"
               href="https://www.marriott.com/en-us/hotels/atlox-moxy-atlanta-midtown/overview/?scid=f2ae0541-1279-4f24-b197-a979c79310b0"
               target="_blank"
@@ -666,13 +659,14 @@ export default function SaveTheDatePage() {
           <p className="footer-message">
             A formal invitation to follow.<br />
             For now, save the date and book your stay.<br />
-            We&rsquo;ll share additional wedding details soon.
+            We&#8217;ll share additional wedding details soon.
           </p>
           <p className="footer-sub">
             Ashley &amp; Jared &nbsp;&middot;&nbsp; November 14, 2026 &nbsp;&middot;&nbsp; Atlanta, Georgia
           </p>
           <img className="footer-logo" src={LOGO} alt="AJ" />
         </div>
+
       </div>
     </>
   );
