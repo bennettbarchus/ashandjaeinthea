@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from "react";
 const LOGO = "/images/aj-monogram-1.png";
 const FORTH = "/images/forth-skyline-sm.png";
 const SKYLINE = "/images/hotels-bg.png";
-const COUPLE = "/images/IMG_1786.png";
+const COUPLE = "/images/IMG_1787.png";
 
 const PASSWORD = "14november26";
 
