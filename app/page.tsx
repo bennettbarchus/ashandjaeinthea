@@ -475,7 +475,7 @@ export default function SaveTheDatePage() {
     }
     .footer-message {
       font-family: 'La Belle Aurore', cursive;
-      font-size: clamp(1.3rem, 3.5vw, 2.2rem);
+      font-size: clamp(1.25rem, 3.5vw, 2.2rem);
       font-weight: 400;
       color: var(--mocha);
       line-height: 1.8;
@@ -689,7 +689,7 @@ export default function SaveTheDatePage() {
           <div className="footer-ornament">&#10022; &middot; &#10022;</div>
           <p className="footer-message">
             A formal invitation to follow.<br />
-            For now, save the date and book your stay.<br />
+            <br />For now, save the date and book your stay.<br />
             We&#8217;ll share additional wedding details soon.
           </p>
           <p className="footer-sub">
