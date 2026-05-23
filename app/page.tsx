@@ -475,7 +475,7 @@ export default function SaveTheDatePage() {
     }
     .footer-message {
       font-family: 'La Belle Aurore', cursive;
-      font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+      font-size: clamp(1.3rem, 3.5vw, 2.2rem);
       font-weight: 400;
       color: var(--mocha);
       line-height: 1.8;
