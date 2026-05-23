@@ -681,7 +681,7 @@ export default function SaveTheDatePage() {
             We&#8217;ll share additional wedding details soon.
           </p>
           <p className="footer-sub">
-            Ashley &amp; Jared &nbsp;&middot;&nbsp; November 14, 2026 &nbsp;&middot;&nbsp; Atlanta, Georgia
+            Ashley &amp; Jared &nbsp;&middot;&nbsp; November 13-14, 2026 &nbsp;&middot;&nbsp; Atlanta, GA
           </p>
           <img className="footer-logo" src={LOGO} alt="AJ" />
           <p className="footer-credit">Crafted with love by Ashley &amp; Jared &nbsp;&middot;&nbsp; 2026</p>
