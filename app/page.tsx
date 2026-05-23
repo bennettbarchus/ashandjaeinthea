@@ -580,7 +580,7 @@ export default function SaveTheDatePage() {
           <p className="accom-intro">
             We secured preferred rates at the following hotels for our guests.
             Availability is limited, so we recommend booking early and asking for
-            the <em>&lsquo;Pandit &amp; Bennett-Barchus&rsquo;</em> wedding room block.
+            the <em>&lsquo;Pandit &amp; Bennett Barchus&rsquo;</em> wedding room block.
           </p>
 
           {/* Forth Hotel */}
