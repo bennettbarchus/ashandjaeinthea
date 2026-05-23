@@ -17,10 +17,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link
-          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap"
-          rel="stylesheet"
-        />
+       <link
+  href="https://fonts.googleapis.com/css2?family=La+Belle+Aurore&family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&family=Cinzel:wght@400;500;600&display=swap"
+  rel="stylesheet"
+/>
       </head>
       <body style={{ margin: 0, padding: 0 }}>{children}</body>
     </html>

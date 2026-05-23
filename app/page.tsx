@@ -74,7 +74,7 @@ export default function SaveTheDatePage() {
   }, [unlocked]);
 
   const styles = `
-    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=La+Belle+Aurore&family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&family=Cinzel:wght@400;500;600&display=swap');
 
     :root {
       --blush: #F3C7C3;
@@ -90,7 +90,7 @@ export default function SaveTheDatePage() {
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      font-family: 'EB Garamond', Georgia, serif;
+      font-family: 'Playfair Display', Georgia, serif;
       background: var(--parchment);
       color: var(--mocha);
       overflow-x: hidden;
@@ -137,11 +137,10 @@ export default function SaveTheDatePage() {
       100% { opacity: 1; transform: translateY(0); }
     }
     .password-label {
-      font-family: 'EB Garamond', serif;
-      font-style: italic;
-      font-size: 0.95rem;
+      font-family: 'Cinzel', serif;
+      font-size: 0.75rem;
       color: var(--mocha);
-      letter-spacing: 0.12em;
+      letter-spacing: 0.2em;
       opacity: 0.7;
       text-transform: uppercase;
     }
@@ -150,7 +149,7 @@ export default function SaveTheDatePage() {
       border-bottom: 1px solid rgba(94, 59, 43, 0.35);
       background: transparent;
       text-align: center;
-      font-family: 'EB Garamond', serif;
+      font-family: 'Playfair Display', serif;
       font-size: 1.05rem;
       letter-spacing: 0.25em;
       color: var(--mocha);
@@ -170,8 +169,8 @@ export default function SaveTheDatePage() {
       background: transparent;
       border: 1px solid var(--mocha);
       color: var(--mocha);
-      font-family: 'EB Garamond', serif;
-      font-size: 0.75rem;
+      font-family: 'Cinzel', serif;
+      font-size: 0.7rem;
       letter-spacing: 0.25em;
       text-transform: uppercase;
       padding: 10px 36px;
@@ -180,7 +179,7 @@ export default function SaveTheDatePage() {
     }
     .password-btn:hover { background: var(--mocha); color: #FAF5F0; }
     .password-error {
-      font-family: 'EB Garamond', serif;
+      font-family: 'Playfair Display', serif;
       font-style: italic;
       color: #b05050;
       font-size: 0.85rem;
@@ -254,28 +253,27 @@ export default function SaveTheDatePage() {
     .couple-photo { width: 100%; display: block; object-fit: cover; }
 
     .save-the-date {
-      font-family: 'EB Garamond', serif;
-      font-size: clamp(0.85rem, 1.8vw, 1rem);
-      letter-spacing: 0.45em;
+      font-family: 'Cinzel', serif;
+      font-size: clamp(0.7rem, 1.8vw, 0.85rem);
+      letter-spacing: 0.35em;
       text-transform: uppercase;
       color: var(--mocha);
       opacity: 0.75;
       margin-bottom: 16px;
     }
     .couple-names {
-      font-family: 'Cormorant Garamond', serif;
+      font-family: 'La Belle Aurore', cursive;
       font-size: clamp(3.5rem, 9vw, 6.5rem);
-      font-weight: 500;
-      font-style: italic;
-      line-height: 1.05;
+      font-weight: 400;
+      line-height: 1.15;
       color: var(--mocha);
       margin-bottom: 18px;
-      letter-spacing: 0.02em;
+      letter-spacing: 0.03em;
     }
     .wedding-date {
-      font-family: 'EB Garamond', serif;
-      font-size: clamp(1rem, 2.2vw, 1.25rem);
-      letter-spacing: 0.3em;
+      font-family: 'Cinzel', serif;
+      font-size: clamp(0.8rem, 2vw, 1rem);
+      letter-spacing: 0.25em;
       color: var(--mocha);
       opacity: 0.9;
       text-transform: uppercase;
@@ -294,18 +292,17 @@ export default function SaveTheDatePage() {
       margin: 0 auto;
     }
     .section-title {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(2.2rem, 5vw, 3.4rem);
-      font-weight: 500;
-      font-style: italic;
+      font-family: 'La Belle Aurore', cursive;
+      font-size: clamp(2.4rem, 5.5vw, 3.8rem);
+      font-weight: 400;
       color: var(--mocha);
       text-align: center;
       margin-bottom: 8px;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.02em;
     }
     .section-subtitle {
-      font-family: 'EB Garamond', serif;
-      font-size: 0.88rem;
+      font-family: 'Cinzel', serif;
+      font-size: 0.72rem;
       letter-spacing: 0.35em;
       text-transform: uppercase;
       color: var(--mocha);
@@ -321,17 +318,17 @@ export default function SaveTheDatePage() {
       gap: 8px;
     }
     .countdown-num {
-      font-family: 'Cormorant Garamond', serif;
+      font-family: 'Playfair Display', serif;
       font-size: clamp(5rem, 14vw, 8rem);
-      font-weight: 300;
+      font-weight: 700;
       color: var(--mocha);
       line-height: 1;
       display: block;
       letter-spacing: -0.02em;
     }
     .countdown-label {
-      font-family: 'EB Garamond', serif;
-      font-size: 1rem;
+      font-family: 'Cinzel', serif;
+      font-size: 0.85rem;
       letter-spacing: 0.45em;
       text-transform: uppercase;
       color: var(--mocha);
@@ -340,8 +337,9 @@ export default function SaveTheDatePage() {
     }
 
     .accom-intro {
-      font-family: 'EB Garamond', serif;
-      font-size: clamp(1.05rem, 2.2vw, 1.25rem);
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: clamp(1rem, 2.2vw, 1.2rem);
       line-height: 1.85;
       text-align: center;
       color: var(--mocha);
@@ -365,15 +363,14 @@ export default function SaveTheDatePage() {
       z-index: -1;
     }
     .hotel-name {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(1.7rem, 3.5vw, 2.4rem);
-      font-weight: 500;
-      font-style: italic;
+      font-family: 'La Belle Aurore', cursive;
+      font-size: clamp(1.9rem, 3.5vw, 2.6rem);
+      font-weight: 400;
       color: var(--mocha);
       margin-bottom: 6px;
     }
     .hotel-tagline {
-      font-family: 'EB Garamond', serif;
+      font-family: 'Playfair Display', serif;
       font-style: italic;
       font-size: 1.05rem;
       color: var(--mocha);
@@ -388,14 +385,14 @@ export default function SaveTheDatePage() {
       margin-bottom: 22px;
     }
     .hotel-detail-span {
-      font-family: 'EB Garamond', serif;
-      font-size: 1.05rem;
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem;
       line-height: 1.6;
       color: var(--mocha);
     }
     .hotel-detail-label {
-      font-family: 'EB Garamond', serif;
-      font-size: 0.78rem;
+      font-family: 'Cinzel', serif;
+      font-size: 0.65rem;
       letter-spacing: 0.2em;
       text-transform: uppercase;
       color: var(--mocha);
@@ -432,8 +429,8 @@ export default function SaveTheDatePage() {
       font-family: 'EB Garamond', serif;
     }
     .rate-label {
-      font-family: 'EB Garamond', serif;
-      font-size: 0.85rem;
+      font-family: 'Cinzel', serif;
+      font-size: 0.65rem;
       letter-spacing: 0.2em;
       text-transform: uppercase;
       color: var(--mocha);
@@ -441,7 +438,7 @@ export default function SaveTheDatePage() {
       margin-top: 2px;
     }
     .hotel-block-note {
-      font-family: 'EB Garamond', serif;
+      font-family: 'Playfair Display', serif;
       font-style: italic;
       font-size: 1rem;
       color: var(--mocha);
@@ -454,8 +451,8 @@ export default function SaveTheDatePage() {
       border: 1px solid var(--mocha);
       color: var(--mocha);
       text-decoration: none;
-      font-family: 'EB Garamond', serif;
-      font-size: 0.85rem;
+      font-family: 'Cinzel', serif;
+      font-size: 0.7rem;
       letter-spacing: 0.3em;
       text-transform: uppercase;
       padding: 13px 36px;
@@ -476,18 +473,17 @@ export default function SaveTheDatePage() {
       letter-spacing: 0.5em;
     }
     .footer-message {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(1.5rem, 3.5vw, 2.1rem);
-      font-weight: 500;
-      font-style: italic;
+      font-family: 'La Belle Aurore', cursive;
+      font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+      font-weight: 400;
       color: var(--mocha);
-      line-height: 1.65;
+      line-height: 1.8;
       max-width: 560px;
       margin: 0 auto 24px;
     }
     .footer-sub {
-      font-family: 'EB Garamond', serif;
-      font-size: 0.9rem;
+      font-family: 'Cinzel', serif;
+      font-size: 0.72rem;
       letter-spacing: 0.25em;
       text-transform: uppercase;
       color: var(--mocha);
@@ -559,7 +555,7 @@ export default function SaveTheDatePage() {
           <p className="save-the-date fade-in">Save the Date</p>
           <h1 className="couple-names fade-in">Ashley + Jared</h1>
           <p className="wedding-date fade-in">
-            November 13 - 14, 2026 &nbsp;&middot;&nbsp; Atlanta, GA
+            November 14, 2026 &nbsp;&middot;&nbsp; Atlanta, GA
           </p>
           <div className="divider fade-in" />
           <div className="couple-photo-wrap fade-in">
@@ -595,7 +591,7 @@ export default function SaveTheDatePage() {
           <div className="hotel-card">
             <h3 className="hotel-name">Forth Hotel</h3>
             <p className="hotel-tagline">
-              The most seamless option for guests who want to stay where the big day unfolds.
+              &#8220;The most seamless option for guests who want to stay where the big day unfolds.&#8221;
             </p>
             <div className="hotel-details">
               <span className="hotel-detail-label">Address</span>
@@ -633,7 +629,7 @@ export default function SaveTheDatePage() {
           <div className="hotel-card">
             <h3 className="hotel-name">Moxy Atlanta Midtown</h3>
             <p className="hotel-tagline">
-              A chic, social option in Midtown Atlanta with easy access to the wedding venue and afterparty.
+              &#8220;A chic, social option in Midtown Atlanta with easy access to the wedding venue and afterparty.&#8221;
             </p>
             <div className="hotel-details">
               <span className="hotel-detail-label">Address</span>
