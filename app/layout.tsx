@@ -2,8 +2,11 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Ashley + Jared | Save the Date | 11.14.26",
-  description: "Save the date for the wedding of Ashley and Jared — November 14, 2026 in Atlanta, GA.",
+  title: "Ashley & Jared | Save the Date | 11.14.26",
+  description: "Save the date for the wedding of Ashley & Jared — November 14, 2026 in Atlanta, GA.",
+  icons: {
+    icon: "/images/aj-monogram-1.png",
+  },
 };
 
 export default function RootLayout({
