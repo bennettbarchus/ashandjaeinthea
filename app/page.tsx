@@ -675,7 +675,7 @@ export default function SaveTheDatePage() {
             </p>
             <a
               className="book-btn"
-              href="https://www.marriott.com/en-us/hotels/atlox-moxy-atlanta-midtown/overview/?scid=f2ae0541-1279-4f24-b197-a979c79310b0"
+              href="https://www.marriott.com/event-reservations/reservation-link.mi?id=1780359040547&key=GRP&app=resvlink&_branch_match_id=1587905884587868822&_branch_referrer=H4sIAAAAAAAAA8soKSkottLXTywo0MtNLCrKzC8p0UvOz9UvSi3OyczLtgdK2ALZZSCOWmaKraG5hYGxqaWBiYGpibladmqlrXtQgFpdUWpaKlB3Xnp8UlF%2BeXFqka1zRlF%2BbioA57e8MWAAAAA%3D"
               target="_blank"
               rel="noopener noreferrer"
             >
