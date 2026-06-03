@@ -637,7 +637,7 @@ export default function SaveTheDatePage() {
             </p>
             <a
               className="book-btn"
-              href="https://www.forthatlanta.com"
+              href="https://be.synxis.com/?Hotel=46131&Chain=10237&arrive=2026-11-12&depart=2026-11-15&adult=1&child=0&group=111226PBB"
               target="_blank"
               rel="noopener noreferrer"
             >
