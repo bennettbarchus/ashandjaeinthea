@@ -465,10 +465,10 @@ export function RsvpShell({ initialSettings }: { initialSettings: RsvpSettings }
 
   if (!settings.rsvpOpen) {
     return (
-      <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center bg-ivory px-6 py-10 text-center text-espresso sm:max-w-lg">
-        <h1 className="font-playfair text-2xl text-espresso">RSVP is currently closed.</h1>
+      <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center bg-parchment px-6 py-10 text-center text-mocha sm:max-w-lg">
+        <h1 className="font-playfair text-2xl text-mocha">RSVP is currently closed.</h1>
         {settings.supportEmail ? (
-          <p className="mt-4 font-lora text-sm text-taupe">
+          <p className="mt-4 font-playfair text-sm text-sand">
             Please reach out to{" "}
             <a href={`mailto:${settings.supportEmail}`} className="underline">
               {settings.supportEmail}
@@ -481,10 +481,10 @@ export function RsvpShell({ initialSettings }: { initialSettings: RsvpSettings }
   }
 
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col bg-ivory px-6 py-10 text-espresso sm:max-w-lg">
-      {screen.id !== "welcome" && screen.id !== "confirmation" ? (
-        <ProgressIndicator current={stepNumber} total={totalStepsEstimate} />
-      ) : null}
+    <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col bg-parchment px-6 py-10 text-mocha sm:max-w-lg">
+      {/* Shown on every screen, including Welcome (per spec — "include a subtle
+          progress indicator") and Confirmation (reads as 100% complete). */}
+      <ProgressIndicator current={stepNumber} total={totalStepsEstimate} />
 
       {showBack ? (
         <div className="mb-4">
@@ -508,7 +508,8 @@ export function RsvpShell({ initialSettings }: { initialSettings: RsvpSettings }
             query={searchQuery}
             onQueryChange={setSearchQuery}
             results={trimmedQuery.length >= 3 && !isLoadingInvitation ? searchResults : []}
-            isSearching={(trimmedQuery.length >= 3 && isSearching) || isLoadingInvitation}
+            isSearching={trimmedQuery.length >= 3 && isSearching}
+            isSelecting={isLoadingInvitation}
             errorMessage={trimmedQuery.length >= 3 ? searchError : null}
             onSelect={selectHousehold}
             supportEmail={settings.supportEmail}

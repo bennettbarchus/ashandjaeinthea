@@ -17,10 +17,10 @@ export function ProgressIndicator({
         aria-valuemin={0}
         aria-valuemax={100}
         aria-label="RSVP progress"
-        className="h-1 w-full overflow-hidden rounded-full bg-taupe/25"
+        className="h-1 w-full overflow-hidden bg-sand/25"
       >
         <div
-          className="h-full rounded-full bg-gold motion-safe:transition-[width] motion-safe:duration-300"
+          className="h-full bg-peach motion-safe:transition-[width] motion-safe:duration-300"
           style={{ width: `${pct}%` }}
         />
       </div>

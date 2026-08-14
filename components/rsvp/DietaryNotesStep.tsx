@@ -18,7 +18,7 @@ export function DietaryNotesStep({
   return (
     <div>
       <StepHeading
-        eyebrow="Screen 8 of 10"
+        eyebrow="Dietary Notes"
         title="Do you have any food allergies or dietary restrictions?"
         description="Optional — let us know so we can accommodate you."
       />
@@ -26,7 +26,7 @@ export function DietaryNotesStep({
       <div className="space-y-6">
         {guests.map((guest) => (
           <div key={guest.id}>
-            <p className="mb-2 font-lora text-sm text-taupe">{guest.displayName}</p>
+            <p className="mb-2 font-playfair text-sm text-sand">{guest.displayName}</p>
             <TextAreaField
               value={guest.dietaryNotes}
               onChange={(e) => onChange(guest.id, e.target.value)}

@@ -25,7 +25,7 @@ export function HouseholdConfirmStep({
   return (
     <div>
       <StepHeading
-        eyebrow="Screen 3 of 10"
+        eyebrow="Confirm Household"
         title="We found your invitation."
         description="Is this your party?"
       />
@@ -34,7 +34,7 @@ export function HouseholdConfirmStep({
         {guests.map((guest) => (
           <div
             key={guest.id}
-            className="rounded-2xl border border-taupe/40 bg-white/40 px-5 py-4"
+            className="border border-sand/40 bg-cream/50 px-5 py-4"
           >
             {guest.isPlusOne && guest.plusOneNameEditable ? (
               <div>
@@ -49,7 +49,7 @@ export function HouseholdConfirmStep({
                 />
               </div>
             ) : (
-              <p className="font-lora text-base text-espresso">{guest.displayName}</p>
+              <p className="font-playfair text-base text-mocha">{guest.displayName}</p>
             )}
           </div>
         ))}
@@ -66,7 +66,7 @@ export function HouseholdConfirmStep({
         </SecondaryButton>
       </div>
 
-      <p className="mt-4 text-center font-lora text-xs text-taupe">{householdName}</p>
+      <p className="mt-4 text-center font-playfair text-xs text-sand">{householdName}</p>
     </div>
   );
 }

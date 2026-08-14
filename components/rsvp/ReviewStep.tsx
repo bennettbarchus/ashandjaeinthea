@@ -42,12 +42,12 @@ export function ReviewStep({
 
   return (
     <div>
-      <StepHeading eyebrow="Screen 9 of 10" title="Review your RSVP" />
+      <StepHeading eyebrow="Review" title="Review your RSVP" />
 
       <div className="space-y-6">
         {eventOrder.map((event) => (
-          <div key={event.eventId} className="rounded-2xl border border-taupe/40 bg-white/40 p-5">
-            <p className="mb-2 font-playfair text-lg text-espresso">{event.eventName}</p>
+          <div key={event.eventId} className="border border-sand/40 bg-cream/50 p-5">
+            <p className="mb-2 font-playfair text-lg text-mocha">{event.eventName}</p>
             <ul className="space-y-1">
               {guests.map((guest) => {
                 const answer = guest.answers.find((a) => a.eventId === event.eventId);
@@ -58,7 +58,7 @@ export function ReviewStep({
                     ? ` — ${answer.mealChoice}${answer.steakTemperature ? `, ${answer.steakTemperature}` : ""}`
                     : "";
                 return (
-                  <li key={guest.id} className="font-lora text-sm text-espresso/90">
+                  <li key={guest.id} className="font-playfair text-sm text-mocha/90">
                     {guest.displayName} — {status}
                     {mealSuffix}
                   </li>
@@ -69,11 +69,11 @@ export function ReviewStep({
         ))}
 
         {dietaryEntries.length > 0 ? (
-          <div className="rounded-2xl border border-taupe/40 bg-white/40 p-5">
-            <p className="mb-2 font-playfair text-lg text-espresso">Dietary Notes</p>
+          <div className="border border-sand/40 bg-cream/50 p-5">
+            <p className="mb-2 font-playfair text-lg text-mocha">Dietary Notes</p>
             <ul className="space-y-1">
               {dietaryEntries.map((guest) => (
-                <li key={guest.id} className="font-lora text-sm text-espresso/90">
+                <li key={guest.id} className="font-playfair text-sm text-mocha/90">
                   {guest.displayName}: {guest.dietaryNotes}
                 </li>
               ))}

@@ -16,19 +16,23 @@ export function ConfirmationStep({
 }) {
   return (
     <div>
-      <StepHeading eyebrow="Screen 10 of 10" title="Your RSVP has been received." />
+      <StepHeading
+        eyebrow="Confirmation"
+        flourish="Thank You"
+        title="Your RSVP has been received."
+      />
 
-      <p className="font-lora text-base leading-relaxed text-espresso/90">
+      <p className="font-playfair text-base leading-relaxed text-mocha/90">
         {confirmationMessage}
       </p>
 
       {rsvpDeadline ? (
-        <p className="mt-4 font-lora text-sm text-taupe">
+        <p className="mt-4 font-playfair text-sm text-sand">
           Please note the RSVP deadline is {rsvpDeadline}.
         </p>
       ) : null}
 
-      <p className="mt-4 font-lora text-sm text-taupe">
+      <p className="mt-4 font-playfair text-sm text-sand">
         Need to make a change? Return to this page any time before the deadline to update
         your RSVP.
       </p>

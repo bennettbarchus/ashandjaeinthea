@@ -16,6 +16,7 @@ export function WelcomeStep({
     <div>
       <StepHeading
         eyebrow="RSVP"
+        flourish="Ashley & Jared"
         title="We're so excited to celebrate with you."
         description="Enter your name to find your invitation."
       />

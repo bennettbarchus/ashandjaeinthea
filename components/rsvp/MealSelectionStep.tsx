@@ -31,7 +31,7 @@ export function MealSelectionStep({
       <div className="space-y-6">
         {guests.map((guest) => (
           <div key={guest.id}>
-            <p className="mb-3 font-lora text-base text-espresso">{guest.displayName}</p>
+            <p className="mb-3 font-playfair text-base text-mocha">{guest.displayName}</p>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               {mealOptions.map((option) => (
                 <ChoiceButton

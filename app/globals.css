@@ -2,32 +2,35 @@
 
 /*
  * Tailwind v4 is CSS-first: it does not read tailwind.config.ts (that file
- * has been removed). Custom theme tokens are declared here instead. The
- * font tokens are bound to CSS variables of the same name so they pick up
- * whatever next/font defines for --font-playfair / --font-lora in the
- * nearest ancestor (see app/rsvp/layout.tsx) — undefined (and unused)
- * outside that subtree.
+ * has been removed). Custom theme tokens are declared here instead.
+ *
+ * This palette and type system is extracted directly from the homepage
+ * (app/page.tsx)'s inline <style> block, not invented separately — see
+ * that file for the source of truth. The font tokens are bound to CSS
+ * variables of the same name so they pick up whatever next/font defines
+ * for --font-playfair / --font-cinzel / --font-belleaurore in the nearest
+ * ancestor (see app/rsvp/layout.tsx) — undefined (and unused) outside
+ * that subtree.
  */
 @theme {
-  --color-ivory: #f8f5f0;
-  --color-espresso: #3b2f2f;
-  --color-cinnamon: #a8562e;
-  --color-taupe: #b9a48d;
-  --color-gold: #c9a66b;
+  --color-parchment: #f7eee8; /* page background */
+  --color-cream: #faf5f0; /* card/surface background, text-on-mocha */
+  --color-mocha: #5e3b2b; /* primary text, headings, borders, primary interactive color */
+  --color-sand: #bfa58a; /* secondary/muted text, subtle borders, dividers */
+  --color-blush: #f3c7c3; /* soft decorative accent */
+  --color-peach: #f1a96a; /* warm accent */
+  --color-lavender: #c9b6c9; /* decorative accent */
+  --color-sage: #7e877a; /* decorative accent */
+  --color-alert: #b05050; /* homepage's own incorrect-password error color */
 
   --font-playfair: var(--font-playfair);
-  --font-lora: var(--font-lora);
-
-  --text-hero: 3rem;
-  --text-subhero: 1.5rem;
-  --text-heading: 2rem;
-  --text-body: 1rem;
-  --text-small: 0.875rem;
+  --font-cinzel: var(--font-cinzel);
+  --font-belleaurore: var(--font-belleaurore);
 }
 
 :root {
-  --background: #f8f5f0;
-  --foreground: #3b2f2f;
+  --background: #f7eee8;
+  --foreground: #5e3b2b;
 }
 
 html,

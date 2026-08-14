@@ -48,9 +48,10 @@ export function VerificationStep({
   return (
     <div>
       <StepHeading
-        eyebrow="Screen 4 of 10"
+        eyebrow="Verification"
         title="One more step"
         description={copy.description}
+        focusOnMount={false}
       />
 
       {verificationOptions.length > 1 ? (
@@ -62,10 +63,10 @@ export function VerificationStep({
               role="radio"
               aria-checked={method === opt}
               onClick={() => onMethodChange(opt)}
-              className={`min-h-[40px] rounded-full border px-4 py-1.5 font-lora text-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold ${
+              className={`min-h-[40px] border px-4 py-1.5 font-playfair text-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mocha ${
                 method === opt
-                  ? "border-espresso bg-espresso text-ivory"
-                  : "border-taupe/50 text-espresso hover:border-espresso"
+                  ? "border-mocha bg-mocha text-cream"
+                  : "border-sand/50 text-mocha hover:border-mocha"
               }`}
             >
               {METHOD_COPY[opt].label}
@@ -83,6 +84,7 @@ export function VerificationStep({
         onChange={(e) => onValueChange(e.target.value)}
         aria-label={copy.label}
         onKeyDown={(e) => e.key === "Enter" && onSubmit()}
+        autoFocus
       />
 
       <ErrorText>{errorMessage}</ErrorText>
