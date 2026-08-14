@@ -10,6 +10,21 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.resolve(process.cwd()),
   },
+  async redirects() {
+    return [
+      {
+        source: "/",
+        has: [
+          {
+            type: "host",
+            value: "rsvp.ashandjaeinthea.com",
+          },
+        ],
+        destination: "/rsvp",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
