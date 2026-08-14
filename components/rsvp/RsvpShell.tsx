@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import type {
   Attendance,
   InvitationEventMeta,
@@ -50,45 +49,7 @@ function isSteak(mealChoice: string): boolean {
   return mealChoice.trim().toLowerCase() === STEAK_ENTREE_LABEL.toLowerCase();
 }
 
-function subscribeToUnlockState() {
-  // The "aj_unlocked" flag is only ever written by the homepage's password
-  // gate and never changes during this component's lifetime, so there's
-  // nothing to subscribe to — this store is read-once-per-mount.
-  return () => {};
-}
-function getUnlockedSnapshot(): boolean {
-  return window.localStorage.getItem("aj_unlocked") === "true";
-}
-function getUnlockedServerSnapshot(): boolean {
-  return false;
-}
-
 export function RsvpShell({ initialSettings }: { initialSettings: RsvpSettings }) {
-  const router = useRouter();
-  // Used only to decide what to render (blank vs. the shell) — never to
-  // decide whether to redirect. On the first client render this legitimately
-  // differs from the real localStorage value (it must match the server
-  // snapshot for hydration), which briefly reports "locked" even for an
-  // already-unlocked guest; React corrects it moments later. See the
-  // redirect effect below, which does its own independent one-time check.
-  const unlocked = useSyncExternalStore(
-    subscribeToUnlockState,
-    getUnlockedSnapshot,
-    getUnlockedServerSnapshot
-  );
-
-  useEffect(() => {
-    // Deliberately does NOT depend on `unlocked` above — that value is
-    // transiently wrong during the hydration render (see comment above),
-    // and redirecting off of it would bounce already-unlocked guests back
-    // to "/". This runs exactly once on mount, after hydration has settled,
-    // and reads localStorage directly. router.replace is navigation, not
-    // component state, so it's fine to call synchronously here.
-    if (window.localStorage.getItem("aj_unlocked") !== "true") {
-      router.replace("/");
-    }
-  }, [router]);
-
   const [settings, setSettings] = useState<RsvpSettings>(initialSettings);
   const [history, setHistory] = useState<Screen[]>([{ id: "welcome" }]);
   const screen = history[history.length - 1];
@@ -501,10 +462,6 @@ export function RsvpShell({ initialSettings }: { initialSettings: RsvpSettings }
 
   const showBack = history.length > 1 && screen.id !== "confirmation";
   const showGenericFooter = ["event", "meal", "steak", "dietary"].includes(screen.id);
-
-  if (!unlocked) {
-    return null;
-  }
 
   if (!settings.rsvpOpen) {
     return (
