@@ -1,5 +1,6 @@
 // app/layout.tsx
 import type { Metadata } from "next";
+import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Ashley & Jared | Save the Date | 11.14.26",
