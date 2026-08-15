@@ -152,17 +152,50 @@ export async function ensureTabs(tabNames: string[]): Promise<void> {
   });
 }
 
-/** Used only by scripts/seed-sheet.ts to populate a tab from scratch. */
+/**
+ * Used by scripts/seed-sheet.ts and one-off maintenance scripts to populate
+ * a tab from scratch. valueInputOption defaults to "RAW" (existing
+ * behavior); pass "USER_ENTERED" to have leading "="  strings evaluated as
+ * live formulas instead of stored as literal text (used by the Dashboard
+ * tab, which stays in sync via formulas rather than a point-in-time dump).
+ */
 export async function overwriteTab(
   tabName: string,
-  rows: (string | number | boolean)[][]
+  rows: (string | number | boolean)[][],
+  valueInputOption: "RAW" | "USER_ENTERED" = "RAW"
 ): Promise<void> {
   const sheets = getSheetsClient();
   await sheets.spreadsheets.values.update({
     spreadsheetId: SHEET_ID,
     range: `${tabName}!A1`,
-    valueInputOption: "RAW",
+    valueInputOption,
     requestBody: { values: rows },
+  });
+}
+
+/** Looks up a tab's numeric sheetId (needed for cell-formatting requests). */
+export async function getSheetId(tabName: string): Promise<number> {
+  const sheets = getSheetsClient();
+  const spreadsheet = await sheets.spreadsheets.get({ spreadsheetId: SHEET_ID });
+  const sheet = (spreadsheet.data.sheets ?? []).find(
+    (s) => s.properties?.title === tabName
+  );
+  const sheetId = sheet?.properties?.sheetId;
+  if (sheetId === undefined || sheetId === null) {
+    throw new Error(`Sheet not found: ${tabName}`);
+  }
+  return sheetId;
+}
+
+/** Generic batchUpdate escape hatch for one-off maintenance scripts that need cell formatting. */
+export async function batchUpdateSpreadsheet(
+  requests: sheets_v4.Schema$Request[]
+): Promise<void> {
+  if (!requests.length) return;
+  const sheets = getSheetsClient();
+  await sheets.spreadsheets.batchUpdate({
+    spreadsheetId: SHEET_ID,
+    requestBody: { requests },
   });
 }
 
