@@ -79,18 +79,51 @@ export async function POST(request: NextRequest) {
     const ambiguousKey = normalizeName(
       household.search_name || household.primary_guest_name
     );
-    const ambiguousCount = households.rows.filter(
-      (r) =>
-        normalizeName(r.data.search_name || r.data.primary_guest_name) ===
-        ambiguousKey
-    ).length;
-    const isAmbiguous = ambiguousCount > 1;
+    const exactNameCollision =
+      households.rows.filter(
+        (r) =>
+          normalizeName(r.data.search_name || r.data.primary_guest_name) ===
+          ambiguousKey
+      ).length > 1;
+
+    // Two households can share a last name (e.g. "Kati Swenson" and "Kelsi
+    // Swenson & Anthony Tran") without their full stored name colliding —
+    // a guest searching the shared surname could still tap the wrong result.
+    // Treat that as ambiguous too, gated on last names actually present.
+    const normalizeLastName = (s: string) => s.trim().toLowerCase();
+    const lastNamesByHousehold = new Map<string, Set<string>>();
+    for (const g of guests.rows) {
+      const ln = normalizeLastName(g.data.last_name);
+      if (!ln) continue;
+      const set = lastNamesByHousehold.get(g.data.household_id) ?? new Set<string>();
+      set.add(ln);
+      lastNamesByHousehold.set(g.data.household_id, set);
+    }
+    const myLastNames = lastNamesByHousehold.get(householdId) ?? new Set<string>();
+    const lastNameCollision =
+      myLastNames.size > 0 &&
+      households.rows.some((r) => {
+        if (r.data.household_id === householdId) return false;
+        const otherLastNames = lastNamesByHousehold.get(r.data.household_id);
+        if (!otherLastNames) return false;
+        for (const ln of myLastNames) {
+          if (otherLastNames.has(ln)) return true;
+        }
+        return false;
+      });
+
+    const isAmbiguous = exactNameCollision || lastNameCollision;
 
     let verified = !isAmbiguous;
     let verificationOptions: InvitationResponse["verificationOptions"];
 
     if (isAmbiguous) {
-      const availableMethods = availableVerificationMethods(household);
+      // Zip is required whenever it's on file (true for every household
+      // today) — it's guaranteed present and unambiguous, unlike phone/email
+      // which are only sparsely populated. Fall back to whatever else is
+      // available only if a household is ever missing a zip.
+      const allMethods = availableVerificationMethods(household);
+      const availableMethods = allMethods.includes("zip") ? ["zip" as const] : allMethods;
       verificationOptions = availableMethods;
 
       if (verification) {
