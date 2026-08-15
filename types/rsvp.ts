@@ -14,6 +14,7 @@ export interface HouseholdRow {
   household_name: string;
   primary_guest_name: string;
   search_name: string;
+  street_address: string;
   city: string;
   state: string;
   zip_code: string;

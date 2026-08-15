@@ -118,6 +118,22 @@ async function writeCells(
   });
 }
 
+/**
+ * Clears all cell content in a tab. Used by one-off maintenance scripts
+ * before a full rewrite whose row/column count may be smaller than what's
+ * currently there (overwriteTab alone only touches cells within the new
+ * data's extent, so a shrinking write would otherwise leave stale trailing
+ * rows behind).
+ */
+export async function clearTab(tabName: string): Promise<void> {
+  const sheets = getSheetsClient();
+  await sheets.spreadsheets.values.clear({
+    spreadsheetId: SHEET_ID,
+    range: tabName,
+    requestBody: {},
+  });
+}
+
 /** Used only by scripts/seed-sheet.ts to create any tabs that don't exist yet. */
 export async function ensureTabs(tabNames: string[]): Promise<void> {
   const sheets = getSheetsClient();
