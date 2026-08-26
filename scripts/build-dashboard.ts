@@ -32,21 +32,28 @@ async function main() {
   const R = () => rows.length + 1; // 1-indexed row number of the NEXT row to be pushed
 
   // --- Row 1-3: right-side dynamic lists (headers here, left title also here) ---
+  // These two lists are FILTER() spills that grow downward as RSVPs come in
+  // — they must live in columns far enough right that they can never grow
+  // into the left block's widest table ("By Event", which uses A:F). Each
+  // list also gets its own spacer column so they can't collide with each
+  // other either, no matter how tall either one gets.
+  const dietaryNoteCondition =
+    'Invitations!H2:H<>"",NOT(REGEXMATCH(LOWER(TRIM(Invitations!H2:H)),"^(none|n/?a)$"))';
   rows.push([
-    "Ashley & Jared — RSVP Dashboard", "", "", "",
+    "Ashley & Jared — RSVP Dashboard", "", "", "", "", "", "",
     "DIETARY NOTES / ACCOMMODATIONS", "", "", "",
     "HOUSEHOLDS NOT YET RESPONDED",
   ]);
   rows.push([
-    "This tab updates automatically — no need to edit anything here.", "", "", "",
+    "This tab updates automatically — no need to edit anything here.", "", "", "", "", "", "",
     "Guest", "Event", "Note", "",
     "Household", "Location",
   ]);
   rows.push([
-    "", "", "", "",
-    '=IFERROR(FILTER(Invitations!B2:B,Invitations!H2:H<>""),"None yet")',
-    '=IFERROR(FILTER(Invitations!C2:C,Invitations!H2:H<>""),"")',
-    '=IFERROR(FILTER(Invitations!H2:H,Invitations!H2:H<>""),"")',
+    "", "", "", "", "", "", "",
+    `=IFERROR(FILTER(Invitations!B2:B,${dietaryNoteCondition}),"None yet")`,
+    `=IFERROR(FILTER(Invitations!C2:C,${dietaryNoteCondition}),"")`,
+    `=IFERROR(FILTER(Invitations!H2:H,${dietaryNoteCondition}),"")`,
     "",
     '=IFERROR(FILTER(Households!C2:C,Households!L2:L<>"TRUE"),"All responded! 🎉")',
     '=IFERROR(FILTER(Households!F2:F&", "&Households!G2:G,Households!L2:L<>"TRUE"),"")',
@@ -163,16 +170,22 @@ async function main() {
     .map(({ i }) => i + 1);
 
   const requests = [
-    bold(1, 1, 0, 10),
+    bold(1, 1, 0, 13),
     ...sectionHeaderRows.map((row) => bold(row, row, 0, 1)),
-    ...sectionHeaderRows.map((row) => fill(row, row, 0, 10, { red: 0.92, green: 0.92, blue: 0.86 })),
-    bold(2, 2, 4, 10), // right-list column headers
+    // Fill is deliberately limited to the left block (A:G) — the same rows
+    // in columns H+ can already contain live FILTER-spilled list data by
+    // the time this runs, and painting over those cells would be confusing.
+    ...sectionHeaderRows.map((row) => fill(row, row, 0, 7, { red: 0.92, green: 0.92, blue: 0.86 })),
+    bold(2, 2, 7, 13), // right-list column headers
     bold(byEventHeaderRow, byEventHeaderRow, 0, 6), // by-event table header
     bold(mealEventRow, mealEventRow, 0, 1),
     percent(responseRateRow, 1),
     colWidth(0, 1, 260),
-    colWidth(4, 5, 200),
-    colWidth(8, 9, 200),
+    colWidth(7, 8, 200), // Guest
+    colWidth(8, 9, 120), // Event
+    colWidth(9, 10, 220), // Note
+    colWidth(11, 12, 220), // Household
+    colWidth(12, 13, 180), // Location
   ];
 
   await batchUpdateSpreadsheet(requests as any);
