@@ -31,11 +31,25 @@ async function main() {
   const eventCount = events.rows.length;
   console.log(`Building dashboard for ${eventCount} events:`, events.rows.map((r) => r.data.event_id));
 
-  // The Dietary Notes list below is a BOUNDED (non-spilling) formula block —
-  // unlike a plain FILTER(), which is unsafe here because something else is
-  // stacked underneath it — so its row count has to be fixed at build time.
-  // Size it off how many unique (guest, note) pairs exist right now, with
+  // These lists are BOUNDED (non-spilling) formula blocks — unlike a plain
+  // FILTER(), which is unsafe here because something else is stacked
+  // underneath each of them — so their row counts have to be fixed at build
+  // time. Size each off how many unique entries exist right now, with
   // generous headroom, rather than guessing a constant.
+  const uniqueGuestsWith = (attendance: "YES" | "NO") => {
+    const set = new Set<string>();
+    for (const r of invitations.rows) {
+      if (r.data.attendance === attendance) set.add(r.data.guest_name);
+    }
+    return set.size;
+  };
+  const comingCount = uniqueGuestsWith("YES");
+  const notComingCount = uniqueGuestsWith("NO");
+  const comingReservedRows = Math.max(20, comingCount * 4);
+  const notComingReservedRows = Math.max(15, notComingCount * 4);
+  console.log(`Coming: ${comingCount} unique guests now, reserving ${comingReservedRows} rows.`);
+  console.log(`Not coming: ${notComingCount} unique guests now, reserving ${notComingReservedRows} rows.`);
+
   const uniqueNotes = new Set<string>();
   for (const r of invitations.rows) {
     const note = r.data.dietary_notes.trim();
@@ -96,6 +110,26 @@ async function main() {
     ]);
   }
   rows.push(["(To add a future event: add one more row above referencing the new Events tab row, or rerun scripts/build-dashboard.ts)"]);
+  rows.push([]);
+
+  // --- Coming / Not Coming (per-guest, deduped across events) ---
+  // A guest who said YES to all their events collapses to one line here
+  // (same combined text each time); a guest with mixed answers (yes to one
+  // event, no to another) correctly appears once in each list. This is
+  // deliberately placed above Meal Choices / Steak Temperature — who's
+  // actually coming matters more than what they're eating.
+  rows.push(["COMING (RSVP YES)"]);
+  rows.push([`="Count: "&IFERROR(COUNTA(UNIQUE(FILTER(Invitations!B2:B,Invitations!E2:E="YES"))),0)`]);
+  for (let i = 1; i <= comingReservedRows; i++) {
+    rows.push([`=IFERROR(INDEX(UNIQUE(FILTER(Invitations!B2:B,Invitations!E2:E="YES")),${i}),"")`]);
+  }
+  rows.push([]);
+
+  rows.push(["NOT COMING (RSVP NO)"]);
+  rows.push([`="Count: "&IFERROR(COUNTA(UNIQUE(FILTER(Invitations!B2:B,Invitations!E2:E="NO"))),0)`]);
+  for (let i = 1; i <= notComingReservedRows; i++) {
+    rows.push([`=IFERROR(INDEX(UNIQUE(FILTER(Invitations!B2:B,Invitations!E2:E="NO")),${i}),"")`]);
+  }
   rows.push([]);
 
   // --- Meal choices (auto-detects whichever event has requires_meal=TRUE) ---
