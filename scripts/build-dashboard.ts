@@ -36,15 +36,17 @@ async function main() {
   // underneath each of them — so their row counts have to be fixed at build
   // time. Size each off how many unique entries exist right now, with
   // generous headroom, rather than guessing a constant.
-  const uniqueGuestsWith = (attendance: "YES" | "NO") => {
-    const set = new Set<string>();
-    for (const r of invitations.rows) {
-      if (r.data.attendance === attendance) set.add(r.data.guest_name);
-    }
-    return set.size;
-  };
-  const comingCount = uniqueGuestsWith("YES");
-  const notComingCount = uniqueGuestsWith("NO");
+  const comingSet = new Set<string>(); // has a YES to at least one event
+  const noSet = new Set<string>(); // has a NO to at least one event
+  for (const r of invitations.rows) {
+    if (r.data.attendance === "YES") comingSet.add(r.data.guest_name);
+    if (r.data.attendance === "NO") noSet.add(r.data.guest_name);
+  }
+  const comingCount = comingSet.size;
+  // "Not Coming" means declining every event, not just one (e.g. skipping
+  // the after party but attending the ceremony still counts as coming) —
+  // guests with a NO to at least one event AND a YES to none.
+  const notComingCount = [...noSet].filter((g) => !comingSet.has(g)).length;
   const comingReservedRows = Math.max(20, comingCount * 4);
   const notComingReservedRows = Math.max(15, notComingCount * 4);
   console.log(`Coming: ${comingCount} unique guests now, reserving ${comingReservedRows} rows.`);
@@ -114,10 +116,10 @@ async function main() {
 
   // --- Coming / Not Coming (per-guest, deduped across events) ---
   // A guest who said YES to all their events collapses to one line here
-  // (same combined text each time); a guest with mixed answers (yes to one
-  // event, no to another) correctly appears once in each list. This is
-  // deliberately placed above Meal Choices / Steak Temperature — who's
-  // actually coming matters more than what they're eating.
+  // (same combined text each time). "Coming" is anyone with a YES to AT
+  // LEAST ONE event — declining the after party but attending the ceremony
+  // still counts as coming. This is deliberately placed above Meal Choices
+  // / Steak Temperature — who's actually coming matters more than food.
   rows.push(["COMING (RSVP YES)"]);
   rows.push([`="Count: "&IFERROR(COUNTA(UNIQUE(FILTER(Invitations!B2:B,Invitations!E2:E="YES"))),0)`]);
   for (let i = 1; i <= comingReservedRows; i++) {
@@ -125,10 +127,18 @@ async function main() {
   }
   rows.push([]);
 
+  // "Not Coming" is the mirror image of "Coming": only guests who declined
+  // EVERY event (a NO on at least one, and a YES on none) — not anyone who
+  // simply skipped one event while still attending others. The per-row
+  // ARRAYFORMULA(COUNTIFS(...)) checks, for each NO row, whether that same
+  // guest has a YES anywhere else in the sheet; guests with a mixed record
+  // are excluded here (they're already covered by the Coming list above).
   rows.push(["NOT COMING (RSVP NO)"]);
-  rows.push([`="Count: "&IFERROR(COUNTA(UNIQUE(FILTER(Invitations!B2:B,Invitations!E2:E="NO"))),0)`]);
+  const notComingCondition =
+    'Invitations!E2:E="NO",ARRAYFORMULA(COUNTIFS(Invitations!$B$2:$B,Invitations!$B$2:$B,Invitations!$E$2:$E,"YES"))=0';
+  rows.push([`="Count: "&IFERROR(COUNTA(UNIQUE(FILTER(Invitations!B2:B,${notComingCondition}))),0)`]);
   for (let i = 1; i <= notComingReservedRows; i++) {
-    rows.push([`=IFERROR(INDEX(UNIQUE(FILTER(Invitations!B2:B,Invitations!E2:E="NO")),${i}),"")`]);
+    rows.push([`=IFERROR(INDEX(UNIQUE(FILTER(Invitations!B2:B,${notComingCondition})),${i}),"")`]);
   }
   rows.push([]);
 
