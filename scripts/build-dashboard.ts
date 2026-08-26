@@ -1,9 +1,14 @@
 // Rebuilds the "Dashboard" tab in the RSVP Google Sheet: a live, formula-driven
 // summary (households/guests responded, per-event Yes/No/Pending, meal and
 // steak-temperature breakdowns, dietary notes, and a not-yet-responded list).
+// Single vertical column (the "By Event" table is the only part wider than
+// two columns) — read top to bottom, no scrolling right required.
+//
 // Safe to rerun any time — it fully rebuilds the tab from the current
 // Events/Households/Guests/Invitations structure. Rerun this after adding or
-// removing an event so the "By Event" table picks up the new row count.
+// removing an event so the "By Event" table picks up the new row count, or
+// if the Dietary Notes list ever looks like it's running out of room (its
+// reserved row count is sized off the live data each time this runs).
 //
 // Usage: npx tsx scripts/build-dashboard.ts [--dry-run]
 import { loadEnvConfig } from "@next/env";
@@ -19,11 +24,26 @@ async function main() {
     getSheetId,
     batchUpdateSpreadsheet,
     getEventsTab,
+    getInvitationsTab,
   } = await import("../lib/google-sheets");
 
-  const events = await getEventsTab();
+  const [events, invitations] = await Promise.all([getEventsTab(), getInvitationsTab()]);
   const eventCount = events.rows.length;
   console.log(`Building dashboard for ${eventCount} events:`, events.rows.map((r) => r.data.event_id));
+
+  // The Dietary Notes list below is a BOUNDED (non-spilling) formula block —
+  // unlike a plain FILTER(), which is unsafe here because something else is
+  // stacked underneath it — so its row count has to be fixed at build time.
+  // Size it off how many unique (guest, note) pairs exist right now, with
+  // generous headroom, rather than guessing a constant.
+  const uniqueNotes = new Set<string>();
+  for (const r of invitations.rows) {
+    const note = r.data.dietary_notes.trim();
+    if (!note || /^(none|n\/?a)$/i.test(note)) continue;
+    uniqueNotes.add(`${r.data.guest_name}: ${note}`);
+  }
+  const dietaryReservedRows = Math.max(15, uniqueNotes.size * 4);
+  console.log(`Dietary notes: ${uniqueNotes.size} unique entries now, reserving ${dietaryReservedRows} rows.`);
 
   await ensureTabs([TAB]);
   await clearTab(TAB);
@@ -31,33 +51,9 @@ async function main() {
   const rows: (string | number)[][] = [];
   const R = () => rows.length + 1; // 1-indexed row number of the NEXT row to be pushed
 
-  // --- Row 1-3: right-side dynamic lists (headers here, left title also here) ---
-  // These two lists are FILTER() spills that grow downward as RSVPs come in
-  // — they must live in columns far enough right that they can never grow
-  // into the left block's widest table ("By Event", which uses A:F). Each
-  // list also gets its own spacer column so they can't collide with each
-  // other either, no matter how tall either one gets.
-  const dietaryNoteCondition =
-    'Invitations!H2:H<>"",NOT(REGEXMATCH(LOWER(TRIM(Invitations!H2:H)),"^(none|n/?a)$"))';
-  rows.push([
-    "Ashley & Jared — RSVP Dashboard", "", "", "", "", "", "",
-    "DIETARY NOTES / ACCOMMODATIONS", "", "", "",
-    "HOUSEHOLDS NOT YET RESPONDED",
-  ]);
-  rows.push([
-    "This tab updates automatically — no need to edit anything here.", "", "", "", "", "", "",
-    "Guest", "Event", "Note", "",
-    "Household", "Location",
-  ]);
-  rows.push([
-    "", "", "", "", "", "", "",
-    `=IFERROR(FILTER(Invitations!B2:B,${dietaryNoteCondition}),"None yet")`,
-    `=IFERROR(FILTER(Invitations!C2:C,${dietaryNoteCondition}),"")`,
-    `=IFERROR(FILTER(Invitations!H2:H,${dietaryNoteCondition}),"")`,
-    "",
-    '=IFERROR(FILTER(Households!C2:C,Households!L2:L<>"TRUE"),"All responded! 🎉")',
-    '=IFERROR(FILTER(Households!F2:F&", "&Households!G2:G,Households!L2:L<>"TRUE"),"")',
-  ]);
+  rows.push(["Ashley & Jared — RSVP Dashboard"]);
+  rows.push(["This tab updates automatically — no need to edit anything here."]);
+  rows.push([]);
 
   // --- Overview ---
   rows.push(["OVERVIEW"]);
@@ -69,6 +65,7 @@ async function main() {
   // keyword and won't match a text cell, so use SUMPRODUCT with a plain
   // string-equality comparison instead.
   rows.push(["Households Responded", '=SUMPRODUCT(--(Households!L2:L="TRUE"))']);
+  const notRespondedRow = R();
   rows.push(["Households Not Yet Responded", `=B${overviewStart}-B${overviewStart + 2}`]);
   const responseRateRow = R();
   rows.push(["Response Rate", `=IFERROR(B${overviewStart + 2}/B${overviewStart},0)`]);
@@ -77,7 +74,8 @@ async function main() {
   rows.push(["Days Remaining", `=IFERROR(DATEVALUE(B${deadlineRow})-TODAY(),"")`]);
   rows.push([]);
 
-  // --- By event (one row per row currently in the Events tab; add a row here + rerun this script if a new event is added) ---
+  // --- By event (one row per row currently in the Events tab; the only
+  // section wider than 2 columns, since it's inherently a comparison table) ---
   rows.push(["BY EVENT"]);
   const byEventHeaderRow = R();
   rows.push(["Event", "Date", "Invited", "Yes", "No", "Pending"]);
@@ -121,6 +119,37 @@ async function main() {
   rows.push(["Medium well", '=COUNTIFS(Invitations!F:F,"Steak",Invitations!G:G,"Medium well")']);
   rows.push(["Well done", '=COUNTIFS(Invitations!F:F,"Steak",Invitations!G:G,"Well done")']);
   rows.push(["Not Yet Chosen", '=COUNTIFS(Invitations!F:F,"Steak",Invitations!G:G,"")']);
+  rows.push([]);
+
+  // --- Dietary notes / accommodations ---
+  // One line per unique (guest, note) pair — a guest's note is usually
+  // identical across all 3 of their event rows, so dedupe rather than list
+  // it 3x. Bounded (INDEX+IFERROR per row, not a spilling FILTER) because
+  // the Households list below needs to be able to grow freely underneath it.
+  rows.push(["DIETARY NOTES / ACCOMMODATIONS"]);
+  const dietaryCondition =
+    'Invitations!H2:H<>"",NOT(REGEXMATCH(LOWER(TRIM(Invitations!H2:H)),"^(none|n/?a)$"))';
+  const dietarySource = `Invitations!B2:B&": "&Invitations!H2:H`;
+  rows.push([`="Count: "&IFERROR(COUNTA(UNIQUE(FILTER(${dietarySource},${dietaryCondition}))),0)`]);
+  const dietaryListStart = R();
+  for (let i = 1; i <= dietaryReservedRows; i++) {
+    rows.push([`=IFERROR(INDEX(UNIQUE(FILTER(${dietarySource},${dietaryCondition})),${i}),"")`]);
+  }
+  rows.push([]);
+
+  // --- Households not yet responded ---
+  // The one genuinely unbounded FILTER spill on the sheet — safe because
+  // it's the LAST thing on the tab, so there's nothing below it to collide
+  // with no matter how long the list gets.
+  rows.push(["HOUSEHOLDS NOT YET RESPONDED"]);
+  rows.push([`="Count: "&B${notRespondedRow}`]);
+  // Households!A2:A<>"" bounds the FILTER to real data rows — without it,
+  // the open-ended L2:L range also matches every blank row below row 113
+  // out to the sheet's full row count (blank <> "TRUE" is true), padding
+  // the list with junk " — , " entries.
+  rows.push([
+    '=IFERROR(FILTER(Households!C2:C&" — "&Households!F2:F&", "&Households!G2:G,Households!L2:L<>"TRUE",Households!A2:A<>""),"All responded! 🎉")',
+  ]);
 
   console.log(`\nTotal rows: ${rows.length}`);
 
@@ -170,22 +199,14 @@ async function main() {
     .map(({ i }) => i + 1);
 
   const requests = [
-    bold(1, 1, 0, 13),
+    bold(1, 1, 0, 1),
     ...sectionHeaderRows.map((row) => bold(row, row, 0, 1)),
-    // Fill is deliberately limited to the left block (A:G) — the same rows
-    // in columns H+ can already contain live FILTER-spilled list data by
-    // the time this runs, and painting over those cells would be confusing.
-    ...sectionHeaderRows.map((row) => fill(row, row, 0, 7, { red: 0.92, green: 0.92, blue: 0.86 })),
-    bold(2, 2, 7, 13), // right-list column headers
+    ...sectionHeaderRows.map((row) => fill(row, row, 0, 6, { red: 0.92, green: 0.92, blue: 0.86 })),
     bold(byEventHeaderRow, byEventHeaderRow, 0, 6), // by-event table header
     bold(mealEventRow, mealEventRow, 0, 1),
     percent(responseRateRow, 1),
-    colWidth(0, 1, 260),
-    colWidth(7, 8, 200), // Guest
-    colWidth(8, 9, 120), // Event
-    colWidth(9, 10, 220), // Note
-    colWidth(11, 12, 220), // Household
-    colWidth(12, 13, 180), // Location
+    colWidth(0, 1, 480), // A — long text lives here (labels, notes, household lines)
+    colWidth(1, 2, 140), // B — values / By Event's Date column
   ];
 
   await batchUpdateSpreadsheet(requests as any);

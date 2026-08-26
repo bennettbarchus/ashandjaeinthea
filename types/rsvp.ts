@@ -52,6 +52,8 @@ export interface EventRow {
 /** Raw row shape from the "Invitations" tab. */
 export interface InvitationRow {
   guest_id: string;
+  /** Denormalized for readability when scanning the sheet directly — not used by app logic. */
+  guest_name: string;
   event_id: string;
   invited: string; // "TRUE" | "FALSE"
   attendance: string; // "" | "YES" | "NO"
