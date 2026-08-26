@@ -226,6 +226,18 @@ async function main() {
       fields: "pixelSize",
     },
   });
+  // clearTab() (called earlier) only clears cell VALUES, never formatting —
+  // so bold/fill/borders from a previous build (row counts and section
+  // positions shift as sections get added) or a manual edit in the Sheets
+  // UI stay stuck on whatever content happens to land there now. Reset
+  // formatting across a generous range first so every rebuild starts clean.
+  const resetFormat = (endRow: number, endCol: number) => ({
+    repeatCell: {
+      range: { sheetId, startRowIndex: 0, endRowIndex: endRow, startColumnIndex: 0, endColumnIndex: endCol },
+      cell: { userEnteredFormat: {} },
+      fields: "userEnteredFormat",
+    },
+  });
 
   const sectionHeaderRows = rows
     .map((r, i) => ({ r, i }))
@@ -233,6 +245,7 @@ async function main() {
     .map(({ i }) => i + 1);
 
   const requests = [
+    resetFormat(Math.max(rows.length + 20, 400), 10),
     bold(1, 1, 0, 1),
     ...sectionHeaderRows.map((row) => bold(row, row, 0, 1)),
     ...sectionHeaderRows.map((row) => fill(row, row, 0, 6, { red: 0.92, green: 0.92, blue: 0.86 })),
