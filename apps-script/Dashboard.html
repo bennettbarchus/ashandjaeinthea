@@ -1,19 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="utf-8">
   <base target="_top">
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
   <style>
     /* Palette lifted from the site's app/globals.css so the dashboard reads
-       as part of the same wedding, not a bolted-on admin tool. */
+       as part of the same wedding, not a bolted-on admin tool.
+       --brick and --gold are the planning-side names for the same two
+       accents the site calls alert and peach. */
     :root {
       --parchment: #f7eee8;
       --cream: #faf5f0;
       --mocha: #5e3b2b;
       --sand: #bfa58a;
-      --peach: #f1a96a;
+      --gold: #f1a96a;
       --sage: #7e877a;
-      --alert: #b05050;
+      --brick: #b05050;
     }
     * { box-sizing: border-box; }
     body {
@@ -24,7 +27,7 @@
       font-family: 'Playfair Display', Georgia, serif;
       -webkit-font-smoothing: antialiased;
     }
-    .wrap { max-width: 880px; margin: 0 auto; }
+    .wrap { max-width: 980px; margin: 0 auto; }
     h1 {
       font-family: 'Cinzel', Georgia, serif;
       font-size: 1.4rem; font-weight: 600; letter-spacing: .18em;
@@ -38,25 +41,42 @@
       margin: 34px 0 12px; padding-bottom: 8px;
       border-bottom: 1px solid rgba(191,165,138,.35);
     }
+    h2.feature {
+      font-size: .78rem; color: var(--mocha);
+      border-bottom: 1px solid rgba(94,59,43,.35);
+    }
 
     .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
     .stat { background: var(--cream); border: 1px solid rgba(191,165,138,.4); padding: 16px 18px; }
     .stat .n { font-size: 1.9rem; line-height: 1.1; }
     .stat .l { font-size: .78rem; color: var(--sand); margin-top: 4px; }
+    .stat.flag { border-color: rgba(176,80,80,.45); background: rgba(176,80,80,.06); }
+    .stat.flag .n { color: var(--brick); }
+    .stat.small .n { font-size: 1.45rem; }
 
     table { width: 100%; border-collapse: collapse; font-size: .9rem; }
-    th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid rgba(191,165,138,.3); }
+    th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid rgba(191,165,138,.3); vertical-align: top; }
     th {
       font-family: 'Cinzel', Georgia, serif; font-size: .62rem; letter-spacing: .16em;
       text-transform: uppercase; color: var(--sand); font-weight: 500;
     }
     td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
     .table-scroll { overflow-x: auto; }
+    tr.flagged td { background: rgba(176,80,80,.05); }
 
     .pill { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: .78rem; }
     .pill.yes { background: rgba(126,135,122,.18); color: var(--sage); }
-    .pill.no { background: rgba(176,80,80,.13); color: var(--alert); }
+    .pill.no { background: rgba(176,80,80,.13); color: var(--brick); }
     .pill.pending { background: rgba(241,169,106,.18); color: #a9672c; }
+    .pill.alert {
+      background: rgba(176,80,80,.14); color: var(--brick);
+      border: 1px solid rgba(176,80,80,.35); font-weight: 500;
+    }
+    .pill.quiet { background: rgba(191,165,138,.18); color: var(--sand); }
+
+    tr.clickable { cursor: pointer; }
+    tr.clickable:hover td { background: rgba(241,169,106,.10); }
+    .jump { font-size: .72rem; color: var(--gold); font-style: italic; white-space: nowrap; }
 
     .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; }
     ul.names { list-style: none; margin: 0; padding: 0; font-size: .88rem; column-gap: 24px; }
@@ -65,13 +85,39 @@
     .count { font-size: .8rem; color: var(--sand); margin: 0 0 8px; }
     .empty { color: var(--sand); font-style: italic; font-size: .88rem; }
 
+    .section-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
+    .btn {
+      font-family: 'Cinzel', Georgia, serif; font-size: .62rem; letter-spacing: .16em;
+      text-transform: uppercase; color: var(--mocha); background: transparent;
+      border: 1px solid rgba(94,59,43,.4); padding: 8px 14px; cursor: pointer;
+      white-space: nowrap;
+    }
+    .btn:hover { background: rgba(94,59,43,.06); }
+
+    .print-only { display: none; }
     .loading { text-align: center; padding: 60px 0; color: var(--sand); font-style: italic; }
     .err {
       background: rgba(176,80,80,.08); border: 1px solid rgba(176,80,80,.3);
-      color: var(--alert); padding: 14px 16px; font-size: .88rem;
+      color: var(--brick); padding: 14px 16px; font-size: .88rem;
     }
     footer { margin-top: 40px; color: var(--sand); font-size: .76rem; font-style: italic; text-align: center; }
     @media (max-width: 520px) { .stat .n { font-size: 1.5rem; } body { padding: 20px 14px 50px; } }
+
+    /* Printing: everything is hidden, then the ceremony section alone is
+       made visible and floated to the top of the sheet. Using visibility
+       rather than display keeps the table's own layout intact. */
+    @media print {
+      body { background: #fff; padding: 0; }
+      body * { visibility: hidden; }
+      #ceremony, #ceremony * { visibility: visible; }
+      #ceremony { position: absolute; left: 0; top: 0; width: 100%; }
+      .no-print, .no-print * { visibility: hidden !important; display: none !important; }
+      .print-only { display: block; }
+      tr.flagged td { background: #fff; }
+      .pill.alert { border-color: #999; color: #000; background: #fff; }
+      th, td { border-bottom: 1px solid #ccc; }
+      h2.feature { color: #000; border-bottom: 1px solid #000; }
+    }
   </style>
 </head>
 <body>
@@ -88,8 +134,9 @@
     });
   }
 
-  function stat(n, label) {
-    return '<div class="stat"><div class="n">' + esc(n) + '</div><div class="l">' + esc(label) + '</div></div>';
+  function stat(n, label, cls) {
+    return '<div class="stat ' + (cls || '') + '"><div class="n">' + esc(n) +
+      '</div><div class="l">' + esc(label) + '</div></div>';
   }
 
   function nameList(items, emptyText) {
@@ -108,6 +155,46 @@
     }).join('') + '</tbody></table>';
   }
 
+  /* ---- The primary planning view: who is at the ceremony, and what they eat ---- */
+  function ceremonySection(d) {
+    if (!d.ceremonyGuests.length) {
+      return '<section id="ceremony"><h2 class="feature">Ceremony guest list</h2>' +
+        '<p class="empty">No confirmed ceremony guests yet.</p></section>';
+    }
+
+    var s = d.ceremonySummary;
+    var h = '<section id="ceremony">';
+    h += '<div class="section-head"><h2 class="feature">Ceremony guest list' +
+      (d.ceremonyEventName ? ' — ' + esc(d.ceremonyEventName) : '') + '</h2>' +
+      '<button class="btn no-print" onclick="window.print()">Print list</button></div>';
+
+    h += '<p class="print-only sub">Confirmed guests, entr&eacute;es and dietary notes.</p>';
+
+    h += '<div class="stats">' + stat(s.attending, 'Confirmed attending', 'small');
+    s.entrees.forEach(function (e) {
+      if (e.label === 'Not yet chosen' && !e.count) return;
+      h += stat(e.count, e.label, 'small');
+    });
+    h += stat(s.withDietary, 'With dietary notes', 'small flag') + '</div>';
+
+    h += '<div class="table-scroll" style="margin-top:16px"><table><thead><tr>' +
+      '<th>Guest</th><th>Household</th><th>Entr&eacute;e</th>' +
+      '<th>Steak temp.</th><th>Dietary notes</th></tr></thead><tbody>';
+
+    d.ceremonyGuests.forEach(function (g) {
+      h += '<tr class="' + (g.hasDietary ? 'flagged' : '') + '">' +
+        '<td>' + esc(g.name) + '</td>' +
+        '<td>' + esc(g.household) + '</td>' +
+        '<td>' + (g.entree ? esc(g.entree) : '<span class="pill quiet">Not chosen</span>') + '</td>' +
+        '<td>' + esc(g.steakTemp) + '</td>' +
+        '<td>' + (g.hasDietary ? '<span class="pill alert">' + esc(g.dietary) + '</span>' : '') + '</td>' +
+        '</tr>';
+    });
+
+    h += '</tbody></table></div></section>';
+    return h;
+  }
+
   function render(d) {
     var h = '';
 
@@ -120,17 +207,24 @@
       stat(d.overview.deadline, 'RSVP deadline') +
       '</div>';
 
-    // One row per active event — nothing here is hardcoded per event.
+    // Primary view sits directly under the headline numbers.
+    h += ceremonySection(d);
+
+    // One row per active event — nothing here is hardcoded per event. The
+    // ceremony row jumps to the full list above rather than expanding.
     h += '<h2>By event</h2><div class="table-scroll"><table><thead><tr>' +
       '<th>Event</th><th>Date</th><th class="num">Invited</th>' +
-      '<th class="num">Yes</th><th class="num">No</th><th class="num">Pending</th>' +
+      '<th class="num">Yes</th><th class="num">No</th><th class="num">Pending</th><th></th>' +
       '</tr></thead><tbody>';
     d.byEvent.forEach(function (e) {
-      h += '<tr><td>' + esc(e.name) + '</td><td>' + esc(e.date) + '</td>' +
+      var isCeremony = e.eventId === d.ceremonyEventId && d.ceremonyGuests.length > 0;
+      h += '<tr' + (isCeremony ? ' class="clickable" onclick="jumpToCeremony()"' : '') + '>' +
+        '<td>' + esc(e.name) + '</td><td>' + esc(e.date) + '</td>' +
         '<td class="num">' + e.invited + '</td>' +
         '<td class="num"><span class="pill yes">' + e.yes + '</span></td>' +
         '<td class="num"><span class="pill no">' + e.no + '</span></td>' +
-        '<td class="num"><span class="pill pending">' + e.pending + '</span></td></tr>';
+        '<td class="num"><span class="pill pending">' + e.pending + '</span></td>' +
+        '<td>' + (isCeremony ? '<span class="jump">View guest list &uarr;</span>' : '') + '</td></tr>';
     });
     h += '</tbody></table></div>';
 
@@ -141,29 +235,40 @@
       nameList(d.notComing, 'No regrets yet.') + '</div>';
     h += '</div>';
 
-    if (d.meals.length) {
-      h += '<div class="cols">';
-      h += '<div><h2>Meal choices' + (d.mealEventName ? ' — ' + esc(d.mealEventName) : '') + '</h2>' +
-        countTable(d.meals) + '</div>';
-      h += '<div><h2>' + esc(d.steakLabel) + ' temperature</h2>' + countTable(d.steak) + '</div>';
-      h += '</div>';
+    if (d.steak.length) {
+      h += '<h2>' + esc(d.steakLabel) + ' temperature</h2>' + countTable(d.steak);
     }
 
-    h += '<h2>Dietary notes</h2><p class="count">' + d.dietary.length + ' entries</p>';
+    h += '<h2>Dietary notes</h2><p class="count">' + d.dietary.length + ' entries across all events</p>';
     h += d.dietary.length
       ? '<ul class="names">' + d.dietary.map(function (x) {
           return '<li>' + esc(x.guest) + ' <span class="where">— ' + esc(x.note) + '</span></li>';
         }).join('') + '</ul>'
       : '<p class="empty">None recorded.</p>';
 
-    h += '<h2>Households not yet responded</h2><p class="count">' +
-      d.notRespondedList.length + ' households</p>' +
-      nameList(d.notRespondedList, 'All responded! 🎉');
+    // Outstanding responses first, then alphabetical.
+    h += '<h2>Households</h2><p class="count">' +
+      d.households.filter(function (x) { return !x.responded; }).length +
+      ' of ' + d.households.length + ' still to respond</p>';
+    h += '<div class="table-scroll"><table><thead><tr>' +
+      '<th>Household</th><th>Where</th><th>Status</th></tr></thead><tbody>';
+    d.households.forEach(function (x) {
+      h += '<tr><td>' + esc(x.name) + '</td><td>' + esc(x.location) + '</td>' +
+        '<td>' + (x.responded
+          ? '<span class="pill yes">Responded</span>'
+          : '<span class="pill pending">Not yet</span>') + '</td></tr>';
+    });
+    h += '</tbody></table></div>';
 
     h += '<footer>Last refreshed ' + esc(d.generatedAt) + ' (' + esc(d.timeZone) + ')' +
       '<br>Every figure counts only guests with a live invitation.</footer>';
 
     document.getElementById('root').innerHTML = h;
+  }
+
+  function jumpToCeremony() {
+    var el = document.getElementById('ceremony');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   function fail(err) {

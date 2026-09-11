@@ -22,6 +22,13 @@
 
 var SPREADSHEET_ID = '1Y7TIq0Lj1NEnRQFr2Xebk4-c5bo8E4h31edhhOpf5Ms';
 
+/**
+ * Candidate event_ids for the ceremony, matching the app's
+ * CEREMONY_EVENT_ID_CANDIDATES. Falls back to whichever event has
+ * requires_meal = TRUE, since that is the sit-down meal by definition.
+ */
+var CEREMONY_EVENT_IDS = ['ceremony'];
+
 /** Web app entry point. */
 function doGet() {
   return HtmlService.createTemplateFromFile('Dashboard')
@@ -105,7 +112,34 @@ function getDashboardData() {
 
   // --- Lookups -----------------------------------------------------
   var householdOfGuest = {};
-  guests.forEach(function (g) { householdOfGuest[g.guest_id] = g.household_id; });
+  var guestById = {};
+  guests.forEach(function (g) {
+    householdOfGuest[g.guest_id] = g.household_id;
+    guestById[g.guest_id] = g;
+  });
+
+  var householdById = {};
+  households.forEach(function (h) { householdById[h.household_id] = h; });
+
+  function householdLabel(guestId) {
+    var h = householdById[householdOfGuest[guestId]];
+    if (!h) return '';
+    return h.household_name || h.primary_guest_name || '';
+  }
+
+  /**
+   * A real dietary note, or '' for the phrasings guests use to mean
+   * "nothing to flag". Kept deliberately tight — whole-string matches
+   * only — so a genuine note like "no nuts" is never swallowed. Without
+   * this, "No restrictions" renders as a red allergy pill, which is
+   * exactly the noise the highlight is meant to cut through.
+   */
+  var NON_NOTE = /^(none|n\/?a|no|nope|no known allergies|no allergies|no dietary restrictions|no restrictions)\.?$/i;
+
+  function realNote(value) {
+    var note = String(value || '').trim();
+    return !note || NON_NOTE.test(note) ? '' : note;
+  }
 
   // Only invited rows are ever considered from here down.
   var invited = invitations.filter(isInvited_);
@@ -219,12 +253,82 @@ function getDashboardData() {
     });
   }
 
+  // --- Ceremony guest list: the primary planning view -----------------
+  //
+  // Everyone with attendance = YES on the ceremony, with what they're eating
+  // and any allergy note, sorted so flagged guests sit at the top.
+  var ceremonyEvent = activeEvents.filter(function (e) {
+    return CEREMONY_EVENT_IDS.indexOf(e.event_id) !== -1;
+  })[0] || mealEvent;
+
+  var ceremonyGuests = [];
+  var ceremonySummary = { attending: 0, entrees: [], withDietary: 0 };
+
+  if (ceremonyEvent) {
+    var ceremonyRows = invited.filter(function (inv) {
+      return inv.event_id === ceremonyEvent.event_id &&
+        String(inv.attendance || '').trim().toUpperCase() === 'YES';
+    });
+
+    ceremonyGuests = ceremonyRows.map(function (inv) {
+      var g = guestById[inv.guest_id] || {};
+      var note = realNote(inv.dietary_notes);
+      return {
+        name: inv.guest_name,
+        lastName: String(g.last_name || inv.guest_name).toLowerCase(),
+        household: householdLabel(inv.guest_id),
+        entree: inv.meal_choice || '',
+        steakTemp: inv.meal_choice === steakLabel ? (inv.steak_temperature || '') : '',
+        dietary: note,
+        hasDietary: note.length > 0
+      };
+    });
+
+    // Flagged guests first so allergies can't be missed, then by last name.
+    ceremonyGuests.sort(function (a, b) {
+      if (a.hasDietary !== b.hasDietary) return a.hasDietary ? -1 : 1;
+      if (a.lastName !== b.lastName) return a.lastName < b.lastName ? -1 : 1;
+      return a.name.localeCompare(b.name);
+    });
+
+    var entreeOptions = settingList_(settings, 'meal_options', ['Steak', 'Fish', 'Vegetarian']);
+    ceremonySummary = {
+      attending: ceremonyGuests.length,
+      entrees: entreeOptions.map(function (option) {
+        return {
+          label: option,
+          count: ceremonyGuests.filter(function (x) { return x.entree === option; }).length
+        };
+      }).concat([{
+        label: 'Not yet chosen',
+        count: ceremonyGuests.filter(function (x) { return !x.entree; }).length
+      }]),
+      withDietary: ceremonyGuests.filter(function (x) { return x.hasDietary; }).length
+    };
+  }
+
+  // --- Households table: outstanding responses first ------------------
+  var householdRows = households.filter(function (h) {
+    return invitedHouseholdIds[h.household_id];
+  }).map(function (h) {
+    var where = [h.city, h.state].filter(function (x) { return x; }).join(', ');
+    return {
+      name: h.household_name || h.primary_guest_name,
+      primary: h.primary_guest_name || '',
+      location: where,
+      responded: String(h.submitted).trim().toUpperCase() === 'TRUE'
+    };
+  }).sort(function (a, b) {
+    if (a.responded !== b.responded) return a.responded ? 1 : -1;
+    return a.name.localeCompare(b.name);
+  });
+
   // --- Dietary notes, deduped (a note repeats across a guest's events) ---
   var seenNotes = {};
   var dietary = [];
   invited.forEach(function (inv) {
-    var note = String(inv.dietary_notes || '').trim();
-    if (!note || /^(none|n\/?a)$/i.test(note)) return;
+    var note = realNote(inv.dietary_notes);
+    if (!note) return;
     var key = inv.guest_name + ': ' + note;
     if (seenNotes[key]) return;
     seenNotes[key] = true;
@@ -253,6 +357,11 @@ function getDashboardData() {
     steak: steak,
     steakLabel: steakLabel,
     dietary: dietary,
-    notRespondedList: notResponded
+    notRespondedList: notResponded,
+    ceremonyEventName: ceremonyEvent ? ceremonyEvent.event_name : '',
+    ceremonyEventId: ceremonyEvent ? ceremonyEvent.event_id : '',
+    ceremonySummary: ceremonySummary,
+    ceremonyGuests: ceremonyGuests,
+    households: householdRows
   };
 }
