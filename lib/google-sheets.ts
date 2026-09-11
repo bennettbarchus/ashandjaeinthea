@@ -190,6 +190,28 @@ export async function writeCell(range: string, value: string): Promise<void> {
   });
 }
 
+/**
+ * Appends rows to the end of a tab. Used by one-off maintenance scripts
+ * that add records (a test household, say) without rewriting the tab —
+ * unlike overwriteTab(), which starts at A1 and would clobber.
+ *
+ * Each row must be ordered to match the tab's existing header row.
+ */
+export async function appendRows(
+  tabName: string,
+  rows: (string | number | boolean)[][]
+): Promise<void> {
+  if (!rows.length) return;
+  const sheets = getSheetsClient();
+  await sheets.spreadsheets.values.append({
+    spreadsheetId: SHEET_ID,
+    range: `${tabName}!A1`,
+    valueInputOption: "RAW",
+    insertDataOption: "INSERT_ROWS",
+    requestBody: { values: rows },
+  });
+}
+
 /** Looks up a tab's numeric sheetId (needed for cell-formatting requests). */
 export async function getSheetId(tabName: string): Promise<number> {
   const sheets = getSheetsClient();
