@@ -191,6 +191,28 @@ export async function writeCell(range: string, value: string): Promise<void> {
 }
 
 /**
+ * Writes many individually-addressed cells in a single API call.
+ *
+ * The per-cell writeCell() above is fine for a handful of edits, but a
+ * bulk change (flipping an `invited` column across hundreds of rows)
+ * would issue hundreds of sequential requests and run into the Sheets
+ * per-user rate limit. This batches them into one request.
+ */
+export async function writeCellsByRange(
+  updates: { range: string; value: string }[]
+): Promise<void> {
+  if (!updates.length) return;
+  const sheets = getSheetsClient();
+  await sheets.spreadsheets.values.batchUpdate({
+    spreadsheetId: SHEET_ID,
+    requestBody: {
+      valueInputOption: "RAW",
+      data: updates.map((u) => ({ range: u.range, values: [[u.value]] })),
+    },
+  });
+}
+
+/**
  * Appends rows to the end of a tab. Used by one-off maintenance scripts
  * that add records (a test household, say) without rewriting the tab —
  * unlike overwriteTab(), which starts at A1 and would clobber.

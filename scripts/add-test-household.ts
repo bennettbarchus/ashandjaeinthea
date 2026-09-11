@@ -17,7 +17,7 @@ import {
   getGuestsTab,
   getHouseholdsTab,
   getInvitationsTab,
-  writeCell,
+  writeCellsByRange,
 } from "@/lib/google-sheets";
 import { WELCOME_EVENT_ID_CANDIDATES } from "@/types/welcome";
 
@@ -85,12 +85,16 @@ async function main() {
         .map((r) => ({ tab: "Invitations", headers: invitations.headers, rowNumber: r.rowNumber })),
     ];
 
-    for (const t of targets) {
-      for (let i = 0; i < t.headers.length; i++) {
-        await writeCell(`${t.tab}!${columnToLetter(i)}${t.rowNumber}`, "");
-      }
-      console.log(`Cleared ${t.tab} row ${t.rowNumber}`);
-    }
+    // One batched request — a per-cell loop here would be ~50 sequential
+    // writes and can trip the Sheets per-user rate limit.
+    const blanks = targets.flatMap((t) =>
+      t.headers.map((_, i) => ({
+        range: `${t.tab}!${columnToLetter(i)}${t.rowNumber}`,
+        value: "",
+      }))
+    );
+    await writeCellsByRange(blanks);
+    for (const t of targets) console.log(`Cleared ${t.tab} row ${t.rowNumber}`);
     console.log(`\nRemoved test household ${householdId} and guest(s) ${guestIds.join(", ")}.`);
     return;
   }
