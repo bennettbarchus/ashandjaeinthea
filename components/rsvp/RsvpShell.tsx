@@ -243,8 +243,11 @@ export function RsvpShell({ initialSettings }: { initialSettings: RsvpSettings }
    * doubles as "is this guest invited to it?". It's only populated once
    * verification has passed.
    */
-  function eventMatching(candidates: readonly string[]): InvitationEventMeta | undefined {
-    return events.find((e) => candidates.includes(e.eventId));
+  function eventMatching(
+    candidates: readonly string[],
+    eventList: InvitationEventMeta[]
+  ): InvitationEventMeta | undefined {
+    return eventList.find((e) => candidates.includes(e.eventId));
   }
 
   /**
@@ -302,17 +305,19 @@ export function RsvpShell({ initialSettings }: { initialSettings: RsvpSettings }
    * so far, and each entry is only included if the guest is invited to the
    * event behind it.
    */
-  function orderedScreens(): { screen: Screen; stage: number }[] {
+  function orderedScreens(
+    eventList: InvitationEventMeta[] = events
+  ): { screen: Screen; stage: number }[] {
     const steps: { screen: Screen; stage: number }[] = [];
     const push = (screen: Screen) => steps.push({ screen, stage: stageOf(screen) });
 
-    const welcomeEvent = eventMatching(WELCOME_EVENT_ID_CANDIDATES);
+    const welcomeEvent = eventMatching(WELCOME_EVENT_ID_CANDIDATES, eventList);
     if (welcomeEvent) {
       push({ id: "event", eventId: welcomeEvent.eventId });
       push({ id: "dress" });
     }
 
-    const ceremonyEvent = eventMatching(CEREMONY_EVENT_ID_CANDIDATES);
+    const ceremonyEvent = eventMatching(CEREMONY_EVENT_ID_CANDIDATES, eventList);
     if (ceremonyEvent) {
       push({ id: "event", eventId: ceremonyEvent.eventId });
       push({ id: "ceremonyDress" });
@@ -326,7 +331,7 @@ export function RsvpShell({ initialSettings }: { initialSettings: RsvpSettings }
       ...CEREMONY_EVENT_ID_CANDIDATES,
       ...AFTERPARTY_EVENT_ID_CANDIDATES,
     ] as readonly string[];
-    for (const e of events.filter((ev) => !named.includes(ev.eventId))) {
+    for (const e of eventList.filter((ev) => !named.includes(ev.eventId))) {
       push({ id: "event", eventId: e.eventId });
     }
 
@@ -334,17 +339,26 @@ export function RsvpShell({ initialSettings }: { initialSettings: RsvpSettings }
     for (const e of steakEvents()) push({ id: "steak", eventId: e.eventId });
     push({ id: "dietary" });
 
-    const afterParty = eventMatching(AFTERPARTY_EVENT_ID_CANDIDATES);
+    const afterParty = eventMatching(AFTERPARTY_EVENT_ID_CANDIDATES, eventList);
     if (afterParty) push({ id: "event", eventId: afterParty.eventId });
 
     push({ id: "review" });
     return steps;
   }
 
+  /**
+   * Enter the wizard at its first screen.
+   *
+   * Takes its events from `inv` rather than the `events` memo on purpose.
+   * submitVerification() calls this in the same tick as setInvitation(), so
+   * the memo — which returns [] until the invitation is both committed and
+   * unlocked — is still empty at this point. Reading it here sent verified
+   * guests straight to dietary notes, since an empty event list leaves
+   * dietary as the first entry in the ordered list.
+   */
   function goToFirstWizardStep(inv: InvitationResponse) {
-    const evs = inv.events ?? [];
-    const first = evs.length > 0 ? orderedScreens()[0]?.screen : undefined;
-    setHistory((h) => [...h, first ?? { id: "dietary" }]);
+    const first = orderedScreens(inv.events ?? [])[0]?.screen ?? { id: "dietary" as const };
+    setHistory((h) => [...h, first]);
   }
 
   function confirmParty() {
