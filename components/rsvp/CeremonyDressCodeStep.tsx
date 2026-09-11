@@ -6,13 +6,17 @@ import { StepHeading } from "./ui";
 /**
  * Where the ceremony inspiration image might live, tried in order.
  *
- * The image is committed to the repo separately from this code, so the
- * component can't assume it is there yet. /images/ is where the welcome
- * illustration actually landed; the bare path is the one the brief named.
+ * /images/ is where the illustration actually landed; the bare path is the
+ * one the brief originally named. If neither resolves, the component falls
+ * back to a labelled placeholder rather than a broken image.
+ *
+ * .webp, not .png: the file is WebP data and was briefly committed under a
+ * .png name. Browsers sniff the real format regardless, but the extension
+ * drives the Content-Type Next serves it with, so the two should agree.
  */
 const INSPIRATION_SRCS = [
-  "/images/ceremony_inspiration.png",
-  "/ceremony_inspiration.png",
+  "/images/ceremony_inspiration.webp",
+  "/ceremony_inspiration.webp",
 ];
 
 /**
