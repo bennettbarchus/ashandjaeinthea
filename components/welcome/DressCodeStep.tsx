@@ -47,7 +47,7 @@ export function DressCodeStep() {
       <StepHeading
         eyebrow="Welcome Celebration"
         title="Dress Code"
-        description="We encourage you to celebrate with us dressed in Traditional Indian or African attire. As we blend our families and cultures together, we welcome our guests to enjoy the theme for the evening dressed in festive cultural attire."
+        description="We encourage you to celebrate with us dressed in Traditional Indian or African attire. As we blend our families and cultures together, we welcome our friends and family to enjoy the theme for the evening with us."
       />
 
       <figure className="my-10">
