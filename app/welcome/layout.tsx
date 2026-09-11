@@ -25,10 +25,40 @@ const belleAurore = La_Belle_Aurore({
   display: "swap",
 });
 
+const WELCOME_URL = "https://rsvp.ashandjaeinthea.com/welcome";
+const WELCOME_TITLE = "Ashley & Jared · Welcome Celebration";
+const WELCOME_DESCRIPTION =
+  "An evening of music, color and celebration as our families come together — Friday, November 13, 2026 in Atlanta. Find your invitation and let us know you'll be there.";
+
 export const metadata: Metadata = {
-  title: "Welcome Celebration | Ashley & Jared",
-  description:
-    "Join Ashley & Jared for the Friday Welcome Celebration — November 13, 2026 in Atlanta, GA.",
+  title: WELCOME_TITLE,
+  description: WELCOME_DESCRIPTION,
+  openGraph: {
+    title: WELCOME_TITLE,
+    description: WELCOME_DESCRIPTION,
+    url: WELCOME_URL,
+    siteName: "Ashley & Jared",
+    type: "website",
+    locale: "en_US",
+    // Resolved against metadataBase in app/layout.tsx. 1143x601 is very
+    // close to the 1.91:1 that Open Graph previews crop to, so it survives
+    // the crop essentially intact.
+    images: [
+      {
+        url: "/images/welcome_inspiration.png",
+        width: 1143,
+        height: 601,
+        alt: "Guests in traditional Indian and African attire, celebrating together",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: WELCOME_TITLE,
+    description: WELCOME_DESCRIPTION,
+    images: ["/images/welcome_inspiration.png"],
+  },
+  alternates: { canonical: WELCOME_URL },
 };
 
 export default function WelcomeLayout({ children }: { children: React.ReactNode }) {

@@ -25,9 +25,38 @@ const belleAurore = La_Belle_Aurore({
   display: "swap",
 });
 
+const RSVP_URL = "https://rsvp.ashandjaeinthea.com/rsvp";
+const RSVP_TITLE = "Ashley & Jared · RSVP";
+const RSVP_DESCRIPTION =
+  "We're getting married in Atlanta on Saturday, November 14, 2026. Find your invitation, let us know you'll be joining us, and choose your menu for the reception.";
+
 export const metadata: Metadata = {
-  title: "RSVP | Ashley & Jared",
-  description: "RSVP for the wedding of Ashley & Jared — November 14, 2026 in Atlanta, GA.",
+  title: RSVP_TITLE,
+  description: RSVP_DESCRIPTION,
+  openGraph: {
+    title: RSVP_TITLE,
+    description: RSVP_DESCRIPTION,
+    url: RSVP_URL,
+    siteName: "Ashley & Jared",
+    type: "website",
+    locale: "en_US",
+    // Resolved against metadataBase in app/layout.tsx.
+    images: [
+      {
+        url: "/images/forth-skyline-sm.png",
+        width: 768,
+        height: 512,
+        alt: "Watercolor of the Atlanta skyline at sunset",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: RSVP_TITLE,
+    description: RSVP_DESCRIPTION,
+    images: ["/images/forth-skyline-sm.png"],
+  },
+  alternates: { canonical: RSVP_URL },
 };
 
 export default function RsvpLayout({ children }: { children: React.ReactNode }) {

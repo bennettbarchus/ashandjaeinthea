@@ -3,6 +3,11 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  // Required for the relative og:image paths in the /rsvp and /welcome
+  // layouts to resolve — Next throws a build error on a relative URL in a
+  // metadata field without it. Points at the portal subdomain because that
+  // is where those routes and their images are served from.
+  metadataBase: new URL("https://rsvp.ashandjaeinthea.com"),
   title: "Ashley & Jared | Save the Date | 11.14.26",
   description: "Save the date for the wedding of Ashley & Jared — November 14, 2026 in Atlanta, GA.",
   icons: {
