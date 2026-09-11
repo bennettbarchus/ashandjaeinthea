@@ -36,9 +36,13 @@ async function main() {
   // underneath each of them — so their row counts have to be fixed at build
   // time. Size each off how many unique entries exist right now, with
   // generous headroom, rather than guessing a constant.
-  const comingSet = new Set<string>(); // has a YES to at least one event
-  const noSet = new Set<string>(); // has a NO to at least one event
+  // Only rows the guest is actually invited to count. A revoked invitation
+  // can leave a stale attendance answer behind (removing an invite doesn't
+  // erase the reply given while it stood), and those must not be counted.
+  const comingSet = new Set<string>(); // has a YES to at least one invited event
+  const noSet = new Set<string>(); // has a NO to at least one invited event
   for (const r of invitations.rows) {
+    if (r.data.invited !== "TRUE") continue;
     if (r.data.attendance === "YES") comingSet.add(r.data.guest_name);
     if (r.data.attendance === "NO") noSet.add(r.data.guest_name);
   }
@@ -54,6 +58,7 @@ async function main() {
 
   const uniqueNotes = new Set<string>();
   for (const r of invitations.rows) {
+    if (r.data.invited !== "TRUE") continue;
     const note = r.data.dietary_notes.trim();
     if (!note || /^(none|n\/?a)$/i.test(note)) continue;
     uniqueNotes.add(`${r.data.guest_name}: ${note}`);
@@ -97,18 +102,22 @@ async function main() {
   rows.push(["Event", "Date", "Invited", "Yes", "No", "Pending"]);
   for (let i = 0; i < eventCount; i++) {
     const evRow = i + 2; // Events tab data starts at row 2
-    // "Invited" and "Pending" deliberately don't filter on Invitations!D
-    // (invited) via COUNTIFS — same "TRUE" keyword-vs-text-cell mismatch as
-    // above. Every invitation row is currently invited=TRUE by construction
-    // (no invited=FALSE rows exist), so a plain per-event row count is
-    // equivalent and avoids the issue.
+    // Every figure here is scoped to rows with invited=TRUE, so guests who
+    // aren't invited to an event don't inflate its totals — and neither do
+    // stale answers left on invitations that were later revoked.
+    //
+    // SUMPRODUCT with a plain string comparison rather than COUNTIFS:
+    // "TRUE" as a COUNTIFS criterion is parsed as the boolean keyword and
+    // never matches these text cells, the same trap the Households
+    // Responded formula above sidesteps the same way.
+    const invitedToEvent = `(Invitations!$C$2:$C=Events!A${evRow})*(Invitations!$D$2:$D="TRUE")`;
     rows.push([
       `=Events!B${evRow}`,
       `=Events!C${evRow}`,
-      `=COUNTIF(Invitations!C:C,Events!A${evRow})`,
-      `=COUNTIFS(Invitations!C:C,Events!A${evRow},Invitations!E:E,"YES")`,
-      `=COUNTIFS(Invitations!C:C,Events!A${evRow},Invitations!E:E,"NO")`,
-      `=COUNTIFS(Invitations!C:C,Events!A${evRow},Invitations!E:E,"")`,
+      `=SUMPRODUCT(${invitedToEvent})`,
+      `=SUMPRODUCT(${invitedToEvent}*(Invitations!$E$2:$E="YES"))`,
+      `=SUMPRODUCT(${invitedToEvent}*(Invitations!$E$2:$E="NO"))`,
+      `=SUMPRODUCT(${invitedToEvent}*(Invitations!$E$2:$E=""))`,
     ]);
   }
   rows.push(["(To add a future event: add one more row above referencing the new Events tab row, or rerun scripts/build-dashboard.ts)"]);
@@ -121,9 +130,15 @@ async function main() {
   // still counts as coming. This is deliberately placed above Meal Choices
   // / Steak Temperature — who's actually coming matters more than food.
   rows.push(["COMING (RSVP YES)"]);
-  rows.push([`="Count: "&IFERROR(COUNTA(UNIQUE(FILTER(Invitations!B2:B,Invitations!E2:E="YES"))),0)`]);
+  // The invited=TRUE term matters here: a guest whose only YES sits on an
+  // event they were later un-invited from is not coming to anything, and
+  // without it they'd still be listed. Inside FILTER a plain ="TRUE"
+  // comparison works fine — it's an array comparison against text, not a
+  // COUNTIFS criterion.
+  const comingCondition = 'Invitations!E2:E="YES",Invitations!D2:D="TRUE"';
+  rows.push([`="Count: "&IFERROR(COUNTA(UNIQUE(FILTER(Invitations!B2:B,${comingCondition}))),0)`]);
   for (let i = 1; i <= comingReservedRows; i++) {
-    rows.push([`=IFERROR(INDEX(UNIQUE(FILTER(Invitations!B2:B,Invitations!E2:E="YES")),${i}),"")`]);
+    rows.push([`=IFERROR(INDEX(UNIQUE(FILTER(Invitations!B2:B,${comingCondition})),${i}),"")`]);
   }
   rows.push([]);
 
@@ -134,8 +149,14 @@ async function main() {
   // guest has a YES anywhere else in the sheet; guests with a mixed record
   // are excluded here (they're already covered by the Coming list above).
   rows.push(["NOT COMING (RSVP NO)"]);
+  // The per-row COUNTIFS has to match the text "TRUE" as a criterion, where
+  // the bare keyword would be read as a boolean and match nothing — so it
+  // uses the wildcard "TRU*", which matches the text and not "FALSE".
+  // (SUMPRODUCT can't be used here: it won't broadcast per row.)
   const notComingCondition =
-    'Invitations!E2:E="NO",ARRAYFORMULA(COUNTIFS(Invitations!$B$2:$B,Invitations!$B$2:$B,Invitations!$E$2:$E,"YES"))=0';
+    'Invitations!E2:E="NO",Invitations!D2:D="TRUE",' +
+    'ARRAYFORMULA(COUNTIFS(Invitations!$B$2:$B,Invitations!$B$2:$B,' +
+    'Invitations!$E$2:$E,"YES",Invitations!$D$2:$D,"TRU*"))=0';
   rows.push([`="Count: "&IFERROR(COUNTA(UNIQUE(FILTER(Invitations!B2:B,${notComingCondition}))),0)`]);
   for (let i = 1; i <= notComingReservedRows; i++) {
     rows.push([`=IFERROR(INDEX(UNIQUE(FILTER(Invitations!B2:B,${notComingCondition})),${i}),"")`]);
@@ -151,18 +172,23 @@ async function main() {
     '=INDEX(Events!A2:A,MATCH("TRUE",Events!F2:F,0))',
   ]);
   const mealRef = `$C$${mealEventRow}`;
-  rows.push(["Steak", `=COUNTIFS(Invitations!C:C,${mealRef},Invitations!F:F,"Steak")`]);
-  rows.push(["Fish", `=COUNTIFS(Invitations!C:C,${mealRef},Invitations!F:F,"Fish")`]);
-  rows.push(["Vegetarian", `=COUNTIFS(Invitations!C:C,${mealRef},Invitations!F:F,"Vegetarian")`]);
-  rows.push(["Not Yet Chosen (attending)", `=COUNTIFS(Invitations!C:C,${mealRef},Invitations!E:E,"YES",Invitations!F:F,"")`]);
+  const invitedToMeal = `(Invitations!$C$2:$C=${mealRef})*(Invitations!$D$2:$D="TRUE")`;
+  rows.push(["Steak", `=SUMPRODUCT(${invitedToMeal}*(Invitations!$F$2:$F="Steak"))`]);
+  rows.push(["Fish", `=SUMPRODUCT(${invitedToMeal}*(Invitations!$F$2:$F="Fish"))`]);
+  rows.push(["Vegetarian", `=SUMPRODUCT(${invitedToMeal}*(Invitations!$F$2:$F="Vegetarian"))`]);
+  rows.push([
+    "Not Yet Chosen (attending)",
+    `=SUMPRODUCT(${invitedToMeal}*(Invitations!$E$2:$E="YES")*(Invitations!$F$2:$F=""))`,
+  ]);
   rows.push([]);
 
   // --- Steak temperature ---
   rows.push(["STEAK TEMPERATURE"]);
-  rows.push(["Medium", '=COUNTIFS(Invitations!F:F,"Steak",Invitations!G:G,"Medium")']);
-  rows.push(["Medium well", '=COUNTIFS(Invitations!F:F,"Steak",Invitations!G:G,"Medium well")']);
-  rows.push(["Well done", '=COUNTIFS(Invitations!F:F,"Steak",Invitations!G:G,"Well done")']);
-  rows.push(["Not Yet Chosen", '=COUNTIFS(Invitations!F:F,"Steak",Invitations!G:G,"")']);
+  const invitedSteak = '(Invitations!$D$2:$D="TRUE")*(Invitations!$F$2:$F="Steak")';
+  rows.push(["Medium", `=SUMPRODUCT(${invitedSteak}*(Invitations!$G$2:$G="Medium"))`]);
+  rows.push(["Medium well", `=SUMPRODUCT(${invitedSteak}*(Invitations!$G$2:$G="Medium well"))`]);
+  rows.push(["Well done", `=SUMPRODUCT(${invitedSteak}*(Invitations!$G$2:$G="Well done"))`]);
+  rows.push(["Not Yet Chosen", `=SUMPRODUCT(${invitedSteak}*(Invitations!$G$2:$G=""))`]);
   rows.push([]);
 
   // --- Dietary notes / accommodations ---
@@ -172,7 +198,8 @@ async function main() {
   // the Households list below needs to be able to grow freely underneath it.
   rows.push(["DIETARY NOTES / ACCOMMODATIONS"]);
   const dietaryCondition =
-    'Invitations!H2:H<>"",NOT(REGEXMATCH(LOWER(TRIM(Invitations!H2:H)),"^(none|n/?a)$"))';
+    'Invitations!H2:H<>"",Invitations!D2:D="TRUE",' +
+    'NOT(REGEXMATCH(LOWER(TRIM(Invitations!H2:H)),"^(none|n/?a)$"))';
   const dietarySource = `Invitations!B2:B&": "&Invitations!H2:H`;
   rows.push([`="Count: "&IFERROR(COUNTA(UNIQUE(FILTER(${dietarySource},${dietaryCondition}))),0)`]);
   const dietaryListStart = R();
