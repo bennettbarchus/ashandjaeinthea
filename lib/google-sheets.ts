@@ -1,5 +1,6 @@
 import { google, sheets_v4 } from "googleapis";
 import type {
+  Attendance,
   EventRow,
   GuestRow,
   HouseholdRow,
@@ -321,6 +322,73 @@ export async function submitRsvp(params: {
       },
     },
   ]);
+
+  return nowIso;
+}
+
+/**
+ * Writes attendance for the standalone /welcome flow.
+ *
+ * Deliberately narrower than submitRsvp(): it only ever touches the rows
+ * of the "Invitations" tab for the single `eventId` it is handed (plus
+ * editable plus-one names on "Guests"), and never sets Households.submitted — answering the
+ * Friday question is not the same as completing the full wedding RSVP,
+ * and flipping that flag here would misreport the Dashboard.
+ * meal_choice / steak_temperature are left untouched for the same reason:
+ * the Friday event has requires_meal=FALSE, so this flow has no business
+ * writing to them.
+ */
+export async function submitWelcomeRsvp(params: {
+  /** Resolved server-side, never taken from the request body. */
+  eventId: string;
+  responses: { guestId: string; attendance: Attendance; dietaryNotes?: string }[];
+  plusOneNames?: SubmitPlusOneName[];
+}): Promise<string> {
+  const nowIso = new Date().toISOString();
+  const [guests, invitations] = await Promise.all([
+    getGuestsTab(),
+    getInvitationsTab(),
+  ]);
+
+  const invUpdates = params.responses
+    .map((resp) => {
+      const match = invitations.rows.find(
+        (r) =>
+          r.data.guest_id === resp.guestId &&
+          r.data.event_id === params.eventId &&
+          r.data.invited === "TRUE"
+      );
+      if (!match) return null;
+      return {
+        rowNumber: match.rowNumber,
+        values: {
+          attendance: resp.attendance,
+          dietary_notes: resp.dietaryNotes ?? "",
+          updated_at: nowIso,
+        },
+      };
+    })
+    .filter((v): v is NonNullable<typeof v> => v !== null);
+
+  if (invUpdates.length) {
+    await writeCells("Invitations", invitations.headers, invUpdates);
+  }
+
+  if (params.plusOneNames?.length) {
+    const guestUpdates = params.plusOneNames
+      .map((po) => {
+        const match = guests.rows.find((r) => r.data.guest_id === po.guestId);
+        if (!match) return null;
+        return {
+          rowNumber: match.rowNumber,
+          values: { display_name: po.displayName },
+        };
+      })
+      .filter((v): v is NonNullable<typeof v> => v !== null);
+    if (guestUpdates.length) {
+      await writeCells("Guests", guests.headers, guestUpdates);
+    }
+  }
 
   return nowIso;
 }
