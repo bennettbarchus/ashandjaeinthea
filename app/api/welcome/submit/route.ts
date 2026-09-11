@@ -3,6 +3,7 @@ import { submitWelcomeRsvp } from "@/lib/google-sheets";
 import { getRsvpSettings, isDeadlinePassed } from "@/lib/rsvp-config";
 import { sanitizeText } from "@/lib/rsvp-validation";
 import {
+  householdGuests,
   invitedGuestsForHousehold,
   loadWelcomeContext,
   welcomeSubmitRequestSchema,
@@ -142,8 +143,23 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // Is this event the household's entire invitation? If so, answering it
+    // completes their RSVP and the household should be marked submitted;
+    // if they're also invited to the ceremony it plainly doesn't.
+    const householdGuestIds = new Set(
+      householdGuests(ctx, payload.householdId).map((g) => g.guest_id)
+    );
+    const welcomeIsWholeInvitation = ctx.invitations.every(
+      (r) =>
+        !householdGuestIds.has(r.data.guest_id) ||
+        r.data.invited !== "TRUE" ||
+        r.data.event_id === event.event_id
+    );
+
     const submittedAt = await submitWelcomeRsvp({
       eventId: event.event_id,
+      householdId: payload.householdId,
+      markHouseholdSubmitted: welcomeIsWholeInvitation,
       responses,
       plusOneNames,
     });

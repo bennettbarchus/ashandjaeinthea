@@ -390,22 +390,31 @@ export async function submitRsvp(params: {
  * Writes attendance for the standalone /welcome flow.
  *
  * Deliberately narrower than submitRsvp(): it only ever touches the rows
- * of the "Invitations" tab for the single `eventId` it is handed (plus
- * editable plus-one names on "Guests"), and never sets Households.submitted — answering the
- * Friday question is not the same as completing the full wedding RSVP,
- * and flipping that flag here would misreport the Dashboard.
- * meal_choice / steak_temperature are left untouched for the same reason:
- * the Friday event has requires_meal=FALSE, so this flow has no business
- * writing to them.
+ * of the "Invitations" tab for the single `eventId` it is handed, plus
+ * editable plus-one names on "Guests". meal_choice / steak_temperature are
+ * left alone — the Friday event has requires_meal=FALSE, so this flow has
+ * no business writing to them.
+ *
+ * Households.submitted is set ONLY when `markHouseholdSubmitted` is true,
+ * which the caller decides by checking whether the welcome event is the
+ * household's entire invitation. For a household also invited to the
+ * ceremony, answering the Friday question is not the same as completing
+ * their RSVP and the flag must stay FALSE. For the welcome-only guests it
+ * is the whole thing, and leaving it FALSE stranded them in the
+ * dashboard's "not yet responded" list with no way ever to leave it.
  */
 export async function submitWelcomeRsvp(params: {
   /** Resolved server-side, never taken from the request body. */
   eventId: string;
+  householdId: string;
+  /** True only when this event is the household's entire invitation. */
+  markHouseholdSubmitted: boolean;
   responses: { guestId: string; attendance: Attendance; dietaryNotes?: string }[];
   plusOneNames?: SubmitPlusOneName[];
 }): Promise<string> {
   const nowIso = new Date().toISOString();
-  const [guests, invitations] = await Promise.all([
+  const [households, guests, invitations] = await Promise.all([
+    getHouseholdsTab(),
     getGuestsTab(),
     getInvitationsTab(),
   ]);
@@ -447,6 +456,28 @@ export async function submitWelcomeRsvp(params: {
       .filter((v): v is NonNullable<typeof v> => v !== null);
     if (guestUpdates.length) {
       await writeCells("Guests", guests.headers, guestUpdates);
+    }
+  }
+
+  if (params.markHouseholdSubmitted) {
+    const household = households.rows.find(
+      (r) => r.data.household_id === params.householdId
+    );
+    if (household) {
+      await writeCells("Households", households.headers, [
+        {
+          rowNumber: household.rowNumber,
+          values: {
+            submitted: "TRUE",
+            // Keep the original timestamp if they're amending an answer.
+            submitted_at:
+              household.data.submitted === "TRUE"
+                ? household.data.submitted_at
+                : nowIso,
+            updated_at: nowIso,
+          },
+        },
+      ]);
     }
   }
 
