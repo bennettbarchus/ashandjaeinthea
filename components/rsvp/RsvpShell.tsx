@@ -11,7 +11,11 @@ import type {
   SubmitEventResponse,
   VerificationMethod,
 } from "@/types/rsvp";
-import { CEREMONY_EVENT_ID_CANDIDATES, STEAK_ENTREE_LABEL } from "@/types/rsvp";
+import {
+  AFTERPARTY_EVENT_ID_CANDIDATES,
+  CEREMONY_EVENT_ID_CANDIDATES,
+  STEAK_ENTREE_LABEL,
+} from "@/types/rsvp";
 import { WELCOME_EVENT_ID_CANDIDATES } from "@/types/welcome";
 import { ProgressIndicator } from "./ProgressIndicator";
 import { WelcomeStep } from "./WelcomeStep";
@@ -235,45 +239,112 @@ export function RsvpShell({ initialSettings }: { initialSettings: RsvpSettings }
 
   /**
    * `events` only lists events the household is actually invited to (the
-   * invitation route builds it from invited=TRUE rows), so these double as
-   * "is this guest invited to it?" checks. They're only populated once
+   * invitation route builds it from invited=TRUE rows), so a hit here
+   * doubles as "is this guest invited to it?". It's only populated once
    * verification has passed.
    */
-  function isInvitedTo(candidates: readonly string[]): boolean {
-    return events.some((e) => candidates.includes(e.eventId));
-  }
-
-  /** The first screen that actually asks the guest something. */
-  function firstAnswerScreen(inv: InvitationResponse): Screen {
-    const evs = inv.events ?? [];
-    return evs.length > 0 ? { id: "event", eventId: evs[0].eventId } : { id: "dietary" };
-  }
-
-  /** Meal, then steak, then dietary — whichever of those applies first. */
-  function firstMealOrLaterScreen(): Screen {
-    const meals = mealEvents();
-    if (meals.length > 0) return { id: "meal", eventId: meals[0].eventId };
-    const steaks = steakEvents();
-    if (steaks.length > 0) return { id: "steak", eventId: steaks[0].eventId };
-    return { id: "dietary" };
+  function eventMatching(candidates: readonly string[]): InvitationEventMeta | undefined {
+    return events.find((e) => candidates.includes(e.eventId));
   }
 
   /**
-   * What follows the last attendance question.
+   * Position of each screen in the wizard, low to high. Each event's dress
+   * code sits directly after that event's own attendance question, so the
+   * guest says whether they're coming and is then told what to wear for it,
+   * rather than being handed both dress codes at the end.
    *
-   * Both dress code screens sit here, after the guest has said who's coming
-   * and before any meal questions: what to wear is only meaningful once they
-   * know they're attending, and each screen is skipped entirely for anyone
-   * not invited to that event.
+   * Ranks rather than a plain array index because meal and steak screens
+   * appear and disappear as answers change; comparing ranks means navigation
+   * still lands somewhere sensible if the screen you're on is no longer in
+   * the list (say you went back and switched off the steak entrée).
    */
-  function screenAfterAttendance(): Screen {
-    if (isInvitedTo(WELCOME_EVENT_ID_CANDIDATES)) return { id: "dress" };
-    if (isInvitedTo(CEREMONY_EVENT_ID_CANDIDATES)) return { id: "ceremonyDress" };
-    return firstMealOrLaterScreen();
+  const STAGE = {
+    welcomeAttendance: 0,
+    welcomeDress: 1,
+    ceremonyAttendance: 2,
+    ceremonyDress: 3,
+    otherAttendance: 4,
+    meal: 5,
+    steak: 6,
+    dietary: 7,
+    afterPartyAttendance: 8,
+    review: 9,
+  } as const;
+
+  function stageOf(screen: Screen): number {
+    switch (screen.id) {
+      case "dress":
+        return STAGE.welcomeDress;
+      case "ceremonyDress":
+        return STAGE.ceremonyDress;
+      case "meal":
+        return STAGE.meal;
+      case "steak":
+        return STAGE.steak;
+      case "dietary":
+        return STAGE.dietary;
+      case "event":
+        if (WELCOME_EVENT_ID_CANDIDATES.includes(screen.eventId as never))
+          return STAGE.welcomeAttendance;
+        if (CEREMONY_EVENT_ID_CANDIDATES.includes(screen.eventId as never))
+          return STAGE.ceremonyAttendance;
+        if (AFTERPARTY_EVENT_ID_CANDIDATES.includes(screen.eventId as never))
+          return STAGE.afterPartyAttendance;
+        return STAGE.otherAttendance;
+      default:
+        return STAGE.review;
+    }
+  }
+
+  /**
+   * Every screen this guest still has to see, in order. Rebuilt on demand
+   * because which meal and steak screens apply depends on the answers given
+   * so far, and each entry is only included if the guest is invited to the
+   * event behind it.
+   */
+  function orderedScreens(): { screen: Screen; stage: number }[] {
+    const steps: { screen: Screen; stage: number }[] = [];
+    const push = (screen: Screen) => steps.push({ screen, stage: stageOf(screen) });
+
+    const welcomeEvent = eventMatching(WELCOME_EVENT_ID_CANDIDATES);
+    if (welcomeEvent) {
+      push({ id: "event", eventId: welcomeEvent.eventId });
+      push({ id: "dress" });
+    }
+
+    const ceremonyEvent = eventMatching(CEREMONY_EVENT_ID_CANDIDATES);
+    if (ceremonyEvent) {
+      push({ id: "event", eventId: ceremonyEvent.eventId });
+      push({ id: "ceremonyDress" });
+    }
+
+    // Any event that isn't one of the three named above still gets its
+    // attendance question, so adding an event to the sheet can't drop it
+    // silently out of the flow.
+    const named = [
+      ...WELCOME_EVENT_ID_CANDIDATES,
+      ...CEREMONY_EVENT_ID_CANDIDATES,
+      ...AFTERPARTY_EVENT_ID_CANDIDATES,
+    ] as readonly string[];
+    for (const e of events.filter((ev) => !named.includes(ev.eventId))) {
+      push({ id: "event", eventId: e.eventId });
+    }
+
+    for (const e of mealEvents()) push({ id: "meal", eventId: e.eventId });
+    for (const e of steakEvents()) push({ id: "steak", eventId: e.eventId });
+    push({ id: "dietary" });
+
+    const afterParty = eventMatching(AFTERPARTY_EVENT_ID_CANDIDATES);
+    if (afterParty) push({ id: "event", eventId: afterParty.eventId });
+
+    push({ id: "review" });
+    return steps;
   }
 
   function goToFirstWizardStep(inv: InvitationResponse) {
-    setHistory((h) => [...h, firstAnswerScreen(inv)]);
+    const evs = inv.events ?? [];
+    const first = evs.length > 0 ? orderedScreens()[0]?.screen : undefined;
+    setHistory((h) => [...h, first ?? { id: "dietary" }]);
   }
 
   function confirmParty() {
@@ -363,60 +434,12 @@ export function RsvpShell({ initialSettings }: { initialSettings: RsvpSettings }
     setHistory((h) => (h.length > 1 ? h.slice(0, -1) : h));
   }
 
+  /** Advance to the first remaining screen ranked after the current one. */
   function goNextFrom(current: Screen) {
-    // Welcome dress code -> ceremony dress code if they're invited to it,
-    // otherwise straight on to the meal questions.
-    if (current.id === "dress") {
-      setHistory((h) => [
-        ...h,
-        isInvitedTo(CEREMONY_EVENT_ID_CANDIDATES)
-          ? { id: "ceremonyDress" }
-          : firstMealOrLaterScreen(),
-      ]);
-      return;
-    }
-    if (current.id === "ceremonyDress") {
-      setHistory((h) => [...h, firstMealOrLaterScreen()]);
-      return;
-    }
-    if (current.id === "event") {
-      const idx = events.findIndex((e) => e.eventId === current.eventId);
-      if (idx >= 0 && idx < events.length - 1) {
-        setHistory((h) => [...h, { id: "event", eventId: events[idx + 1].eventId }]);
-        return;
-      }
-      // Last attendance question answered — dress code screens come next.
-      setHistory((h) => [...h, screenAfterAttendance()]);
-      return;
-    }
-    if (current.id === "meal") {
-      const meals = mealEvents();
-      const idx = meals.findIndex((e) => e.eventId === current.eventId);
-      if (idx >= 0 && idx < meals.length - 1) {
-        setHistory((h) => [...h, { id: "meal", eventId: meals[idx + 1].eventId }]);
-        return;
-      }
-      const steaks = steakEvents();
-      if (steaks.length > 0) {
-        setHistory((h) => [...h, { id: "steak", eventId: steaks[0].eventId }]);
-        return;
-      }
-      setHistory((h) => [...h, { id: "dietary" }]);
-      return;
-    }
-    if (current.id === "steak") {
-      const steaks = steakEvents();
-      const idx = steaks.findIndex((e) => e.eventId === current.eventId);
-      if (idx >= 0 && idx < steaks.length - 1) {
-        setHistory((h) => [...h, { id: "steak", eventId: steaks[idx + 1].eventId }]);
-        return;
-      }
-      setHistory((h) => [...h, { id: "dietary" }]);
-      return;
-    }
-    if (current.id === "dietary") {
-      setHistory((h) => [...h, { id: "review" }]);
-    }
+    const steps = orderedScreens();
+    const currentStage = stageOf(current);
+    const next = steps.find((s) => s.stage > currentStage)?.screen ?? { id: "review" as const };
+    setHistory((h) => [...h, next]);
   }
 
   function canContinue(current: Screen): boolean {
@@ -500,16 +523,12 @@ export function RsvpShell({ initialSettings }: { initialSettings: RsvpSettings }
   }));
 
   const stepNumber = history.length;
-  const dressCodeScreenCount =
-    (isInvitedTo(WELCOME_EVENT_ID_CANDIDATES) ? 1 : 0) +
-    (isInvitedTo(CEREMONY_EVENT_ID_CANDIDATES) ? 1 : 0);
+  // welcome + search + confirm (+ verify), then every wizard screen the
+  // guest still has to see, then the confirmation. Derived from the same
+  // list that drives navigation, so the bar can't drift from the real flow.
   const totalStepsEstimate = Math.max(
     stepNumber,
-    5 +
-      events.length +
-      mealEvents().length * 2 +
-      (invitation?.requiresVerification ? 1 : 0) +
-      dressCodeScreenCount
+    3 + (invitation?.requiresVerification ? 1 : 0) + orderedScreens().length + 1
   );
 
   const showBack = history.length > 1 && screen.id !== "confirmation";

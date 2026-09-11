@@ -11,6 +11,9 @@ export type VerificationMethod = "zip" | "phone_last_four" | "email";
  */
 export const CEREMONY_EVENT_ID_CANDIDATES = ["ceremony"] as const;
 
+/** Candidate `event_id`s for the after party, resolved the same way. */
+export const AFTERPARTY_EVENT_ID_CANDIDATES = ["afterparty"] as const;
+
 /** The entrée label that triggers the steak-temperature question. Shared between client and server. */
 export const STEAK_ENTREE_LABEL = "Steak";
 
