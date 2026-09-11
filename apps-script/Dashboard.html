@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    /* Palette lifted from the site's app/globals.css so the dashboard reads
+       as part of the same wedding, not a bolted-on admin tool. */
+    :root {
+      --parchment: #f7eee8;
+      --cream: #faf5f0;
+      --mocha: #5e3b2b;
+      --sand: #bfa58a;
+      --peach: #f1a96a;
+      --sage: #7e877a;
+      --alert: #b05050;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 28px 20px 60px;
+      background: var(--parchment);
+      color: var(--mocha);
+      font-family: 'Playfair Display', Georgia, serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    .wrap { max-width: 880px; margin: 0 auto; }
+    h1 {
+      font-family: 'Cinzel', Georgia, serif;
+      font-size: 1.4rem; font-weight: 600; letter-spacing: .18em;
+      text-transform: uppercase; margin: 0 0 6px;
+    }
+    .sub { color: var(--sand); font-size: .85rem; font-style: italic; margin: 0 0 28px; }
+    h2 {
+      font-family: 'Cinzel', Georgia, serif;
+      font-size: .7rem; font-weight: 500; letter-spacing: .3em;
+      text-transform: uppercase; color: var(--sand);
+      margin: 34px 0 12px; padding-bottom: 8px;
+      border-bottom: 1px solid rgba(191,165,138,.35);
+    }
+
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+    .stat { background: var(--cream); border: 1px solid rgba(191,165,138,.4); padding: 16px 18px; }
+    .stat .n { font-size: 1.9rem; line-height: 1.1; }
+    .stat .l { font-size: .78rem; color: var(--sand); margin-top: 4px; }
+
+    table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+    th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid rgba(191,165,138,.3); }
+    th {
+      font-family: 'Cinzel', Georgia, serif; font-size: .62rem; letter-spacing: .16em;
+      text-transform: uppercase; color: var(--sand); font-weight: 500;
+    }
+    td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+    .table-scroll { overflow-x: auto; }
+
+    .pill { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: .78rem; }
+    .pill.yes { background: rgba(126,135,122,.18); color: var(--sage); }
+    .pill.no { background: rgba(176,80,80,.13); color: var(--alert); }
+    .pill.pending { background: rgba(241,169,106,.18); color: #a9672c; }
+
+    .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; }
+    ul.names { list-style: none; margin: 0; padding: 0; font-size: .88rem; column-gap: 24px; }
+    ul.names li { padding: 3px 0; border-bottom: 1px solid rgba(191,165,138,.18); }
+    ul.names li span.where { color: var(--sand); font-size: .8rem; }
+    .count { font-size: .8rem; color: var(--sand); margin: 0 0 8px; }
+    .empty { color: var(--sand); font-style: italic; font-size: .88rem; }
+
+    .loading { text-align: center; padding: 60px 0; color: var(--sand); font-style: italic; }
+    .err {
+      background: rgba(176,80,80,.08); border: 1px solid rgba(176,80,80,.3);
+      color: var(--alert); padding: 14px 16px; font-size: .88rem;
+    }
+    footer { margin-top: 40px; color: var(--sand); font-size: .76rem; font-style: italic; text-align: center; }
+    @media (max-width: 520px) { .stat .n { font-size: 1.5rem; } body { padding: 20px 14px 50px; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Ashley &amp; Jared</h1>
+    <p class="sub">RSVP Dashboard</p>
+    <div id="root"><div class="loading">Loading the latest numbers…</div></div>
+  </div>
+
+<script>
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function stat(n, label) {
+    return '<div class="stat"><div class="n">' + esc(n) + '</div><div class="l">' + esc(label) + '</div></div>';
+  }
+
+  function nameList(items, emptyText) {
+    if (!items.length) return '<p class="empty">' + esc(emptyText) + '</p>';
+    return '<ul class="names">' + items.map(function (i) {
+      if (typeof i === 'string') return '<li>' + esc(i) + '</li>';
+      return '<li>' + esc(i.name) +
+        (i.location ? ' <span class="where">— ' + esc(i.location) + '</span>' : '') + '</li>';
+    }).join('') + '</ul>';
+  }
+
+  function countTable(rows) {
+    if (!rows.length) return '';
+    return '<table><tbody>' + rows.map(function (r) {
+      return '<tr><td>' + esc(r.label) + '</td><td class="num">' + esc(r.count) + '</td></tr>';
+    }).join('') + '</tbody></table>';
+  }
+
+  function render(d) {
+    var h = '';
+
+    h += '<h2>Overview</h2><div class="stats">' +
+      stat(d.overview.totalHouseholds, 'Households invited') +
+      stat(d.overview.totalGuests, 'Guests invited') +
+      stat(d.overview.responded, 'Responded') +
+      stat(d.overview.notResponded, 'Still pending') +
+      stat(d.overview.responseRate + '%', 'Response rate') +
+      stat(d.overview.deadline, 'RSVP deadline') +
+      '</div>';
+
+    // One row per active event — nothing here is hardcoded per event.
+    h += '<h2>By event</h2><div class="table-scroll"><table><thead><tr>' +
+      '<th>Event</th><th>Date</th><th class="num">Invited</th>' +
+      '<th class="num">Yes</th><th class="num">No</th><th class="num">Pending</th>' +
+      '</tr></thead><tbody>';
+    d.byEvent.forEach(function (e) {
+      h += '<tr><td>' + esc(e.name) + '</td><td>' + esc(e.date) + '</td>' +
+        '<td class="num">' + e.invited + '</td>' +
+        '<td class="num"><span class="pill yes">' + e.yes + '</span></td>' +
+        '<td class="num"><span class="pill no">' + e.no + '</span></td>' +
+        '<td class="num"><span class="pill pending">' + e.pending + '</span></td></tr>';
+    });
+    h += '</tbody></table></div>';
+
+    h += '<div class="cols">';
+    h += '<div><h2>Coming</h2><p class="count">' + d.coming.length + ' guests</p>' +
+      nameList(d.coming, 'No yeses yet.') + '</div>';
+    h += '<div><h2>Not coming</h2><p class="count">' + d.notComing.length + ' guests</p>' +
+      nameList(d.notComing, 'No regrets yet.') + '</div>';
+    h += '</div>';
+
+    if (d.meals.length) {
+      h += '<div class="cols">';
+      h += '<div><h2>Meal choices' + (d.mealEventName ? ' — ' + esc(d.mealEventName) : '') + '</h2>' +
+        countTable(d.meals) + '</div>';
+      h += '<div><h2>' + esc(d.steakLabel) + ' temperature</h2>' + countTable(d.steak) + '</div>';
+      h += '</div>';
+    }
+
+    h += '<h2>Dietary notes</h2><p class="count">' + d.dietary.length + ' entries</p>';
+    h += d.dietary.length
+      ? '<ul class="names">' + d.dietary.map(function (x) {
+          return '<li>' + esc(x.guest) + ' <span class="where">— ' + esc(x.note) + '</span></li>';
+        }).join('') + '</ul>'
+      : '<p class="empty">None recorded.</p>';
+
+    h += '<h2>Households not yet responded</h2><p class="count">' +
+      d.notRespondedList.length + ' households</p>' +
+      nameList(d.notRespondedList, 'All responded! 🎉');
+
+    h += '<footer>Last refreshed ' + esc(d.generatedAt) + ' (' + esc(d.timeZone) + ')' +
+      '<br>Every figure counts only guests with a live invitation.</footer>';
+
+    document.getElementById('root').innerHTML = h;
+  }
+
+  function fail(err) {
+    document.getElementById('root').innerHTML =
+      '<div class="err"><strong>Could not load the dashboard.</strong><br>' +
+      esc(err && err.message ? err.message : err) + '</div>';
+  }
+
+  google.script.run.withSuccessHandler(render).withFailureHandler(fail).getDashboardData();
+</script>
+</body>
+</html>

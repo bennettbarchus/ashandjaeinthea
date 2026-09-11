@@ -12,6 +12,7 @@
 //
 // Usage: npx tsx scripts/build-dashboard.ts [--dry-run]
 import { loadEnvConfig } from "@next/env";
+import { STEAK_ENTREE_LABEL } from "../types/rsvp";
 
 const TAB = "Dashboard";
 
@@ -25,9 +26,14 @@ async function main() {
     batchUpdateSpreadsheet,
     getEventsTab,
     getInvitationsTab,
+    getSettings,
   } = await import("../lib/google-sheets");
 
-  const [events, invitations] = await Promise.all([getEventsTab(), getInvitationsTab()]);
+  const [events, invitations, settings] = await Promise.all([
+    getEventsTab(),
+    getInvitationsTab(),
+    getSettings(),
+  ]);
   const eventCount = events.rows.length;
   console.log(`Building dashboard for ${eventCount} events:`, events.rows.map((r) => r.data.event_id));
 
@@ -72,6 +78,27 @@ async function main() {
   const rows: (string | number)[][] = [];
   const R = () => rows.length + 1; // 1-indexed row number of the NEXT row to be pushed
 
+  // ---- Shared "is this actually invited?" fragments ----
+  //
+  // Everything on this tab is scoped to invited=TRUE. Nothing here assumes a
+  // particular set of events: the figures are derived from whatever is in the
+  // Events and Invitations tabs at the time, so adding, renaming or retiring an
+  // event needs no edit here beyond a rerun.
+  //
+  // Per Guests row, how many invited=TRUE invitation rows that guest has.
+  // COUNTIFS inside ARRAYFORMULA broadcasts over the criteria column, which is
+  // what makes this a per-guest value rather than one total. The invited test
+  // uses the wildcard "TRU*" because a bare "TRUE" criterion is read as the
+  // boolean keyword and never matches these text cells.
+  const invitedRowsPerGuest =
+    'ARRAYFORMULA(COUNTIFS(Invitations!$A$2:$A,Guests!$A$2:$A,Invitations!$D$2:$D,"TRU*"))';
+  // household_ids with at least one invited guest.
+  const invitedHouseholdIds =
+    `UNIQUE(FILTER(Guests!$B$2:$B,${invitedRowsPerGuest}>0,Guests!$A$2:$A<>""))`;
+  // Per Households row: does this household have anyone invited to anything?
+  const householdHasInvite =
+    `ARRAYFORMULA(ISNUMBER(MATCH(Households!A2:A,${invitedHouseholdIds},0)))`;
+
   rows.push(["Ashley & Jared — RSVP Dashboard"]);
   rows.push(["This tab updates automatically — no need to edit anything here."]);
   rows.push([]);
@@ -79,13 +106,23 @@ async function main() {
   // --- Overview ---
   rows.push(["OVERVIEW"]);
   const overviewStart = R();
-  rows.push(["Total Households", "=COUNTA(Households!A2:A)"]);
-  rows.push(["Total Guests Invited", "=COUNTA(Guests!A2:A)"]);
+  // Counts only households/guests with a live invitation, so someone invited to
+  // nothing never lands in a total or drags the response rate down.
+  rows.push([
+    "Total Households",
+    `=IFERROR(COUNTA(${invitedHouseholdIds}),0)`,
+  ]);
+  rows.push([
+    "Total Guests Invited",
+    '=IFERROR(COUNTA(UNIQUE(FILTER(Invitations!$A$2:$A,Invitations!$D$2:$D="TRUE"))),0)',
+  ]);
   // Households!L (submitted) stores the literal text "TRUE"/"FALSE" — bare
   // "TRUE"/"FALSE" in COUNTIF/COUNTIFS criteria is parsed as a boolean
-  // keyword and won't match a text cell, so use SUMPRODUCT with a plain
-  // string-equality comparison instead.
-  rows.push(["Households Responded", '=SUMPRODUCT(--(Households!L2:L="TRUE"))']);
+  // keyword and won't match a text cell, so compare as a string instead.
+  rows.push([
+    "Households Responded",
+    `=IFERROR(COUNTA(FILTER(Households!A2:A,Households!L2:L="TRUE",Households!A2:A<>"",${householdHasInvite})),0)`,
+  ]);
   const notRespondedRow = R();
   rows.push(["Households Not Yet Responded", `=B${overviewStart}-B${overviewStart + 2}`]);
   const responseRateRow = R();
@@ -93,6 +130,19 @@ async function main() {
   const deadlineRow = R();
   rows.push(["RSVP Deadline", '=IFERROR(VLOOKUP("rsvp_deadline",Settings!A:B,2,FALSE),"Not set")']);
   rows.push(["Days Remaining", `=IFERROR(DATEVALUE(B${deadlineRow})-TODAY(),"")`]);
+  // Stamped at build time rather than =NOW(), which is volatile and would
+  // rewrite itself on every recalculation. The figures above are live formulas
+  // and always reflect the current sheet; this records when the tab was last
+  // rebuilt by scripts/build-dashboard.ts.
+  rows.push([
+    "Dashboard Last Rebuilt",
+    new Date().toLocaleString("en-US", {
+      dateStyle: "medium",
+      timeStyle: "short",
+      timeZone: "America/New_York",
+    }) + " ET",
+  ]);
+  rows.push(["(Figures update live — this is when the layout was last regenerated)"]);
   rows.push([]);
 
   // --- By event (one row per row currently in the Events tab; the only
@@ -120,7 +170,9 @@ async function main() {
       `=SUMPRODUCT(${invitedToEvent}*(Invitations!$E$2:$E=""))`,
     ]);
   }
-  rows.push(["(To add a future event: add one more row above referencing the new Events tab row, or rerun scripts/build-dashboard.ts)"]);
+  rows.push([
+    "(One row per event in the Events tab. Add, rename or retire an event there, then rerun scripts/build-dashboard.ts.)",
+  ]);
   rows.push([]);
 
   // --- Coming / Not Coming (per-guest, deduped across events) ---
@@ -173,9 +225,14 @@ async function main() {
   ]);
   const mealRef = `$C$${mealEventRow}`;
   const invitedToMeal = `(Invitations!$C$2:$C=${mealRef})*(Invitations!$D$2:$D="TRUE")`;
-  rows.push(["Steak", `=SUMPRODUCT(${invitedToMeal}*(Invitations!$F$2:$F="Steak"))`]);
-  rows.push(["Fish", `=SUMPRODUCT(${invitedToMeal}*(Invitations!$F$2:$F="Fish"))`]);
-  rows.push(["Vegetarian", `=SUMPRODUCT(${invitedToMeal}*(Invitations!$F$2:$F="Vegetarian"))`]);
+  // One row per entrée in Settings!meal_options rather than a hardcoded three,
+  // so changing the menu is a Settings edit plus a rerun.
+  for (const option of settings.mealOptions) {
+    rows.push([
+      option,
+      `=SUMPRODUCT(${invitedToMeal}*(Invitations!$F$2:$F="${option}"))`,
+    ]);
+  }
   rows.push([
     "Not Yet Chosen (attending)",
     `=SUMPRODUCT(${invitedToMeal}*(Invitations!$E$2:$E="YES")*(Invitations!$F$2:$F=""))`,
@@ -184,10 +241,14 @@ async function main() {
 
   // --- Steak temperature ---
   rows.push(["STEAK TEMPERATURE"]);
-  const invitedSteak = '(Invitations!$D$2:$D="TRUE")*(Invitations!$F$2:$F="Steak")';
-  rows.push(["Medium", `=SUMPRODUCT(${invitedSteak}*(Invitations!$G$2:$G="Medium"))`]);
-  rows.push(["Medium well", `=SUMPRODUCT(${invitedSteak}*(Invitations!$G$2:$G="Medium well"))`]);
-  rows.push(["Well done", `=SUMPRODUCT(${invitedSteak}*(Invitations!$G$2:$G="Well done"))`]);
+  const invitedSteak = `(Invitations!$D$2:$D="TRUE")*(Invitations!$F$2:$F="${STEAK_ENTREE_LABEL}")`;
+  // Temperatures come from Settings!steak_options for the same reason.
+  for (const option of settings.steakOptions) {
+    rows.push([
+      option,
+      `=SUMPRODUCT(${invitedSteak}*(Invitations!$G$2:$G="${option}"))`,
+    ]);
+  }
   rows.push(["Not Yet Chosen", `=SUMPRODUCT(${invitedSteak}*(Invitations!$G$2:$G=""))`]);
   rows.push([]);
 
@@ -218,8 +279,13 @@ async function main() {
   // the open-ended L2:L range also matches every blank row below row 113
   // out to the sheet's full row count (blank <> "TRUE" is true), padding
   // the list with junk " — , " entries.
+  // The householdHasInvite term keeps households with no live invitation off
+  // this list — without it, anyone de-invited from every event would sit here
+  // as "pending" forever, since they can never respond.
   rows.push([
-    '=IFERROR(FILTER(Households!C2:C&" — "&Households!F2:F&", "&Households!G2:G,Households!L2:L<>"TRUE",Households!A2:A<>""),"All responded! 🎉")',
+    '=IFERROR(FILTER(Households!C2:C&" — "&Households!F2:F&", "&Households!G2:G,' +
+      'Households!L2:L<>"TRUE",Households!A2:A<>"",' +
+      `${householdHasInvite}),"All responded! 🎉")`,
   ]);
 
   console.log(`\nTotal rows: ${rows.length}`);

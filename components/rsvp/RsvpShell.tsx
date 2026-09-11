@@ -12,6 +12,7 @@ import type {
   VerificationMethod,
 } from "@/types/rsvp";
 import { STEAK_ENTREE_LABEL } from "@/types/rsvp";
+import { WELCOME_EVENT_ID_CANDIDATES } from "@/types/welcome";
 import { ProgressIndicator } from "./ProgressIndicator";
 import { WelcomeStep } from "./WelcomeStep";
 import { NameSearchStep } from "./NameSearchStep";
@@ -22,6 +23,7 @@ import { MealSelectionStep } from "./MealSelectionStep";
 import { SteakTemperatureStep } from "./SteakTemperatureStep";
 import { DietaryNotesStep } from "./DietaryNotesStep";
 import { ReviewStep, type ReviewGuest } from "./ReviewStep";
+import { DressCodeStep } from "@/components/welcome/DressCodeStep";
 import { ConfirmationStep } from "./ConfirmationStep";
 import { PrimaryButton, SecondaryButton } from "./ui";
 
@@ -30,6 +32,7 @@ type Screen =
   | { id: "search" }
   | { id: "confirm" }
   | { id: "verify" }
+  | { id: "dress" }
   | { id: "event"; eventId: string }
   | { id: "meal"; eventId: string }
   | { id: "steak"; eventId: string }
@@ -228,13 +231,28 @@ export function RsvpShell({ initialSettings }: { initialSettings: RsvpSettings }
     });
   }
 
-  function goToFirstWizardStep(inv: InvitationResponse) {
+  /** The first screen that actually asks the guest something. */
+  function firstAnswerScreen(inv: InvitationResponse): Screen {
     const evs = inv.events ?? [];
-    if (evs.length > 0) {
-      setHistory((h) => [...h, { id: "event", eventId: evs[0].eventId }]);
-    } else {
-      setHistory((h) => [...h, { id: "dietary" }]);
-    }
+    return evs.length > 0 ? { id: "event", eventId: evs[0].eventId } : { id: "dietary" };
+  }
+
+  /**
+   * Guests invited to the welcome event see the dress code screen first —
+   * it only applies to that evening, so anyone not invited to it skips
+   * straight to their first attendance question.
+   *
+   * `inv.events` only lists events the household is actually invited to
+   * (the invitation route builds it from invited=TRUE rows), and it's only
+   * populated once verification has passed, which is why this runs here
+   * rather than at household confirmation: both the verified and
+   * no-verification-needed paths funnel through this function.
+   */
+  function goToFirstWizardStep(inv: InvitationResponse) {
+    const invitedToWelcome = (inv.events ?? []).some((e) =>
+      (WELCOME_EVENT_ID_CANDIDATES as readonly string[]).includes(e.eventId)
+    );
+    setHistory((h) => [...h, invitedToWelcome ? { id: "dress" } : firstAnswerScreen(inv)]);
   }
 
   function confirmParty() {
@@ -325,6 +343,10 @@ export function RsvpShell({ initialSettings }: { initialSettings: RsvpSettings }
   }
 
   function goNextFrom(current: Screen) {
+    if (current.id === "dress") {
+      if (invitation) setHistory((h) => [...h, firstAnswerScreen(invitation)]);
+      return;
+    }
     if (current.id === "event") {
       const idx = events.findIndex((e) => e.eventId === current.eventId);
       if (idx >= 0 && idx < events.length - 1) {
@@ -455,13 +477,20 @@ export function RsvpShell({ initialSettings }: { initialSettings: RsvpSettings }
   }));
 
   const stepNumber = history.length;
+  const showsDressCode = events.some((e) =>
+    (WELCOME_EVENT_ID_CANDIDATES as readonly string[]).includes(e.eventId)
+  );
   const totalStepsEstimate = Math.max(
     stepNumber,
-    5 + events.length + mealEvents().length * 2 + (invitation?.requiresVerification ? 1 : 0)
+    5 +
+      events.length +
+      mealEvents().length * 2 +
+      (invitation?.requiresVerification ? 1 : 0) +
+      (showsDressCode ? 1 : 0)
   );
 
   const showBack = history.length > 1 && screen.id !== "confirmation";
-  const showGenericFooter = ["event", "meal", "steak", "dietary"].includes(screen.id);
+  const showGenericFooter = ["dress", "event", "meal", "steak", "dietary"].includes(screen.id);
 
   if (!settings.rsvpOpen) {
     return (
@@ -541,6 +570,8 @@ export function RsvpShell({ initialSettings }: { initialSettings: RsvpSettings }
             errorMessage={verifyError}
           />
         )}
+
+        {screen.id === "dress" && <DressCodeStep />}
 
         {screen.id === "event" &&
           (() => {

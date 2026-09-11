@@ -4,13 +4,20 @@
  * Phase 1 — adds the welcome-only households (couples and singles) if they
  *           aren't already present, invited=TRUE for the welcome event and
  *           FALSE for every other active event.
- * Phase 2 — sets invited=FALSE on the welcome event for every guest whose
- *           household isn't on the keep list.
+ * Phase 2 — OPT-IN (--restrict). Sets invited=FALSE on the welcome event for
+ *           every guest whose household isn't on the keep list.
+ *
+ * Phase 2 is off by default because the decision it encodes was reversed: the
+ * 186 original wedding guests are invited to the Welcome Party again and RSVP
+ * to it through /rsvp, while this list covers the welcome-only additions who
+ * use /welcome. Running phase 2 now would de-invite all 186 of them. Pass
+ * --restrict only if you genuinely intend to narrow the Welcome Party back
+ * down to the households listed below.
  *
  * Idempotent: phase 1 skips households that already exist (matched on
  * primary_guest_name), phase 2 only writes rows that aren't already FALSE.
  *
- * Run: npx tsx --env-file=.env.local scripts/finalize-welcome-guest-list.ts [--dry-run]
+ * Run: npx tsx --env-file=.env.local scripts/finalize-welcome-guest-list.ts [--dry-run] [--restrict]
  */
 import {
   appendRows,
@@ -146,7 +153,16 @@ async function main() {
     console.log("  all already present — nothing to add");
   }
 
-  // ---- Phase 2: de-invite everyone else from the welcome event ----
+  // ---- Phase 2 (opt-in): de-invite everyone else from the welcome event ----
+  if (!process.argv.includes("--restrict")) {
+    console.log(
+      "\nPHASE 2 — skipped. The original wedding guests are invited to the Welcome" +
+        "\n  Party again and RSVP to it via /rsvp; narrowing it back down would" +
+        "\n  de-invite them. Pass --restrict if that is genuinely what you want."
+    );
+    return;
+  }
+
   const keepHouseholdIds = new Set(
     households.rows
       .filter((r) => SPECS.some((s) => s.primary === r.data.primary_guest_name))
