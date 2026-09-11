@@ -1,6 +1,13 @@
 import { getSettings } from "./google-sheets";
 import { STEAK_ENTREE_LABEL, type RsvpSettings } from "@/types/rsvp";
 
+/**
+ * The deployed Apps Script dashboard url. Defined in ./dashboard-url so that
+ * next.config.ts can import it without pulling googleapis into config
+ * evaluation; re-exported here as the settings-shaped place to look for it.
+ */
+export { DASHBOARD_URL } from "./dashboard-url";
+
 const CACHE_TTL_MS = 60_000;
 let cache: { value: RsvpSettings; expiresAt: number } | null = null;
 
