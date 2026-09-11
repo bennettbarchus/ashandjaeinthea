@@ -18,6 +18,8 @@ import { HouseholdConfirmStep } from "@/components/rsvp/HouseholdConfirmStep";
 import { DietaryNotesStep } from "@/components/rsvp/DietaryNotesStep";
 import { PrimaryButton, SecondaryButton } from "@/components/rsvp/ui";
 import { WelcomeIntroStep } from "./WelcomeIntroStep";
+import { PersonalMessageStep } from "./PersonalMessageStep";
+import { DressCodeStep } from "./DressCodeStep";
 import { WelcomeAttendanceStep } from "./WelcomeAttendanceStep";
 import { WelcomeReviewStep, type WelcomeReviewGuest } from "./WelcomeReviewStep";
 import { WelcomeConfirmationStep } from "./WelcomeConfirmationStep";
@@ -26,13 +28,15 @@ type Screen =
   | { id: "intro" }
   | { id: "search" }
   | { id: "confirm" }
+  | { id: "message" }
+  | { id: "dress" }
   | { id: "attendance" }
   | { id: "dietary" }
   | { id: "review" }
   | { id: "confirmation" };
 
-/** intro → search → confirm → attendance → dietary → review → confirmation */
-const TOTAL_STEPS = 7;
+/** intro → search → confirm → [message] → dress → attendance → dietary → review → confirmation */
+const STEPS_WITHOUT_MESSAGE = 8;
 
 export function WelcomeShell({ initialSettings }: { initialSettings: RsvpSettings }) {
   const [settings, setSettings] = useState<RsvpSettings>(initialSettings);
@@ -99,6 +103,12 @@ export function WelcomeShell({ initialSettings }: { initialSettings: RsvpSetting
   }
 
   const attendingGuests = guests.filter((g) => attendance[g.id] === "YES");
+  const personalMessage = invitation?.household.personalMessage?.trim() ?? "";
+
+  /** The personal-message screen is skipped entirely when there's no note. */
+  function firstScreenAfterConfirm(): Screen {
+    return personalMessage ? { id: "message" } : { id: "dress" };
+  }
 
   function displayNameFor(guest: InvitationGuest): string {
     const edited = plusOneNames[guest.id]?.trim();
@@ -179,6 +189,14 @@ export function WelcomeShell({ initialSettings }: { initialSettings: RsvpSetting
   }
 
   function goNextFrom(current: Screen) {
+    if (current.id === "message") {
+      setHistory((h) => [...h, { id: "dress" }]);
+      return;
+    }
+    if (current.id === "dress") {
+      setHistory((h) => [...h, { id: "attendance" }]);
+      return;
+    }
     if (current.id === "attendance") {
       // Nothing to ask about food if no one is coming.
       setHistory((h) => [...h, attendingGuests.length > 0 ? { id: "dietary" } : { id: "review" }]);
@@ -248,7 +266,9 @@ export function WelcomeShell({ initialSettings }: { initialSettings: RsvpSetting
   }));
 
   const showBack = history.length > 1 && screen.id !== "confirmation";
-  const showGenericFooter = screen.id === "attendance" || screen.id === "dietary";
+  const showGenericFooter = ["message", "dress", "attendance", "dietary"].includes(
+    screen.id
+  );
 
   if (!settings.rsvpOpen) {
     return (
@@ -271,7 +291,10 @@ export function WelcomeShell({ initialSettings }: { initialSettings: RsvpSetting
 
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col bg-parchment px-6 py-10 text-mocha sm:max-w-lg">
-      <ProgressIndicator current={history.length} total={Math.max(history.length, TOTAL_STEPS)} />
+      <ProgressIndicator
+        current={history.length}
+        total={Math.max(history.length, STEPS_WITHOUT_MESSAGE + (personalMessage ? 1 : 0))}
+      />
 
       {showBack ? (
         <div className="mb-4">
@@ -311,12 +334,18 @@ export function WelcomeShell({ initialSettings }: { initialSettings: RsvpSetting
             onPlusOneNameChange={(guestId, value) =>
               setPlusOneNames((prev) => ({ ...prev, [guestId]: value }))
             }
-            onConfirm={() => setHistory((h) => [...h, { id: "attendance" }])}
+            onConfirm={() => setHistory((h) => [...h, firstScreenAfterConfirm()])}
             onNotMyParty={notMyParty}
             isLoading={false}
             errorMessage={null}
           />
         )}
+
+        {screen.id === "message" && personalMessage && (
+          <PersonalMessageStep message={personalMessage} />
+        )}
+
+        {screen.id === "dress" && <DressCodeStep />}
 
         {screen.id === "attendance" && event && (
           <WelcomeAttendanceStep

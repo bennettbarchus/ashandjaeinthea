@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getRsvpSettings } from "@/lib/rsvp-config";
 import {
   guestDisplayName,
+  sanitizePersonalMessage,
   invitedGuestsForHousehold,
   loadWelcomeContext,
   welcomeInvitationRequestSchema,
@@ -116,6 +117,8 @@ export async function POST(request: NextRequest) {
       household: {
         id: household.household_id,
         name: household.household_name || household.primary_guest_name,
+        // Optional; the column may not exist on older sheets, hence the fallback.
+        personalMessage: sanitizePersonalMessage(household.personal_message ?? ""),
       },
       guests,
       event: {

@@ -24,6 +24,8 @@ export interface HouseholdRow {
   submitted: string; // "TRUE" | "FALSE"
   submitted_at: string;
   updated_at: string;
+  /** Optional note from the couple, shown on its own screen in the /welcome flow. Blank skips that screen. */
+  personal_message: string;
 }
 
 /** Raw row shape from the "Guests" tab. */

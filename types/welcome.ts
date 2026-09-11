@@ -39,6 +39,8 @@ export interface WelcomeInvitationResponse {
   household: {
     id: string;
     name: string;
+    /** Empty string when the couple hasn't written one — the flow skips that screen. */
+    personalMessage: string;
   };
   /**
    * Only the household members with invited=TRUE for `friday_welcome`.

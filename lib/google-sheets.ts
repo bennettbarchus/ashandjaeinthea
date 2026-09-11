@@ -174,6 +174,22 @@ export async function overwriteTab(
   });
 }
 
+/**
+ * Writes a single cell addressed by A1 range (e.g. "Households!O1").
+ * Used by one-off maintenance scripts that need to touch an exact cell
+ * rather than a header-mapped row — adding a new column header, say,
+ * which writeCells() can't do since it maps by existing header name.
+ */
+export async function writeCell(range: string, value: string): Promise<void> {
+  const sheets = getSheetsClient();
+  await sheets.spreadsheets.values.update({
+    spreadsheetId: SHEET_ID,
+    range,
+    valueInputOption: "RAW",
+    requestBody: { values: [[value]] },
+  });
+}
+
 /** Looks up a tab's numeric sheetId (needed for cell-formatting requests). */
 export async function getSheetId(tabName: string): Promise<number> {
   const sheets = getSheetsClient();

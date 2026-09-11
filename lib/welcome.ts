@@ -108,6 +108,30 @@ export async function loadWelcomeContext(): Promise<WelcomeContext> {
   };
 }
 
+// Control chars except newline (0x0A), built from char codes so no raw
+// control bytes end up in this source file — same approach as
+// lib/rsvp-validation.ts's CONTROL_CHARS_PATTERN.
+const CONTROL_CHARS_KEEP_NEWLINE = new RegExp(
+  `[${[...Array.from({ length: 32 }, (_, i) => i).filter((c) => c !== 10), 127]
+    .map((c) => `\\u${c.toString(16).padStart(4, "0")}`)
+    .join("")}]`,
+  "g"
+);
+
+/**
+ * Like sanitizeText(), but keeps newlines so a multi-line note from the
+ * couple survives with its line breaks intact (the screen renders it with
+ * `whitespace-pre-line`). Still strips tags and every other control char.
+ */
+export function sanitizePersonalMessage(input: string): string {
+  return input
+    .replace(/\r\n?/g, "\n")
+    .replace(/<[^>]*>/g, "")
+    .replace(CONTROL_CHARS_KEEP_NEWLINE, "")
+    .trim()
+    .slice(0, 1000);
+}
+
 export function guestDisplayName(guest: GuestRow): string {
   return guest.display_name || `${guest.first_name} ${guest.last_name}`.trim();
 }
