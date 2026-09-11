@@ -11,7 +11,7 @@ import type {
   SubmitEventResponse,
   VerificationMethod,
 } from "@/types/rsvp";
-import { STEAK_ENTREE_LABEL } from "@/types/rsvp";
+import { CEREMONY_EVENT_ID_CANDIDATES, STEAK_ENTREE_LABEL } from "@/types/rsvp";
 import { WELCOME_EVENT_ID_CANDIDATES } from "@/types/welcome";
 import { ProgressIndicator } from "./ProgressIndicator";
 import { WelcomeStep } from "./WelcomeStep";
@@ -24,6 +24,7 @@ import { SteakTemperatureStep } from "./SteakTemperatureStep";
 import { DietaryNotesStep } from "./DietaryNotesStep";
 import { ReviewStep, type ReviewGuest } from "./ReviewStep";
 import { DressCodeStep } from "@/components/welcome/DressCodeStep";
+import { CeremonyDressCodeStep } from "./CeremonyDressCodeStep";
 import { ConfirmationStep } from "./ConfirmationStep";
 import { PrimaryButton, SecondaryButton } from "./ui";
 
@@ -33,6 +34,7 @@ type Screen =
   | { id: "confirm" }
   | { id: "verify" }
   | { id: "dress" }
+  | { id: "ceremonyDress" }
   | { id: "event"; eventId: string }
   | { id: "meal"; eventId: string }
   | { id: "steak"; eventId: string }
@@ -231,28 +233,47 @@ export function RsvpShell({ initialSettings }: { initialSettings: RsvpSettings }
     });
   }
 
+  /**
+   * `events` only lists events the household is actually invited to (the
+   * invitation route builds it from invited=TRUE rows), so these double as
+   * "is this guest invited to it?" checks. They're only populated once
+   * verification has passed.
+   */
+  function isInvitedTo(candidates: readonly string[]): boolean {
+    return events.some((e) => candidates.includes(e.eventId));
+  }
+
   /** The first screen that actually asks the guest something. */
   function firstAnswerScreen(inv: InvitationResponse): Screen {
     const evs = inv.events ?? [];
     return evs.length > 0 ? { id: "event", eventId: evs[0].eventId } : { id: "dietary" };
   }
 
+  /** Meal, then steak, then dietary — whichever of those applies first. */
+  function firstMealOrLaterScreen(): Screen {
+    const meals = mealEvents();
+    if (meals.length > 0) return { id: "meal", eventId: meals[0].eventId };
+    const steaks = steakEvents();
+    if (steaks.length > 0) return { id: "steak", eventId: steaks[0].eventId };
+    return { id: "dietary" };
+  }
+
   /**
-   * Guests invited to the welcome event see the dress code screen first —
-   * it only applies to that evening, so anyone not invited to it skips
-   * straight to their first attendance question.
+   * What follows the last attendance question.
    *
-   * `inv.events` only lists events the household is actually invited to
-   * (the invitation route builds it from invited=TRUE rows), and it's only
-   * populated once verification has passed, which is why this runs here
-   * rather than at household confirmation: both the verified and
-   * no-verification-needed paths funnel through this function.
+   * Both dress code screens sit here, after the guest has said who's coming
+   * and before any meal questions: what to wear is only meaningful once they
+   * know they're attending, and each screen is skipped entirely for anyone
+   * not invited to that event.
    */
+  function screenAfterAttendance(): Screen {
+    if (isInvitedTo(WELCOME_EVENT_ID_CANDIDATES)) return { id: "dress" };
+    if (isInvitedTo(CEREMONY_EVENT_ID_CANDIDATES)) return { id: "ceremonyDress" };
+    return firstMealOrLaterScreen();
+  }
+
   function goToFirstWizardStep(inv: InvitationResponse) {
-    const invitedToWelcome = (inv.events ?? []).some((e) =>
-      (WELCOME_EVENT_ID_CANDIDATES as readonly string[]).includes(e.eventId)
-    );
-    setHistory((h) => [...h, invitedToWelcome ? { id: "dress" } : firstAnswerScreen(inv)]);
+    setHistory((h) => [...h, firstAnswerScreen(inv)]);
   }
 
   function confirmParty() {
@@ -343,8 +364,19 @@ export function RsvpShell({ initialSettings }: { initialSettings: RsvpSettings }
   }
 
   function goNextFrom(current: Screen) {
+    // Welcome dress code -> ceremony dress code if they're invited to it,
+    // otherwise straight on to the meal questions.
     if (current.id === "dress") {
-      if (invitation) setHistory((h) => [...h, firstAnswerScreen(invitation)]);
+      setHistory((h) => [
+        ...h,
+        isInvitedTo(CEREMONY_EVENT_ID_CANDIDATES)
+          ? { id: "ceremonyDress" }
+          : firstMealOrLaterScreen(),
+      ]);
+      return;
+    }
+    if (current.id === "ceremonyDress") {
+      setHistory((h) => [...h, firstMealOrLaterScreen()]);
       return;
     }
     if (current.id === "event") {
@@ -353,17 +385,8 @@ export function RsvpShell({ initialSettings }: { initialSettings: RsvpSettings }
         setHistory((h) => [...h, { id: "event", eventId: events[idx + 1].eventId }]);
         return;
       }
-      const meals = mealEvents();
-      if (meals.length > 0) {
-        setHistory((h) => [...h, { id: "meal", eventId: meals[0].eventId }]);
-        return;
-      }
-      const steaks = steakEvents();
-      if (steaks.length > 0) {
-        setHistory((h) => [...h, { id: "steak", eventId: steaks[0].eventId }]);
-        return;
-      }
-      setHistory((h) => [...h, { id: "dietary" }]);
+      // Last attendance question answered — dress code screens come next.
+      setHistory((h) => [...h, screenAfterAttendance()]);
       return;
     }
     if (current.id === "meal") {
@@ -477,20 +500,22 @@ export function RsvpShell({ initialSettings }: { initialSettings: RsvpSettings }
   }));
 
   const stepNumber = history.length;
-  const showsDressCode = events.some((e) =>
-    (WELCOME_EVENT_ID_CANDIDATES as readonly string[]).includes(e.eventId)
-  );
+  const dressCodeScreenCount =
+    (isInvitedTo(WELCOME_EVENT_ID_CANDIDATES) ? 1 : 0) +
+    (isInvitedTo(CEREMONY_EVENT_ID_CANDIDATES) ? 1 : 0);
   const totalStepsEstimate = Math.max(
     stepNumber,
     5 +
       events.length +
       mealEvents().length * 2 +
       (invitation?.requiresVerification ? 1 : 0) +
-      (showsDressCode ? 1 : 0)
+      dressCodeScreenCount
   );
 
   const showBack = history.length > 1 && screen.id !== "confirmation";
-  const showGenericFooter = ["dress", "event", "meal", "steak", "dietary"].includes(screen.id);
+  const showGenericFooter = ["dress", "ceremonyDress", "event", "meal", "steak", "dietary"].includes(
+    screen.id
+  );
 
   if (!settings.rsvpOpen) {
     return (
@@ -572,6 +597,8 @@ export function RsvpShell({ initialSettings }: { initialSettings: RsvpSettings }
         )}
 
         {screen.id === "dress" && <DressCodeStep />}
+
+        {screen.id === "ceremonyDress" && <CeremonyDressCodeStep />}
 
         {screen.id === "event" &&
           (() => {

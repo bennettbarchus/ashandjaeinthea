@@ -3,6 +3,14 @@
 
 export type VerificationMethod = "zip" | "phone_last_four" | "email";
 
+/**
+ * Candidate `event_id`s for the ceremony, resolved against the Events tab the
+ * same way WELCOME_EVENT_ID_CANDIDATES is. Listed rather than hardcoded so a
+ * renamed event in the sheet doesn't silently drop the ceremony dress code
+ * screen out of the /rsvp flow.
+ */
+export const CEREMONY_EVENT_ID_CANDIDATES = ["ceremony"] as const;
+
 /** The entrée label that triggers the steak-temperature question. Shared between client and server. */
 export const STEAK_ENTREE_LABEL = "Steak";
 
