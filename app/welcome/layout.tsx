@@ -26,7 +26,7 @@ const belleAurore = La_Belle_Aurore({
 });
 
 const WELCOME_URL = "https://rsvp.ashandjaeinthea.com/welcome";
-const WELCOME_TITLE = "Ashley & Jared · Welcome Celebration";
+const WELCOME_TITLE = "Ashley & Jared · Nov 13";
 const WELCOME_DESCRIPTION =
   "An evening of music, color and celebration as our families come together — Friday, November 13, 2026 in Atlanta. Find your invitation and let us know you'll be there.";
 

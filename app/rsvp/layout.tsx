@@ -26,7 +26,7 @@ const belleAurore = La_Belle_Aurore({
 });
 
 const RSVP_URL = "https://rsvp.ashandjaeinthea.com/rsvp";
-const RSVP_TITLE = "Ashley & Jared · RSVP";
+const RSVP_TITLE = "Ashley & Jared · Nov 14";
 const RSVP_DESCRIPTION =
   "We're getting married in Atlanta on Saturday, November 14, 2026. Find your invitation, let us know you'll be joining us, and choose your menu for the reception.";
 
@@ -43,10 +43,10 @@ export const metadata: Metadata = {
     // Resolved against metadataBase in app/layout.tsx.
     images: [
       {
-        url: "/images/forth-skyline-sm.png",
-        width: 768,
-        height: 512,
-        alt: "Watercolor of the Atlanta skyline at sunset",
+        url: "/images/hotels-bg.png",
+        width: 1536,
+        height: 1024,
+        alt: "Watercolor of the Atlanta skyline at sunrise",
       },
     ],
   },
@@ -54,7 +54,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: RSVP_TITLE,
     description: RSVP_DESCRIPTION,
-    images: ["/images/forth-skyline-sm.png"],
+    images: ["/images/hotels-bg.png"],
   },
   alternates: { canonical: RSVP_URL },
 };

@@ -21,7 +21,11 @@ export function WelcomeIntroStep({
         description="Enter your name to find your invitation."
       />
       <PrimaryButton onClick={onBegin}>Begin</PrimaryButton>
-      <RegistryLink registryUrl={registryUrl} registryMessage={registryMessage} />
+      <RegistryLink
+        registryUrl={registryUrl}
+        registryMessage={registryMessage}
+        label="Our Registry"
+      />
     </div>
   );
 }

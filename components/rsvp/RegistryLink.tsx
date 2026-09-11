@@ -4,10 +4,17 @@ export function RegistryLink({
   registryUrl,
   registryMessage,
   variant = "understated",
+  label = "Wedding Registry",
 }: {
   registryUrl: string;
   registryMessage: string;
   variant?: "understated" | "closing";
+  /**
+   * Link text for the understated variant. The /welcome flow overrides it:
+   * its guests are invited to the Friday celebration only, so naming a
+   * "Wedding Registry" would point them at an event they aren't part of.
+   */
+  label?: string;
 }) {
   if (variant === "closing") {
     return (
@@ -35,7 +42,7 @@ export function RegistryLink({
         rel="noopener noreferrer"
         className="font-playfair text-sm text-sand underline decoration-sand/50 underline-offset-4 transition-colors hover:text-mocha focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mocha"
       >
-        Wedding Registry
+        {label}
       </a>
     </div>
   );

@@ -1,5 +1,15 @@
 "use client";
 
+/**
+ * Closing screen for the standalone Friday flow.
+ *
+ * The copy here deliberately treats the Welcome Celebration as a complete
+ * event in itself. Guests reaching this screen are invited to Friday only,
+ * so any mention of the ceremony, the reception, Saturday, or a "wedding
+ * weekend" would point them at something they aren't part of. Keep it to
+ * Friday evening.
+ */
+
 import { StepHeading } from "@/components/rsvp/ui";
 import { RegistryLink } from "@/components/rsvp/RegistryLink";
 
@@ -26,7 +36,7 @@ export function WelcomeConfirmationStep({
 
       <p className="font-playfair text-base leading-relaxed text-mocha/90">
         {isAnyoneAttending
-          ? "Your response has been received. It means so much to us that you'll be there as the weekend begins."
+          ? "Your response has been received. We're so grateful you'll be with us Friday evening — this night is all ours, and we couldn't imagine it without you."
           : "Your response has been received. We'll miss you Friday evening, and we're grateful you told us."}
       </p>
 
