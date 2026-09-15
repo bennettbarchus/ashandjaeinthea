@@ -1,6 +1,10 @@
 import { z } from "zod";
 import type { TabRow } from "./google-sheets";
-import { isDeadlinePassed, isSteakChoice } from "./rsvp-config";
+import {
+  deadlinePassedMessage,
+  isDeadlinePassed,
+  isSteakChoice,
+} from "./rsvp-config";
 import type {
   EventRow,
   GuestRow,
@@ -144,7 +148,7 @@ export function validateSubmission(
     isDeadlinePassed(ctx.settings) &&
     ctx.household.data.submitted !== "TRUE"
   ) {
-    return { ok: false, error: "The RSVP deadline has passed." };
+    return { ok: false, error: deadlinePassedMessage(ctx.settings) };
   }
 
   const guestIds = new Set(ctx.guests.map((g) => g.data.guest_id));

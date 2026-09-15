@@ -8,6 +8,19 @@ import { STEAK_ENTREE_LABEL, type RsvpSettings } from "@/types/rsvp";
  */
 export { DASHBOARD_URL } from "./dashboard-url";
 
+/**
+ * Deadline resolution/enforcement lives in ./deadline so that client
+ * components can import the formatter without pulling googleapis in through
+ * this module's getSettings import. Re-exported here as the settings-shaped
+ * place to look for it.
+ */
+export {
+  deadlinePassedMessage,
+  formatDeadline,
+  isDeadlinePassed,
+  resolveDeadline,
+} from "./deadline";
+
 const CACHE_TTL_MS = 60_000;
 let cache: { value: RsvpSettings; expiresAt: number } | null = null;
 
@@ -23,13 +36,6 @@ export async function getRsvpSettings(): Promise<RsvpSettings> {
   const value = await getSettings();
   cache = { value, expiresAt: Date.now() + CACHE_TTL_MS };
   return value;
-}
-
-export function isDeadlinePassed(settings: RsvpSettings): boolean {
-  if (!settings.rsvpDeadline) return false;
-  const deadline = new Date(settings.rsvpDeadline);
-  if (Number.isNaN(deadline.getTime())) return false;
-  return Date.now() > deadline.getTime();
 }
 
 export function isSteakChoice(mealChoice: string): boolean {

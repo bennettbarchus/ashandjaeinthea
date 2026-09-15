@@ -263,7 +263,7 @@ async function main() {
   const settings: Row[] = [
     ["key", "value"],
     ["rsvp_open", "TRUE"],
-    ["rsvp_deadline", "2026-10-01"],
+    ["rsvp_deadline", "2026-09-15T23:59:00-04:00"],
     ["support_email", "hello@ashandjaeinthea.com"],
     [
       "confirmation_message",

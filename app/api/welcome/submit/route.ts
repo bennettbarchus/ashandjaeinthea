@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { submitWelcomeRsvp } from "@/lib/google-sheets";
-import { getRsvpSettings, isDeadlinePassed } from "@/lib/rsvp-config";
+import {
+  deadlinePassedMessage,
+  getRsvpSettings,
+  isDeadlinePassed,
+} from "@/lib/rsvp-config";
 import { sanitizeText } from "@/lib/rsvp-validation";
 import {
   householdGuests,
@@ -92,7 +96,10 @@ export async function POST(request: NextRequest) {
         (r.data.attendance === "YES" || r.data.attendance === "NO")
     );
     if (isDeadlinePassed(settings) && !hasExistingAnswer) {
-      return NextResponse.json({ error: "The RSVP deadline has passed." }, { status: 400 });
+      return NextResponse.json(
+        { error: deadlinePassedMessage(settings) },
+        { status: 400 }
+      );
     }
 
     const seen = new Set<string>();

@@ -1,5 +1,6 @@
 "use client";
 
+import { formatDeadline } from "@/lib/deadline";
 import { StepHeading } from "./ui";
 import { RegistryLink } from "./RegistryLink";
 
@@ -14,6 +15,10 @@ export function ConfirmationStep({
   registryUrl: string;
   registryMessage: string;
 }) {
+  // Rendered from the Settings tab value, which is a machine-readable
+  // timestamp — formatted here so guests read a date, not an ISO string.
+  const deadline = formatDeadline(rsvpDeadline);
+
   return (
     <div>
       <StepHeading
@@ -26,9 +31,9 @@ export function ConfirmationStep({
         {confirmationMessage}
       </p>
 
-      {rsvpDeadline ? (
+      {deadline ? (
         <p className="mt-4 font-playfair text-sm text-sand">
-          Please note the RSVP deadline is {rsvpDeadline}.
+          Please note the RSVP deadline is {deadline}.
         </p>
       ) : null}
 

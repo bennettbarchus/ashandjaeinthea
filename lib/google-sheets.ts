@@ -264,6 +264,8 @@ export const getHouseholdsTab = () => readTab<HouseholdRow>("Households");
 export const getGuestsTab = () => readTab<GuestRow>("Guests");
 export const getEventsTab = () => readTab<EventRow>("Events");
 export const getInvitationsTab = () => readTab<InvitationRow>("Invitations");
+/** Row-addressed Settings access, for maintenance scripts that edit a setting in place. */
+export const getSettingsTab = () => readTab<SettingsRow>("Settings");
 
 export async function getSettings(): Promise<RsvpSettings> {
   const { rows } = await readTab<SettingsRow>("Settings");

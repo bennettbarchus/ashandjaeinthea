@@ -128,7 +128,14 @@ async function main() {
   const responseRateRow = R();
   rows.push(["Response Rate", `=IFERROR(B${overviewStart + 2}/B${overviewStart},0)`]);
   const deadlineRow = R();
-  rows.push(["RSVP Deadline", '=IFERROR(VLOOKUP("rsvp_deadline",Settings!A:B,2,FALSE),"Not set")']);
+  // rsvp_deadline is stored as a full timestamp ("2026-09-15T23:59:00-04:00")
+  // so the guest-facing pages can enforce an exact cutoff. LEFT(...,10) takes
+  // the calendar-date part, which is what belongs on an overview tile and is
+  // also the only part DATEVALUE() below can parse.
+  rows.push([
+    "RSVP Deadline",
+    '=IFERROR(LEFT(VLOOKUP("rsvp_deadline",Settings!A:B,2,FALSE),10),"Not set")',
+  ]);
   rows.push(["Days Remaining", `=IFERROR(DATEVALUE(B${deadlineRow})-TODAY(),"")`]);
   // Stamped at build time rather than =NOW(), which is volatile and would
   // rewrite itself on every recalculation. The figures above are live formulas

@@ -99,6 +99,21 @@ function settingList_(settings, key, fallback) {
  * Main data builder — everything the page renders comes from here
  * ------------------------------------------------------------------ */
 
+/**
+ * rsvp_deadline is stored as a full timestamp ("2026-09-15T23:59:00-04:00") so
+ * the RSVP site can enforce an exact cutoff. This dashboard only wants the
+ * calendar date, so pull that off the front rather than printing the raw value.
+ */
+function formatDeadline_(raw, tz) {
+  if (!raw) return 'Not set';
+  if (raw instanceof Date) return Utilities.formatDate(raw, tz, 'MMM d, yyyy');
+  var value = String(raw).trim();
+  var parts = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!parts) return value;
+  var date = new Date(Number(parts[1]), Number(parts[2]) - 1, Number(parts[3]));
+  return Utilities.formatDate(date, tz, 'MMM d, yyyy');
+}
+
 function getDashboardData() {
   var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
 
@@ -347,7 +362,7 @@ function getDashboardData() {
       responded: respondedHouseholds,
       notResponded: totalHouseholds - respondedHouseholds,
       responseRate: totalHouseholds ? Math.round((respondedHouseholds / totalHouseholds) * 100) : 0,
-      deadline: settings.rsvp_deadline || 'Not set'
+      deadline: formatDeadline_(settings.rsvp_deadline, tz)
     },
     byEvent: byEvent,
     coming: coming,
