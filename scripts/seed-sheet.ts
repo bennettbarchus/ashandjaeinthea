@@ -263,7 +263,10 @@ async function main() {
   const settings: Row[] = [
     ["key", "value"],
     ["rsvp_open", "TRUE"],
-    ["rsvp_deadline", "2026-09-15T23:59:00-04:00"],
+    // Two deadlines: the technical cutoff that rejects submissions, and the
+    // earlier date published to guests. See scripts/set-rsvp-deadline.ts.
+    ["rsvp_deadline", "2026-09-17T23:59:00-04:00"],
+    ["rsvp_deadline_display", "September 15, 2026"],
     ["support_email", "hello@ashandjaeinthea.com"],
     [
       "confirmation_message",

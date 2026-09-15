@@ -1,6 +1,17 @@
 /**
  * RSVP deadline resolution, formatting and enforcement.
  *
+ * There are two deadlines, deliberately, and they are not the same date:
+ *
+ * - `rsvpDeadline` is the technical cutoff. It decides when a submission is
+ *   rejected, and is never shown to a guest.
+ * - `rsvpDeadlineDisplay` is the published deadline. It is what guests read,
+ *   and it is never enforced.
+ *
+ * The published date is the earlier of the two, so the couple have a quiet
+ * buffer in which late RSVPs still land. Keep the two uses separate: format
+ * the technical value for a guest and the buffer stops being quiet.
+ *
  * Deliberately dependency-free — it is imported by client components
  * (the confirmation screens) as well as by server routes, so it must not
  * pull in lib/google-sheets.ts and googleapis with it. The enforcement
@@ -149,13 +160,34 @@ export function formatDeadline(rsvpDeadline: string | null): string | null {
 }
 
 /**
+ * The deadline as guests should read it.
+ *
+ * Prefers the published `rsvp_deadline_display` value verbatim — it is written
+ * for guests ("September 15, 2026"), so it is shown as written. With no
+ * published value configured the technical deadline is formatted instead, so a
+ * sheet that sets only `rsvp_deadline` still displays something sensible.
+ */
+export function displayDeadline(
+  settings: Pick<RsvpSettings, "rsvpDeadline" | "rsvpDeadlineDisplay">
+): string | null {
+  const published = settings.rsvpDeadlineDisplay?.trim();
+  if (published) return published;
+  return formatDeadline(settings.rsvpDeadline);
+}
+
+/**
  * The rejection shown to a guest who submits too late. Names the deadline they
  * missed (and who to ask) rather than just asserting that one passed.
  */
 export function deadlinePassedMessage(
-  settings: Pick<RsvpSettings, "rsvpDeadline" | "supportEmail">
+  settings: Pick<
+    RsvpSettings,
+    "rsvpDeadline" | "rsvpDeadlineDisplay" | "supportEmail"
+  >
 ): string {
-  const deadline = formatDeadline(settings.rsvpDeadline);
+  // The published deadline, not the technical one — this is copy a guest
+  // reads, and it should match the date the site showed them all along.
+  const deadline = displayDeadline(settings);
   const email = settings.supportEmail.trim();
 
   return [

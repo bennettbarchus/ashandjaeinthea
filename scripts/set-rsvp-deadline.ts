@@ -1,61 +1,87 @@
 /**
- * Sets the `rsvp_deadline` value on the "Settings" tab.
+ * Sets the RSVP deadline pair on the "Settings" tab.
  *
- * The deadline is stored as a full ISO timestamp with an explicit offset
- * (e.g. "2026-09-15T23:59:00-04:00") rather than a bare date. A bare date is
- * still honoured by lib/deadline.ts — it resolves to the end of that day in
- * Eastern Time — but storing the exact instant leaves nothing implicit about
- * when the RSVP actually closes.
+ * Two keys, deliberately holding different dates:
  *
- * Idempotent: re-running with the same value reports "already set" and writes
- * nothing.
+ * - `rsvp_deadline` — the technical cutoff, stored as a full ISO timestamp
+ *   with an explicit offset ("2026-09-17T23:59:00-04:00"). This is what
+ *   actually rejects a submission. A bare date is still honoured by
+ *   lib/deadline.ts (it resolves to the end of that day Eastern), but storing
+ *   the exact instant leaves nothing implicit about when the RSVP closes.
+ * - `rsvp_deadline_display` — the published deadline, free text written for
+ *   guests ("September 15, 2026"). Shown as-is, never parsed, never enforced.
+ *
+ * Publishing the earlier date gives the couple a quiet buffer in which late
+ * RSVPs still land.
+ *
+ * Idempotent: values already in place are reported and left alone, and the
+ * display row is created if the tab doesn't have one yet.
  *
  * Run with:
- *   npx tsx --env-file=.env.local scripts/set-rsvp-deadline.ts 2026-09-15T23:59:00-04:00
+ *   npx tsx --env-file=.env.local scripts/set-rsvp-deadline.ts \
+ *     2026-09-17T23:59:00-04:00 --display "September 15, 2026"
  */
-import { getSettingsTab, writeCell } from "@/lib/google-sheets";
+import { appendRows, getSettingsTab, writeCell } from "@/lib/google-sheets";
 import { formatDeadline, resolveDeadline } from "@/lib/deadline";
 
-const KEY = "rsvp_deadline";
+const DEADLINE_KEY = "rsvp_deadline";
+const DISPLAY_KEY = "rsvp_deadline_display";
 const VALUE_COLUMN = "B"; // Settings is a two-column key/value tab.
 
+const USAGE =
+  'Usage: npx tsx --env-file=.env.local scripts/set-rsvp-deadline.ts <deadline> [--display "<text>"]';
+
 async function main() {
-  const value = process.argv[2]?.trim();
-  if (!value) {
-    throw new Error(
-      "Usage: npx tsx --env-file=.env.local scripts/set-rsvp-deadline.ts <deadline>"
-    );
+  const args = process.argv.slice(2);
+  const displayFlag = args.indexOf("--display");
+  const display =
+    displayFlag === -1 ? undefined : args[displayFlag + 1]?.trim();
+  if (displayFlag !== -1 && !display) {
+    throw new Error(`--display needs a value.\n${USAGE}`);
   }
-  if (!resolveDeadline(value)) {
-    throw new Error(`Not a usable deadline: ${value}`);
+  const deadline = (displayFlag === -1 ? args[0] : args.slice(0, displayFlag)[0])?.trim();
+  if (!deadline) {
+    throw new Error(USAGE);
+  }
+  if (!resolveDeadline(deadline)) {
+    throw new Error(`Not a usable deadline: ${deadline}`);
   }
 
   const { headers, rows } = await getSettingsTab();
-  const keyHeader = headers[0];
-  const valueHeader = headers[1];
-  if (keyHeader !== "key" || valueHeader !== "value") {
+  if (headers[0] !== "key" || headers[1] !== "value") {
     throw new Error(
       `Unexpected Settings layout: expected key/value headers, found ${headers.join(", ")}`
     );
   }
 
-  const row = rows.find((r) => r.data.key === KEY);
-  if (!row) {
-    throw new Error(`No "${KEY}" row found on the Settings tab.`);
+  const setExisting = async (key: string, value: string) => {
+    const row = rows.find((r) => r.data.key === key);
+    if (!row) return false;
+    if (row.data.value === value) {
+      console.log(`${key} is already ${JSON.stringify(value)} — nothing to do.`);
+      return true;
+    }
+    const range = `Settings!${VALUE_COLUMN}${row.rowNumber}`;
+    await writeCell(range, value);
+    console.log(
+      `${key}: ${row.data.value || "(empty)"} -> ${JSON.stringify(value)}  [${range}]`
+    );
+    return true;
+  };
+
+  if (!(await setExisting(DEADLINE_KEY, deadline))) {
+    throw new Error(`No "${DEADLINE_KEY}" row found on the Settings tab.`);
   }
 
-  const current = row.data.value;
-  if (current === value) {
-    console.log(`${KEY} is already set to ${value} — nothing to do.`);
-    return;
+  if (display !== undefined && !(await setExisting(DISPLAY_KEY, display))) {
+    await appendRows("Settings", [[DISPLAY_KEY, display]]);
+    console.log(`${DISPLAY_KEY}: (new row) -> ${JSON.stringify(display)}`);
   }
 
-  const range = `Settings!${VALUE_COLUMN}${row.rowNumber}`;
-  await writeCell(range, value);
-
-  console.log(`${KEY}: ${current || "(empty)"} -> ${value}  [${range}]`);
-  console.log(`Guests will see: ${formatDeadline(value)}`);
-  console.log(`Closes at:       ${resolveDeadline(value)?.toISOString()}`);
+  console.log("");
+  console.log(`Submissions close at: ${resolveDeadline(deadline)?.toISOString()}`);
+  console.log(`                      (${formatDeadline(deadline)})`);
+  console.log(`Guests are told:      ${display ?? "(display value unchanged)"}`);
 }
 
 main().catch((err) => {

@@ -292,6 +292,7 @@ export async function getSettings(): Promise<RsvpSettings> {
   return {
     rsvpOpen: bool("rsvp_open", true),
     rsvpDeadline: map.get("rsvp_deadline")?.trim() || null,
+    rsvpDeadlineDisplay: map.get("rsvp_deadline_display")?.trim() || null,
     supportEmail: str("support_email", ""),
     confirmationMessage: str(
       "confirmation_message",

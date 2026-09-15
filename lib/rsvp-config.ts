@@ -16,6 +16,7 @@ export { DASHBOARD_URL } from "./dashboard-url";
  */
 export {
   deadlinePassedMessage,
+  displayDeadline,
   formatDeadline,
   isDeadlinePassed,
   resolveDeadline,

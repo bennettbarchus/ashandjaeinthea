@@ -711,6 +711,7 @@ export function RsvpShell({ initialSettings }: { initialSettings: RsvpSettings }
           <ConfirmationStep
             confirmationMessage={settings.confirmationMessage}
             rsvpDeadline={settings.rsvpDeadline}
+            rsvpDeadlineDisplay={settings.rsvpDeadlineDisplay}
             registryUrl={settings.registryUrl}
             registryMessage={settings.registryMessage}
           />

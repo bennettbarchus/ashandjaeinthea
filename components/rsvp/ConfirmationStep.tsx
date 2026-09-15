@@ -1,23 +1,25 @@
 "use client";
 
-import { formatDeadline } from "@/lib/deadline";
+import { displayDeadline } from "@/lib/deadline";
 import { StepHeading } from "./ui";
 import { RegistryLink } from "./RegistryLink";
 
 export function ConfirmationStep({
   confirmationMessage,
   rsvpDeadline,
+  rsvpDeadlineDisplay,
   registryUrl,
   registryMessage,
 }: {
   confirmationMessage: string;
   rsvpDeadline: string | null;
+  rsvpDeadlineDisplay: string | null;
   registryUrl: string;
   registryMessage: string;
 }) {
-  // Rendered from the Settings tab value, which is a machine-readable
-  // timestamp — formatted here so guests read a date, not an ISO string.
-  const deadline = formatDeadline(rsvpDeadline);
+  // The published deadline, which is deliberately earlier than the technical
+  // cutoff that app/api/rsvp/submit enforces. Guests see this one only.
+  const deadline = displayDeadline({ rsvpDeadline, rsvpDeadlineDisplay });
 
   return (
     <div>

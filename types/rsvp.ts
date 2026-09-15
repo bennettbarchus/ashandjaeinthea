@@ -84,7 +84,10 @@ export interface SettingsRow {
 
 export interface RsvpSettings {
   rsvpOpen: boolean;
+  /** When submissions actually stop being accepted. Enforced, never displayed. */
   rsvpDeadline: string | null;
+  /** The deadline as published to guests. Displayed, never enforced. */
+  rsvpDeadlineDisplay: string | null;
   supportEmail: string;
   confirmationMessage: string;
   registryUrl: string;
