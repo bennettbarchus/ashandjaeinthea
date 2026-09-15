@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { submitWelcomeRsvp } from "@/lib/google-sheets";
-import {
-  deadlinePassedMessage,
-  getRsvpSettings,
-  isDeadlinePassed,
-} from "@/lib/rsvp-config";
+import { getRsvpSettings } from "@/lib/rsvp-config";
 import { sanitizeText } from "@/lib/rsvp-validation";
 import {
   householdGuests,
@@ -87,20 +83,9 @@ export async function POST(request: NextRequest) {
     }
     const invitedGuestIds = new Set(invitedGuests.map((g) => g.guest_id));
 
-    // Mirrors the main portal: once the deadline is past, only households
-    // that already have an answer on file may amend it.
-    const hasExistingAnswer = ctx.invitations.some(
-      (r) =>
-        r.data.event_id === event.event_id &&
-        invitedGuestIds.has(r.data.guest_id) &&
-        (r.data.attendance === "YES" || r.data.attendance === "NO")
-    );
-    if (isDeadlinePassed(settings) && !hasExistingAnswer) {
-      return NextResponse.json(
-        { error: deadlinePassedMessage(settings) },
-        { status: 400 }
-      );
-    }
+    // No deadline check here, deliberately: Friday-only guests may answer or
+    // change their answer at any time, whatever the RSVP deadline says. The
+    // main portal (app/api/rsvp/submit) still enforces it.
 
     const seen = new Set<string>();
     const responses = [];
