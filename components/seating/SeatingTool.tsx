@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SEATING_PIN, SEATING_PIN_HEADER } from "@/lib/seating-auth";
+import { FloorPlan, type ZoomSetting } from "./FloorPlan";
 import type {
   MoveRequest,
   MoveResponse,
@@ -15,34 +16,15 @@ type Selection =
   | { kind: "seat"; seat: number }
   | { kind: "parking"; row: number };
 
-type TableShape = "round" | "estate" | "sweetheart";
-
-/**
- * The 14 tables plus the sweetheart table, placed to roughly echo the
- * numbered floor plan: rounds down the left and right, the four estate
- * tables in the middle, the couple at the top. `area` names cells in the
- * grid template defined in globals.css (.seating-floor), which only
- * applies from 1400px up — narrower screens stack in this order instead.
- */
-const TABLES: { id: string; shape: TableShape; area: string }[] = [
-  { id: "ST", shape: "sweetheart", area: "st" },
-  { id: "T01", shape: "round", area: "t01" },
-  { id: "T02", shape: "round", area: "t02" },
-  { id: "T03", shape: "round", area: "t03" },
-  { id: "T04", shape: "round", area: "t04" },
-  { id: "T05", shape: "round", area: "t05" },
-  { id: "T06", shape: "round", area: "t06" },
-  { id: "T07", shape: "estate", area: "t07" },
-  { id: "T08", shape: "estate", area: "t08" },
-  { id: "T09", shape: "estate", area: "t09" },
-  { id: "T10", shape: "estate", area: "t10" },
-  { id: "T11", shape: "round", area: "t11" },
-  { id: "T12", shape: "round", area: "t12" },
-  { id: "T13", shape: "round", area: "t13" },
-  { id: "T14", shape: "round", area: "t14" },
-];
-
 const POLL_MS = 60_000;
+
+/** Fit shows the whole room; the rest are screen pixels per plan unit. */
+const ZOOM_STEPS: { label: string; value: ZoomSetting }[] = [
+  { label: "Fit", value: "fit" },
+  { label: "1x", value: 1.3 },
+  { label: "2x", value: 2.1 },
+  { label: "3x", value: 3 },
+];
 
 function mealIcon(meal: string): string {
   const m = meal.toLowerCase();
@@ -69,6 +51,7 @@ export function SeatingTool() {
   const [toast, setToast] = useState<{ text: string; bad?: boolean } | null>(null);
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [zoom, setZoom] = useState<ZoomSetting>("fit");
 
   // Polling must not fire mid-write, or a stale read would land on top of
   // a move that's still in flight. Tracked in a ref (written only from the
@@ -120,16 +103,6 @@ export function SeatingTool() {
     const map = new Map<string, { background: string; border: string }>();
     for (const g of data?.groups ?? []) {
       map.set(g.name, { background: g.background, border: g.border });
-    }
-    return map;
-  }, [data]);
-
-  const seatsByTable = useMemo(() => {
-    const map = new Map<string, SeatCell[]>();
-    for (const seat of data?.seats ?? []) {
-      const list = map.get(seat.table) ?? [];
-      list.push(seat);
-      map.set(seat.table, list);
     }
     return map;
   }, [data]);
@@ -351,31 +324,53 @@ export function SeatingTool() {
         </div>
       </aside>
 
-      <main className="w-full flex-1 overflow-x-auto px-4 py-6 lg:h-screen lg:overflow-y-auto lg:px-8">
-        {selectedGuest && (
-          <div className="mb-4 rounded-sm border border-mocha bg-cream px-4 py-2 font-playfair text-sm">
-            <strong>{selectedGuest}</strong> is selected — click an empty seat to
-            place them, or click them again to put them down.
+      <main className="flex w-full min-w-0 flex-1 flex-col px-4 py-4 lg:h-screen lg:px-6">
+        <div className="mb-3 flex flex-wrap items-center gap-3">
+          {selectedGuest ? (
+            <div className="flex-1 rounded-sm border border-mocha bg-cream px-4 py-2 font-playfair text-sm">
+              <strong>{selectedGuest}</strong> is selected — click an empty seat
+              to place them, or click them again to put them down.
+            </div>
+          ) : (
+            <p className="flex-1 font-playfair text-sm text-sand">
+              Click a guest to pick them up.
+              {zoom === "fit" ? " Zoom in to read names on the plan." : ""}
+            </p>
+          )}
+          <div className="flex items-center gap-1">
+            {ZOOM_STEPS.map((step) => (
+              <button
+                key={String(step.value)}
+                type="button"
+                onClick={() => setZoom(step.value)}
+                className={`rounded-sm border px-3 py-1 font-cinzel text-[0.6rem] uppercase tracking-[0.2em] ${
+                  zoom === step.value
+                    ? "border-mocha bg-mocha text-cream"
+                    : "border-sand text-mocha hover:border-mocha"
+                }`}
+              >
+                {step.label}
+              </button>
+            ))}
           </div>
-        )}
+        </div>
 
+        {/* min-w-0 on the frame below keeps the zoomed canvas scrolling
+            inside it rather than stretching this column past the window. */}
         {loading && !data ? (
           <p className="font-playfair text-sm text-sand">Loading the chart…</p>
         ) : (
-          <div className="seating-floor">
-            {TABLES.map((table) => (
-              <TableView
-                key={table.id}
-                id={table.id}
-                shape={table.shape}
-                area={table.area}
-                seats={seatsByTable.get(table.id) ?? []}
-                selection={selection}
-                groupColors={groupColors}
-                matchesQuery={matchesQuery}
-                onSeatClick={onSeatClick}
-              />
-            ))}
+          <div className="min-h-[60vh] min-w-0 flex-1 overflow-hidden rounded-md border border-sand/50 bg-parchment">
+            <FloorPlan
+              seats={data?.seats ?? []}
+              selectedSeat={selection?.kind === "seat" ? selection.seat : null}
+              groupColors={groupColors}
+              matchesQuery={matchesQuery}
+              mealIcon={mealIcon}
+              hasDietaryNote={hasDietaryNote}
+              onSeatClick={onSeatClick}
+              zoom={zoom}
+            />
           </div>
         )}
       </main>
@@ -391,155 +386,5 @@ export function SeatingTool() {
         </div>
       )}
     </div>
-  );
-}
-
-function TableView({
-  id,
-  shape,
-  area,
-  seats,
-  selection,
-  groupColors,
-  matchesQuery,
-  onSeatClick,
-}: {
-  id: string;
-  shape: TableShape;
-  area: string;
-  seats: SeatCell[];
-  selection: Selection | null;
-  groupColors: Map<string, { background: string; border: string }>;
-  matchesQuery: (name: string) => boolean;
-  onSeatClick: (seat: SeatCell) => void;
-}) {
-  const filled = seats.filter((s) => s.name.trim() !== "").length;
-
-  const header = (
-    <div className="mb-2 text-center">
-      <span className="font-cinzel text-[0.65rem] uppercase tracking-[0.25em]">
-        {id}
-      </span>
-      <span className="ml-2 font-playfair text-[0.7rem] text-sand">
-        {filled}/{seats.length}
-      </span>
-    </div>
-  );
-
-  const chips = seats.map((seat) => (
-    <SeatChip
-      key={seat.seat}
-      seat={seat}
-      selected={selection?.kind === "seat" && selection.seat === seat.seat}
-      highlighted={matchesQuery(seat.name)}
-      color={groupColors.get(seat.group.trim())}
-      onClick={() => onSeatClick(seat)}
-    />
-  ));
-
-  if (shape === "round") {
-    // Seats sit around the rim of the circle, starting at the top. Chips are
-    // centered on the rim, so half of one hangs outside the circle's box on
-    // every side — the px-11/pb-10 padding is what reserves that space, and
-    // without it neighboring tables in the grid overlap.
-    // Circumference has to fit every chip side by side: a chip is 72px
-    // wide and the rim sits at 40% of the box, so the box must be at least
-    // (chip + gap) * seats / (2π * 0.4) across. T03 and T11 seat 16 and
-    // need a much bigger circle than the 9- and 10-seat rounds.
-    const size = Math.max(280, Math.round(32 * seats.length));
-    return (
-      <section
-        style={{ gridArea: area }}
-        className="flex flex-col items-center px-10 pb-8"
-      >
-        {header}
-        <div
-          className="relative rounded-full border border-sand/70 bg-cream/60"
-          style={{ width: size, height: size }}
-        >
-          {seats.map((seat, i) => {
-            const angle = (i / seats.length) * 2 * Math.PI - Math.PI / 2;
-            return (
-              <div
-                key={seat.seat}
-                className="absolute"
-                style={{
-                  left: `${50 + 40 * Math.cos(angle)}%`,
-                  top: `${50 + 40 * Math.sin(angle)}%`,
-                  transform: "translate(-50%, -50%)",
-                }}
-              >
-                {chips[i]}
-              </div>
-            );
-          })}
-        </div>
-      </section>
-    );
-  }
-
-  // Estate tables and the sweetheart table are rectangles: seats run in two
-  // columns down the long sides, which is how they face each other on the
-  // floor plan.
-  return (
-    <section style={{ gridArea: area }} className="flex flex-col items-center">
-      {header}
-      <div className="grid grid-cols-2 gap-2 rounded-md border border-sand/70 bg-cream/60 p-3">
-        {chips}
-      </div>
-    </section>
-  );
-}
-
-function SeatChip({
-  seat,
-  selected,
-  highlighted,
-  color,
-  onClick,
-}: {
-  seat: SeatCell;
-  selected: boolean;
-  highlighted: boolean;
-  color?: { background: string; border: string };
-  onClick: () => void;
-}) {
-  const empty = seat.name.trim() === "";
-  const reserved = empty && seat.notes.trim() !== "";
-
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      title={`Seat ${seatLabel(seat.seat)}${seat.name ? ` — ${seat.name}` : ""}${
-        seat.notes ? ` — ${seat.notes}` : ""
-      }`}
-      style={
-        !empty && color
-          ? { background: color.background, borderColor: color.border }
-          : undefined
-      }
-      className={`h-[2.9rem] w-[4.5rem] overflow-hidden rounded-sm border px-1 py-1 text-center leading-tight transition-shadow ${
-        empty
-          ? "border-dashed border-sand bg-transparent hover:border-mocha"
-          : "border-solid"
-      } ${selected ? "ring-2 ring-mocha" : ""} ${
-        highlighted ? "ring-2 ring-peach" : ""
-      }`}
-    >
-      <span className="block font-cinzel text-[0.5rem] tracking-[0.15em] text-sand">
-        {seatLabel(seat.seat)}
-      </span>
-      {empty ? (
-        <span className="block font-playfair text-[0.6rem] text-sand">
-          {reserved ? seat.notes : "open"}
-        </span>
-      ) : (
-        <span className="block truncate font-playfair text-[0.63rem]">
-          {mealIcon(seat.meal)} {seat.name}
-          {hasDietaryNote(seat.notes) ? " 🚨" : ""}
-        </span>
-      )}
-    </button>
   );
 }
