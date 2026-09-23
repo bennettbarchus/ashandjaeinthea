@@ -47,8 +47,8 @@ export type TableGeometry =
       radius: number;
       /** Set on the serpentine rings (T03, T11), which are drawn as a band. */
       hole?: number;
-      firstSeat: number;
-      seatCount: number;
+      /** Seat numbers in clockwise order. */
+      seats: number[];
     }
   | {
       kind: "estate";
@@ -62,8 +62,8 @@ export type TableGeometry =
       /** y of its first seat; the rest step down by `step`. */
       seatY: number;
       step: number;
-      firstSeat: number;
-      seatCount: number;
+      /** Seat numbers top to bottom. */
+      seats: number[];
     }
   | {
       kind: "sweetheart";
@@ -74,9 +74,12 @@ export type TableGeometry =
       height: number;
       /** Degrees, matching the tilt of the window wall it sits against. */
       rotation: number;
-      firstSeat: number;
-      seatCount: number;
+      seats: number[];
     };
+
+/** Inclusive run of seat numbers, e.g. range(11, 19). */
+const range = (from: number, to: number) =>
+  Array.from({ length: to - from + 1 }, (_, i) => from + i);
 
 const ESTATE_RECT_LEFT = { x: 960, y: 682, width: 60, height: 508 };
 const ESTATE_RECT_RIGHT = { x: 1205, y: 682, width: 60, height: 508 };
@@ -84,12 +87,13 @@ const ESTATE_FIRST_Y = 706;
 const ESTATE_STEP = 46;
 
 export const TABLES: TableGeometry[] = [
-  { kind: "round", id: "T01", cx: 320, cy: 455, ring: 68, radius: 55, firstSeat: 1, seatCount: 10 },
-  { kind: "round", id: "T02", cx: 657, cy: 530, ring: 68, radius: 55, firstSeat: 11, seatCount: 10 },
-  { kind: "round", id: "T03", cx: 712, cy: 850, ring: 128, radius: 116, hole: 62, firstSeat: 21, seatCount: 16 },
-  { kind: "round", id: "T04", cx: 440, cy: 678, ring: 68, radius: 55, firstSeat: 37, seatCount: 10 },
-  { kind: "round", id: "T05", cx: 540, cy: 1125, ring: 68, radius: 55, firstSeat: 47, seatCount: 10 },
-  { kind: "round", id: "T06", cx: 355, cy: 930, ring: 68, radius: 55, firstSeat: 57, seatCount: 10 },
+  { kind: "round", id: "T01", cx: 320, cy: 455, ring: 68, radius: 55, seats: range(1, 10) },
+  // T02 gave up seat 020 and seats nine; the circle shrinks to match.
+  { kind: "round", id: "T02", cx: 657, cy: 530, ring: 64, radius: 51, seats: range(11, 19) },
+  { kind: "round", id: "T03", cx: 712, cy: 850, ring: 128, radius: 116, hole: 62, seats: range(21, 36) },
+  { kind: "round", id: "T04", cx: 440, cy: 678, ring: 68, radius: 55, seats: range(37, 46) },
+  { kind: "round", id: "T05", cx: 540, cy: 1125, ring: 68, radius: 55, seats: range(47, 56) },
+  { kind: "round", id: "T06", cx: 355, cy: 930, ring: 68, radius: 55, seats: range(57, 66) },
   {
     kind: "estate",
     id: "T07",
@@ -98,8 +102,7 @@ export const TABLES: TableGeometry[] = [
     seatX: 957,
     seatY: ESTATE_FIRST_Y,
     step: ESTATE_STEP,
-    firstSeat: 67,
-    seatCount: 11,
+    seats: range(67, 77),
   },
   {
     kind: "estate",
@@ -109,8 +112,7 @@ export const TABLES: TableGeometry[] = [
     seatX: 1024,
     seatY: ESTATE_FIRST_Y,
     step: ESTATE_STEP,
-    firstSeat: 78,
-    seatCount: 11,
+    seats: range(78, 88),
   },
   {
     kind: "estate",
@@ -120,8 +122,7 @@ export const TABLES: TableGeometry[] = [
     seatX: 1200,
     seatY: ESTATE_FIRST_Y,
     step: ESTATE_STEP,
-    firstSeat: 89,
-    seatCount: 11,
+    seats: range(89, 99),
   },
   {
     kind: "estate",
@@ -131,14 +132,24 @@ export const TABLES: TableGeometry[] = [
     seatX: 1265,
     seatY: ESTATE_FIRST_Y,
     step: ESTATE_STEP,
-    firstSeat: 100,
-    seatCount: 11,
+    seats: range(100, 110),
   },
-  { kind: "round", id: "T11", cx: 1566, cy: 849, ring: 128, radius: 116, hole: 62, firstSeat: 111, seatCount: 16 },
-  { kind: "round", id: "T12", cx: 1891, cy: 849, ring: 68, radius: 55, firstSeat: 127, seatCount: 10 },
-  { kind: "round", id: "T13", cx: 1724, cy: 1129, ring: 68, radius: 55, firstSeat: 137, seatCount: 10 },
-  // T14 is the one 60" round; the plan notes it as smaller than the rest.
-  { kind: "round", id: "T14", cx: 2008, cy: 1071, ring: 60, radius: 47, firstSeat: 147, seatCount: 9 },
+  { kind: "round", id: "T11", cx: 1566, cy: 849, ring: 128, radius: 116, hole: 62, seats: range(111, 126) },
+  { kind: "round", id: "T12", cx: 1891, cy: 849, ring: 68, radius: 55, seats: range(127, 136) },
+  { kind: "round", id: "T13", cx: 1724, cy: 1129, ring: 68, radius: 55, seats: range(137, 146) },
+  // T14 was the one 60" round. Its tenth seat is numbered 158 rather than
+  // 156, because 156 and 157 were already the sweetheart's, so its seats
+  // are the one run on the plan that isn't contiguous. The circle grows a
+  // little to take the extra chair.
+  {
+    kind: "round",
+    id: "T14",
+    cx: 2008,
+    cy: 1071,
+    ring: 66,
+    radius: 52,
+    seats: [...range(147, 155), 158],
+  },
   {
     kind: "sweetheart",
     id: "ST",
@@ -147,8 +158,7 @@ export const TABLES: TableGeometry[] = [
     width: 132,
     height: 60,
     rotation: 14,
-    firstSeat: 156,
-    seatCount: 2,
+    seats: [156, 157],
   },
 ];
 
@@ -172,21 +182,19 @@ function buildSeatPoints(): Map<number, SeatPoint> {
   const points = new Map<number, SeatPoint>();
 
   for (const table of TABLES) {
-    for (let i = 0; i < table.seatCount; i += 1) {
-      const seat = table.firstSeat + i;
-
+    table.seats.forEach((seat, i) => {
       if (table.kind === "round") {
         // Seat 1 sits just clockwise of twelve o'clock, not on it, which is
         // why the half-step offset is here: the plan straddles the top of
         // each round with its first and last seat.
-        const angle = (-90 + (i + 0.5) * (360 / table.seatCount)) * RAD;
+        const angle = (-90 + (i + 0.5) * (360 / table.seats.length)) * RAD;
         points.set(seat, {
           seat,
           table: table.id,
           x: table.cx + table.ring * Math.cos(angle),
           y: table.cy + table.ring * Math.sin(angle),
         });
-        continue;
+        return;
       }
 
       if (table.kind === "estate") {
@@ -196,7 +204,7 @@ function buildSeatPoints(): Map<number, SeatPoint> {
           x: table.seatX,
           y: table.seatY + i * table.step,
         });
-        continue;
+        return;
       }
 
       // Sweetheart: both seats along the upper long edge, tilted with the table.
@@ -209,7 +217,7 @@ function buildSeatPoints(): Map<number, SeatPoint> {
         x: table.cx + localX * Math.cos(angle) - localY * Math.sin(angle),
         y: table.cy + localX * Math.sin(angle) + localY * Math.cos(angle),
       });
-    }
+    });
   }
 
   return points;

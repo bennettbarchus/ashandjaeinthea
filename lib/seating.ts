@@ -2,11 +2,16 @@
  * Server-side model of the "Seat assignments" tab for the /seating tool.
  *
  * The tab is not a plain table: rows 1-5 are a title/summary block, row 6
- * holds the column headers, rows 7-163 are the 157 numbered seats, and a
- * "PARKING LOT" block sits below with a header at row 166 and 20 holding
- * rows at 167-186. Columns A-C (seat number, table, seat-at-table) and
+ * holds the column headers, rows 7-164 are the numbered seats, and a
+ * "PARKING LOT" block sits below with a header at row 166 and 50 holding
+ * rows at 167-216. Columns A-C (seat number, table, seat-at-table) and
  * column H (a =IF(D…) status formula) are fixtures of the sheet — this
  * module only ever writes D:G, exactly as the manual edits did.
+ *
+ * A seat's row is its number plus six, always: seat 020 was retired when
+ * T02 dropped to nine seats and its row was blanked rather than deleted,
+ * because deleting it would have shifted every seat below onto the wrong
+ * row. A retired seat has no table and cannot be moved into.
  */
 
 import { readRange, writeCellsByRange } from "@/lib/google-sheets";
@@ -21,9 +26,12 @@ import type {
 
 export const SEAT_TAB = "Seat assignments";
 export const SEAT_FIRST_ROW = 7;
-export const SEAT_LAST_ROW = 163;
+// Row 164 is seat 158, added when T14 went from nine seats to ten.
+export const SEAT_LAST_ROW = 164;
 export const PARKING_FIRST_ROW = 167;
-export const PARKING_LAST_ROW = 186;
+// 50 holding rows. Seats freed by a table shrinking have to go somewhere,
+// and 20 filled up the first time Ashley reshuffled the room.
+export const PARKING_LAST_ROW = 216;
 
 /** Seat number (column A) for a given sheet row, and back again. */
 const seatNumberForRow = (row: number) => row - SEAT_FIRST_ROW + 1;
@@ -261,6 +269,12 @@ function findSeat(data: SeatingData, seatNumber: number): Location {
   const seat = data.seats.find((s) => s.seat === seatNumber);
   if (!seat) {
     throw new MoveError(`Seat ${seatNumber} does not exist.`, 400);
+  }
+  if (!seat.table.trim()) {
+    throw new MoveError(
+      `Seat ${formatSeat(seatNumber)} has been retired and can't be used.`,
+      400
+    );
   }
   return {
     kind: "seat",

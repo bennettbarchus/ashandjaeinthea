@@ -246,8 +246,12 @@ export function SeatingTool() {
 
         <div className="mt-6">
           <h2 className="font-cinzel text-[0.6rem] uppercase tracking-[0.3em] text-sand">
-            Parking lot ({parked.length})
+            Parking lot
           </h2>
+          <p className="mt-1 font-playfair text-xs text-sand">
+            {parked.length} parked · {freeParking} free of{" "}
+            {(data?.parking ?? []).length} slots
+          </p>
           <p className="mt-2 font-playfair text-xs text-sand">
             {selectedGuest
               ? "Click an empty seat to place them."
@@ -287,6 +291,11 @@ export function SeatingTool() {
             {parked.length === 0 && (
               <li className="font-playfair text-xs text-sand">
                 Nobody is parked right now.
+              </li>
+            )}
+            {freeParking > 0 && (
+              <li className="rounded-sm border border-dashed border-sand/70 px-3 py-2 font-playfair text-[0.7rem] text-sand">
+                {freeParking} empty {freeParking === 1 ? "slot" : "slots"}
               </li>
             )}
           </ul>

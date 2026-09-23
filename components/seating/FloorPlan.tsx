@@ -300,7 +300,7 @@ function PlanBackdrop() {
                 fill="#bfa58a"
                 fontFamily="var(--font-cinzel), serif"
               >
-                {table.seatCount}
+                {table.seats.length}
               </text>
             </g>
           );
