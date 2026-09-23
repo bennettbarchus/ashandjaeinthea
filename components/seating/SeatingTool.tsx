@@ -20,7 +20,7 @@ const POLL_MS = 60_000;
 
 /** Fit shows the whole room; the rest are screen pixels per plan unit. */
 const ZOOM_STEPS: { label: string; value: ZoomSetting }[] = [
-  { label: "Fit", value: "fit" },
+  { label: "Fit screen", value: "fit" },
   { label: "1x", value: 1.3 },
   { label: "2x", value: 2.1 },
   { label: "3x", value: 3 },
@@ -51,7 +51,9 @@ export function SeatingTool() {
   const [toast, setToast] = useState<{ text: string; bad?: boolean } | null>(null);
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [zoom, setZoom] = useState<ZoomSetting>("fit");
+  // Opens at a zoom where the seat cards can actually be read; seeing the
+  // whole room at once is a button away rather than the default.
+  const [zoom, setZoom] = useState<ZoomSetting>(1.3);
 
   // Polling must not fire mid-write, or a stale read would land on top of
   // a move that's still in flight. Tracked in a ref (written only from the
@@ -223,8 +225,8 @@ export function SeatingTool() {
   }
 
   return (
-    <div className="flex min-h-screen w-full flex-col bg-parchment text-mocha lg:flex-row">
-      <aside className="w-full shrink-0 border-b border-sand/40 bg-cream px-5 py-6 lg:h-screen lg:w-[280px] lg:overflow-y-auto lg:border-r lg:border-b-0">
+    <div className="flex min-h-screen w-full flex-col bg-parchment text-mocha lg:h-screen lg:flex-row lg:overflow-hidden">
+      <aside className="w-full shrink-0 self-start border-b border-sand/40 bg-cream px-5 py-6 lg:sticky lg:top-0 lg:h-screen lg:w-[280px] lg:overflow-y-auto lg:border-r lg:border-b-0">
         <p className="font-cinzel text-[0.6rem] uppercase tracking-[0.3em] text-sand">
           Ashley &amp; Jared
         </p>
@@ -334,7 +336,9 @@ export function SeatingTool() {
           ) : (
             <p className="flex-1 font-playfair text-sm text-sand">
               Click a guest to pick them up.
-              {zoom === "fit" ? " Zoom in to read names on the plan." : ""}
+              {zoom === "fit"
+                ? " Zoom in to read names, or scroll the plan."
+                : " Scroll the plan to reach every table."}
             </p>
           )}
           <div className="flex items-center gap-1">

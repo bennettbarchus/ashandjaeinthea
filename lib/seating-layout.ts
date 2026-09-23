@@ -1,9 +1,8 @@
 /**
  * Geometry of the reception floor, traced from the printed chart
- * "ASHLEY & JARED / RECEPTION SEAT NUMBERS — REVISED TO SCALE"
- * (ashandjae_finalseatingchart.png). The image itself is deliberately not
- * committed — it is a 690KB reference that nothing at runtime loads — so
- * keep a copy to hand if these coordinates ever need re-checking.
+ * "ASHLEY & JARED / RECEPTION SEAT NUMBERS — REVISED TO SCALE", kept at
+ * public/images/ashandjae_finalseatingchart.png. Nothing loads that image
+ * at runtime; it is the reference to re-check these coordinates against.
  *
  * All coordinates are in that image's own pixel space, so a table's
  * position here can be checked against the printed plan directly. The

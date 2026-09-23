@@ -61,20 +61,23 @@ export function FloorPlan({
   zoom,
 }: Props) {
   const viewportRef = useRef<HTMLDivElement | null>(null);
-  const [fitScale, setFitScale] = useState(0.5);
+  const [viewport, setViewport] = useState({ width: 0, height: 0 });
+  const [edges, setEdges] = useState({
+    left: false,
+    right: false,
+    top: false,
+    bottom: false,
+  });
 
-  // The "fit" zoom depends on the viewport, so it is measured rather than
-  // assumed. A ResizeObserver covers the sidebar collapsing, the window
-  // resizing, and an iPad rotating.
+  // The viewport is measured rather than assumed: the "fit" scale, whether
+  // the plan needs centering, and which edges have more room off-screen all
+  // depend on it. A ResizeObserver covers the window resizing, the sidebar
+  // stacking and an iPad rotating.
   const measure = useCallback(() => {
     const node = viewportRef.current;
     if (!node) return;
-    const padding = 32;
-    const scale = Math.min(
-      (node.clientWidth - padding) / PLAN_BOX.width,
-      (node.clientHeight - padding) / PLAN_BOX.height
-    );
-    setFitScale(Math.max(0.12, scale));
+    setViewport({ width: node.clientWidth, height: node.clientHeight });
+    setEdges(readEdges(node));
   }, []);
 
   useEffect(() => {
@@ -85,60 +88,132 @@ export function FloorPlan({
     return () => observer.disconnect();
   }, [measure]);
 
+  const fitScale = Math.max(
+    MIN_FIT_SCALE,
+    Math.min(
+      (viewport.width - PAD * 2) / PLAN_BOX.width,
+      (viewport.height - PAD * 2) / PLAN_BOX.height
+    )
+  );
   const scale = zoom === "fit" ? fitScale : zoom;
   const showNames = scale >= NAME_THRESHOLD;
   const seatByNumber = new Map(seats.map((s) => [s.seat, s]));
 
+  const contentWidth = PLAN_BOX.width * scale + PAD * 2;
+  const contentHeight = PLAN_BOX.height * scale + PAD * 2;
+
+  // Centering a scroll container's content is only safe while it fits: once
+  // it is wider than the frame, centered overflow spills past the start
+  // edge, and no amount of scrolling reaches it — which is what put T01 out
+  // of reach. So center only when there is room to, and otherwise start at
+  // the top-left corner and let every edge be scrolled to.
+  const fitsHorizontally = viewport.width > 0 && contentWidth <= viewport.width;
+  const fitsVertically = viewport.height > 0 && contentHeight <= viewport.height;
+
   return (
-    // Grid + place-content centres the plan while it fits inside the frame
-    // and still lets it scroll from its own edge once it is larger.
-    <div
-      ref={viewportRef}
-      className="h-full w-full overflow-auto"
-      style={{ display: "grid", placeContent: "center" }}
-    >
+    <div className="relative h-full w-full">
       <div
+        ref={viewportRef}
+        onScroll={(e) => setEdges(readEdges(e.currentTarget))}
+        className="h-full w-full overflow-auto"
         style={{
-          width: PLAN_BOX.width * scale,
-          height: PLAN_BOX.height * scale,
-          position: "relative",
+          display: "grid",
+          justifyContent: fitsHorizontally ? "center" : "start",
+          alignContent: fitsVertically ? "center" : "start",
+          padding: PAD,
         }}
       >
         <div
           style={{
-            width: PLAN_BOX.width,
-            height: PLAN_BOX.height,
-            transform: `scale(${scale})`,
-            transformOrigin: "top left",
-            position: "absolute",
-            inset: 0,
+            width: PLAN_BOX.width * scale,
+            height: PLAN_BOX.height * scale,
+            position: "relative",
           }}
         >
-          <PlanBackdrop />
+          <div
+            style={{
+              width: PLAN_BOX.width,
+              height: PLAN_BOX.height,
+              transform: `scale(${scale})`,
+              transformOrigin: "top left",
+              position: "absolute",
+              inset: 0,
+            }}
+          >
+            <PlanBackdrop />
 
-          {seats.length > 0 &&
-            [...SEAT_POINTS.values()].map((point) => {
-              const seat = seatByNumber.get(point.seat);
-              if (!seat) return null;
-              return (
-                <SeatMark
-                  key={point.seat}
-                  seat={seat}
-                  x={point.x}
-                  y={point.y}
-                  showName={showNames}
-                  selected={selectedSeat === seat.seat}
-                  highlighted={matchesQuery(seat.name)}
-                  color={groupColors.get(seat.group.trim())}
-                  icon={mealIcon(seat.meal)}
-                  flagged={hasDietaryNote(seat.notes)}
-                  onClick={() => onSeatClick(seat)}
-                />
-              );
-            })}
+            {seats.length > 0 &&
+              [...SEAT_POINTS.values()].map((point) => {
+                const seat = seatByNumber.get(point.seat);
+                if (!seat) return null;
+                return (
+                  <SeatMark
+                    key={point.seat}
+                    seat={seat}
+                    x={point.x}
+                    y={point.y}
+                    showName={showNames}
+                    selected={selectedSeat === seat.seat}
+                    highlighted={matchesQuery(seat.name)}
+                    color={groupColors.get(seat.group.trim())}
+                    icon={mealIcon(seat.meal)}
+                    flagged={hasDietaryNote(seat.notes)}
+                    onClick={() => onSeatClick(seat)}
+                  />
+                );
+              })}
+          </div>
         </div>
       </div>
+
+      {/* Fades marking the sides that have more room off-screen. Gated on
+          the axis actually overflowing, so sub-pixel rounding in a frame
+          the plan fits exactly can't leave one showing. */}
+      <ScrollFade side="left" show={!fitsHorizontally && edges.left} />
+      <ScrollFade side="right" show={!fitsHorizontally && edges.right} />
+      <ScrollFade side="top" show={!fitsVertically && edges.top} />
+      <ScrollFade side="bottom" show={!fitsVertically && edges.bottom} />
     </div>
+  );
+}
+
+/** Padding kept around the plan so no table sits flush against the frame. */
+const PAD = 28;
+/** Never shrink the room past the point where the tables read as tables. */
+const MIN_FIT_SCALE = 0.12;
+
+function readEdges(node: HTMLElement) {
+  const slack = 2; // sub-pixel scroll positions shouldn't flicker the fades
+  return {
+    left: node.scrollLeft > slack,
+    right: node.scrollLeft + node.clientWidth < node.scrollWidth - slack,
+    top: node.scrollTop > slack,
+    bottom: node.scrollTop + node.clientHeight < node.scrollHeight - slack,
+  };
+}
+
+function ScrollFade({
+  side,
+  show,
+}: {
+  side: "left" | "right" | "top" | "bottom";
+  show: boolean;
+}) {
+  const base =
+    "pointer-events-none absolute transition-opacity duration-200 " +
+    (show ? "opacity-100" : "opacity-0");
+  const geometry = {
+    left: "inset-y-0 left-0 w-10 bg-gradient-to-r",
+    right: "inset-y-0 right-0 w-10 bg-gradient-to-l",
+    top: "inset-x-0 top-0 h-10 bg-gradient-to-b",
+    bottom: "inset-x-0 bottom-0 h-10 bg-gradient-to-t",
+  }[side];
+
+  return (
+    <div
+      aria-hidden="true"
+      className={`${base} ${geometry} from-mocha/18 to-transparent`}
+    />
   );
 }
 
