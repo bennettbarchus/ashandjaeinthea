@@ -180,6 +180,30 @@ export async function overwriteTab(
  * rather than a header-mapped row — adding a new column header, say,
  * which writeCells() can't do since it maps by existing header name.
  */
+/**
+ * Reads an arbitrary A1 range as a rectangle of raw strings.
+ *
+ * readTab() above is header-mapped and assumes the header sits in row 1,
+ * which the "Seat assignments" tab breaks: its title block occupies rows
+ * 1-5, its headers are row 6, and a separate parking-lot block starts at
+ * row 166. The /seating tool addresses those blocks by fixed row number
+ * instead, so it needs the rows exactly as they are — short rows padded
+ * out to `width` so column indexes stay meaningful.
+ */
+export async function readRange(
+  range: string,
+  width: number
+): Promise<string[][]> {
+  const sheets = getSheetsClient();
+  const res = await sheets.spreadsheets.values.get({
+    spreadsheetId: SHEET_ID,
+    range,
+  });
+  return (res.data.values ?? []).map((row) =>
+    Array.from({ length: width }, (_, i) => String(row[i] ?? "").trim())
+  );
+}
+
 export async function writeCell(range: string, value: string): Promise<void> {
   const sheets = getSheetsClient();
   await sheets.spreadsheets.values.update({
