@@ -88,8 +88,7 @@ const ESTATE_STEP = 46;
 
 export const TABLES: TableGeometry[] = [
   { kind: "round", id: "T01", cx: 320, cy: 455, ring: 68, radius: 55, seats: range(1, 10) },
-  // T02 gave up seat 020 and seats nine; the circle shrinks to match.
-  { kind: "round", id: "T02", cx: 657, cy: 530, ring: 64, radius: 51, seats: range(11, 19) },
+  { kind: "round", id: "T02", cx: 657, cy: 530, ring: 68, radius: 55, seats: range(11, 20) },
   { kind: "round", id: "T03", cx: 712, cy: 850, ring: 128, radius: 116, hole: 62, seats: range(21, 36) },
   { kind: "round", id: "T04", cx: 440, cy: 678, ring: 68, radius: 55, seats: range(37, 46) },
   { kind: "round", id: "T05", cx: 540, cy: 1125, ring: 68, radius: 55, seats: range(47, 56) },

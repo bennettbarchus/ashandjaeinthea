@@ -8,10 +8,11 @@
  * column H (a =IF(D…) status formula) are fixtures of the sheet — this
  * module only ever writes D:G, exactly as the manual edits did.
  *
- * A seat's row is its number plus six, always: seat 020 was retired when
- * T02 dropped to nine seats and its row was blanked rather than deleted,
- * because deleting it would have shifted every seat below onto the wrong
- * row. A retired seat has no table and cannot be moved into.
+ * A seat's row is its number plus six, always. A seat that a table gives
+ * up is blanked rather than deleted, because deleting the row would shift
+ * every seat below it onto the wrong one; such a row keeps its number but
+ * has no table, and is refused as a destination. (T02 was briefly nine
+ * seats this way before seat 020 was restored.)
  */
 
 import { readRange, writeCellsByRange } from "@/lib/google-sheets";
