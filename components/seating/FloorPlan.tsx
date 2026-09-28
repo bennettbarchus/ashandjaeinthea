@@ -307,35 +307,29 @@ function PlanBackdrop() {
         }
 
         if (table.kind === "estate") {
-          // Both tables of a run share one drawn top; only the left-hand
-          // one carries the run's label, so it isn't painted twice.
           return (
             <g key={table.id}>
-              {table.runLabel && (
-                <>
-                  <rect
-                    x={table.rect.x}
-                    y={table.rect.y}
-                    width={table.rect.width}
-                    height={table.rect.height}
-                    rx={6}
-                    fill="#ece2d8"
-                    stroke="#bfa58a"
-                    strokeWidth={3}
-                  />
-                  <text
-                    x={table.rect.x + table.rect.width / 2}
-                    y={table.rect.y - 16}
-                    textAnchor="middle"
-                    fontSize={24}
-                    fill="#5e3b2b"
-                    fontFamily="var(--font-cinzel), serif"
-                    letterSpacing={2}
-                  >
-                    {table.runLabel}
-                  </text>
-                </>
-              )}
+              <rect
+                x={table.rect.x}
+                y={table.rect.y}
+                width={table.rect.width}
+                height={table.rect.height}
+                rx={6}
+                fill="#ece2d8"
+                stroke="#bfa58a"
+                strokeWidth={3}
+              />
+              <text
+                x={table.rect.x + table.rect.width / 2}
+                y={table.rect.y - 16}
+                textAnchor="middle"
+                fontSize={24}
+                fill="#5e3b2b"
+                fontFamily="var(--font-cinzel), serif"
+                letterSpacing={2}
+              >
+                {table.id}
+              </text>
             </g>
           );
         }

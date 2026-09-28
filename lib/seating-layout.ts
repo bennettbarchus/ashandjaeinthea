@@ -45,7 +45,7 @@ export type TableGeometry =
       ring: number;
       /** Radius of the drawn table top. */
       radius: number;
-      /** Set on the serpentine rings (T03, T11), which are drawn as a band. */
+      /** Set on the serpentine rings (T03, T9), which are drawn as a band. */
       hole?: number;
       /** Seat numbers in clockwise order. */
       seats: number[];
@@ -53,16 +53,14 @@ export type TableGeometry =
   | {
       kind: "estate";
       id: string;
-      /** Label shown above the run, e.g. "T07 | T08". */
-      runLabel: string;
-      /** The drawn table top, shared by the pair. */
+      /** The drawn table top. */
       rect: { x: number; y: number; width: number; height: number };
-      /** x of this table's seat column. */
-      seatX: number;
-      /** y of its first seat; the rest step down by `step`. */
+      /** x of each of the table's two seat columns, left then right. */
+      columns: [number, number];
+      /** y of each column's first seat; the rest step down by `step`. */
       seatY: number;
       step: number;
-      /** Seat numbers top to bottom. */
+      /** Seat numbers down the left column, then down the right. */
       seats: number[];
     }
   | {
@@ -93,61 +91,39 @@ export const TABLES: TableGeometry[] = [
   { kind: "round", id: "T04", cx: 440, cy: 678, ring: 68, radius: 55, seats: range(37, 46) },
   { kind: "round", id: "T05", cx: 540, cy: 1125, ring: 68, radius: 55, seats: range(47, 56) },
   { kind: "round", id: "T06", cx: 355, cy: 930, ring: 68, radius: 55, seats: range(57, 66) },
+  // Each estate run is one long table seated down both sides: 11 seats
+  // down its left column, then 11 down its right.
   {
     kind: "estate",
-    id: "T07",
-    runLabel: "T07 | T08",
+    id: "T7",
     rect: ESTATE_RECT_LEFT,
-    seatX: 957,
+    columns: [957, 1024],
     seatY: ESTATE_FIRST_Y,
     step: ESTATE_STEP,
-    seats: range(67, 77),
+    seats: range(67, 88),
   },
   {
     kind: "estate",
-    id: "T08",
-    runLabel: "",
-    rect: ESTATE_RECT_LEFT,
-    seatX: 1024,
-    seatY: ESTATE_FIRST_Y,
-    step: ESTATE_STEP,
-    seats: range(78, 88),
-  },
-  {
-    kind: "estate",
-    id: "T09",
-    runLabel: "T09 | T10",
+    id: "T8",
     rect: ESTATE_RECT_RIGHT,
-    seatX: 1200,
+    columns: [1200, 1265],
     seatY: ESTATE_FIRST_Y,
     step: ESTATE_STEP,
-    seats: range(89, 99),
+    seats: range(89, 110),
   },
-  {
-    kind: "estate",
-    id: "T10",
-    runLabel: "",
-    rect: ESTATE_RECT_RIGHT,
-    seatX: 1265,
-    seatY: ESTATE_FIRST_Y,
-    step: ESTATE_STEP,
-    seats: range(100, 110),
-  },
-  { kind: "round", id: "T11", cx: 1566, cy: 849, ring: 128, radius: 116, hole: 62, seats: range(111, 126) },
-  { kind: "round", id: "T12", cx: 1891, cy: 849, ring: 68, radius: 55, seats: range(127, 136) },
-  { kind: "round", id: "T13", cx: 1724, cy: 1129, ring: 68, radius: 55, seats: range(137, 146) },
-  // T14 was the one 60" round. Its tenth seat is numbered 158 rather than
-  // 156, because 156 and 157 were already the sweetheart's, so its seats
-  // are the one run on the plan that isn't contiguous. The circle grows a
-  // little to take the extra chair.
+  { kind: "round", id: "T9", cx: 1566, cy: 849, ring: 128, radius: 116, hole: 62, seats: range(111, 126) },
+  { kind: "round", id: "T10", cx: 1891, cy: 849, ring: 68, radius: 55, seats: range(127, 136) },
+  { kind: "round", id: "T11", cx: 1724, cy: 1129, ring: 68, radius: 55, seats: range(137, 146) },
+  // The one 60" round. The circle is a little larger than the other
+  // ten-tops to take its tenth chair.
   {
     kind: "round",
-    id: "T14",
+    id: "T12",
     cx: 2008,
     cy: 1071,
     ring: 66,
     radius: 52,
-    seats: [...range(147, 155), 158],
+    seats: range(147, 156),
   },
   {
     kind: "sweetheart",
@@ -157,7 +133,7 @@ export const TABLES: TableGeometry[] = [
     width: 132,
     height: 60,
     rotation: 14,
-    seats: [156, 157],
+    seats: [157, 158],
   },
 ];
 
@@ -197,11 +173,13 @@ function buildSeatPoints(): Map<number, SeatPoint> {
       }
 
       if (table.kind === "estate") {
+        const perColumn = table.seats.length / 2;
+        const column = i < perColumn ? 0 : 1;
         points.set(seat, {
           seat,
           table: table.id,
-          x: table.seatX,
-          y: table.seatY + i * table.step,
+          x: table.columns[column],
+          y: table.seatY + (i % perColumn) * table.step,
         });
         return;
       }
@@ -228,5 +206,5 @@ function buildSeatPoints(): Map<number, SeatPoint> {
  */
 export const NAME_THRESHOLD = 1.25;
 
-/** Seat card size in plan units — sized to the tightest ring (T03/T11 at 16 seats). */
+/** Seat card size in plan units — sized to the tightest ring (T03/T9 at 16 seats). */
 export const CARD = { width: 46, height: 20 };

@@ -27,7 +27,7 @@ import type {
 
 export const SEAT_TAB = "Seat assignments";
 export const SEAT_FIRST_ROW = 7;
-// Row 164 is seat 158, added when T14 went from nine seats to ten.
+// Row 164 is seat 158, the sweetheart table's second seat.
 export const SEAT_LAST_ROW = 164;
 export const PARKING_FIRST_ROW = 167;
 // 50 holding rows. Seats freed by a table shrinking have to go somewhere,

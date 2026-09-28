@@ -2,8 +2,8 @@
  * Shapes shared by the /seating tool's API routes and its client UI.
  *
  * Everything here mirrors the "Seat assignments" tab literally: a seat is
- * identified by its printed seat number (1-157, matching the numbered
- * floor-plan chart), a parking slot by its sheet row (167-186). No guest
+ * identified by its printed seat number (1-158, matching the numbered
+ * floor-plan chart), a parking slot by its sheet row (167-216). No guest
  * ids are involved — that tab stores display names only, and the tool's
  * job is to move those names between cells.
  */
@@ -11,11 +11,11 @@
 export type LocationType = "seat" | "parking";
 
 export interface SeatCell {
-  /** Printed seat number, 1-157 (column A). */
+  /** Printed seat number, 1-158 (column A). */
   seat: number;
   /** 1-indexed sheet row this seat lives on. */
   row: number;
-  /** Table id: "T01".."T14" or "ST" (column B). */
+  /** Table id: "T01".."T06", "T7".."T12", or "ST" (column B). */
   table: string;
   /** Seat position within the table (column C). */
   seatAtTable: string;
@@ -30,7 +30,7 @@ export interface SeatCell {
 }
 
 export interface ParkingSlot {
-  /** 1-indexed sheet row, 167-186. */
+  /** 1-indexed sheet row, 167-216. */
   row: number;
   name: string;
   meal: string;
