@@ -12,7 +12,9 @@
  * up is blanked rather than deleted, because deleting the row would shift
  * every seat below it onto the wrong one; such a row keeps its number but
  * has no table, and is refused as a destination. (T02 was briefly nine
- * seats this way before seat 020 was restored.)
+ * seats this way before seat 020 was restored.) Seats 008, 048 and 138
+ * are retired this way now, taking T01, T05 and T11 down to nine; their
+ * rows' status formula reads "Retired" once column B is blank.
  */
 
 import { readRange, writeCellsByRange } from "@/lib/google-sheets";

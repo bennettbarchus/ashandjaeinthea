@@ -85,11 +85,13 @@ const ESTATE_FIRST_Y = 706;
 const ESTATE_STEP = 46;
 
 export const TABLES: TableGeometry[] = [
-  { kind: "round", id: "T01", cx: 320, cy: 455, ring: 68, radius: 55, seats: range(1, 10) },
+  // T01, T05 and T11 each gave up a seat (008, 048, 138) and seat nine;
+  // their circles shrink to match, the same size T02 had at nine.
+  { kind: "round", id: "T01", cx: 320, cy: 455, ring: 64, radius: 51, seats: [...range(1, 7), ...range(9, 10)] },
   { kind: "round", id: "T02", cx: 657, cy: 530, ring: 68, radius: 55, seats: range(11, 20) },
   { kind: "round", id: "T03", cx: 712, cy: 850, ring: 128, radius: 116, hole: 62, seats: range(21, 36) },
   { kind: "round", id: "T04", cx: 440, cy: 678, ring: 68, radius: 55, seats: range(37, 46) },
-  { kind: "round", id: "T05", cx: 540, cy: 1125, ring: 68, radius: 55, seats: range(47, 56) },
+  { kind: "round", id: "T05", cx: 540, cy: 1125, ring: 64, radius: 51, seats: [47, ...range(49, 56)] },
   { kind: "round", id: "T06", cx: 355, cy: 930, ring: 68, radius: 55, seats: range(57, 66) },
   // Each estate run is one long table seated down both sides: 11 seats
   // down its left column, then 11 down its right.
@@ -113,7 +115,7 @@ export const TABLES: TableGeometry[] = [
   },
   { kind: "round", id: "T9", cx: 1566, cy: 849, ring: 128, radius: 116, hole: 62, seats: range(111, 126) },
   { kind: "round", id: "T10", cx: 1891, cy: 849, ring: 68, radius: 55, seats: range(127, 136) },
-  { kind: "round", id: "T11", cx: 1724, cy: 1129, ring: 68, radius: 55, seats: range(137, 146) },
+  { kind: "round", id: "T11", cx: 1724, cy: 1129, ring: 64, radius: 51, seats: [137, ...range(139, 146)] },
   // The one 60" round. The circle is a little larger than the other
   // ten-tops to take its tenth chair.
   {
