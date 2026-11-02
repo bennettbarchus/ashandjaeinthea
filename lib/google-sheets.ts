@@ -394,6 +394,23 @@ export async function submitRsvp(params: {
     if (guestUpdates.length) {
       await writeCells("Guests", guests.headers, guestUpdates);
     }
+    // Keep the Invitations tab's guest_name in step with the new name, on
+    // every one of that guest's rows: the Apps Script dashboard lists guests
+    // by guest_name, so without this a renamed plus-one keeps showing under
+    // the placeholder.
+    const renamed = new Set(
+      guestUpdates.map((u) => guests.rows.find((r) => r.rowNumber === u.rowNumber)!.data.guest_id)
+    );
+    const nameUpdates = params.plusOneNames
+      .filter((po) => renamed.has(po.guestId))
+      .flatMap((po) =>
+        invitations.rows
+          .filter((r) => r.data.guest_id === po.guestId)
+          .map((r) => ({ rowNumber: r.rowNumber, values: { guest_name: po.displayName } }))
+      );
+    if (nameUpdates.length) {
+      await writeCells("Invitations", invitations.headers, nameUpdates);
+    }
   }
 
   await writeCells("Households", households.headers, [
@@ -483,6 +500,23 @@ export async function submitWelcomeRsvp(params: {
       .filter((v): v is NonNullable<typeof v> => v !== null);
     if (guestUpdates.length) {
       await writeCells("Guests", guests.headers, guestUpdates);
+    }
+    // Keep the Invitations tab's guest_name in step with the new name, on
+    // every one of that guest's rows: the Apps Script dashboard lists guests
+    // by guest_name, so without this a renamed plus-one keeps showing under
+    // the placeholder.
+    const renamed = new Set(
+      guestUpdates.map((u) => guests.rows.find((r) => r.rowNumber === u.rowNumber)!.data.guest_id)
+    );
+    const nameUpdates = params.plusOneNames
+      .filter((po) => renamed.has(po.guestId))
+      .flatMap((po) =>
+        invitations.rows
+          .filter((r) => r.data.guest_id === po.guestId)
+          .map((r) => ({ rowNumber: r.rowNumber, values: { guest_name: po.displayName } }))
+      );
+    if (nameUpdates.length) {
+      await writeCells("Invitations", invitations.headers, nameUpdates);
     }
   }
 
