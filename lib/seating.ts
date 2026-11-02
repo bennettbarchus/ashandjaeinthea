@@ -2,12 +2,14 @@
  * Server-side model of the "Seat assignments" tab for the /seating tool.
  *
  * The tab is not a plain table: rows 1-5 are a title/summary block, row 6
- * holds the column headers, rows 7-158 are the 152 numbered seats in seat
- * order (the sweetheart table first, at seats 1-2, then T01 through T12),
- * and a "PARKING LOT" block sits below with a header at row 160 and 50
- * holding rows at 161-210. Columns A-C (seat number, table, seat-at-table)
- * and column H (a =IF(D…) status formula) are fixtures of the sheet — this
- * module only ever writes D:G, exactly as the manual edits did.
+ * holds the column headers, rows 7-159 are the 153 numbered seats, and a
+ * "PARKING LOT" block sits below with a header at row 160 and 50 holding
+ * rows at 161-210. Seats 1-152 run in table order (the sweetheart table
+ * first, at seats 1-2, then T01 through T12); seat 153 was added afterwards
+ * at T8, beside seat 97, so it is the one number out of table order.
+ * Columns A-C (seat number, table, seat-at-table) and column H (a =IF(D…)
+ * status formula) are fixtures of the sheet — this module only ever writes
+ * D:G, exactly as the manual edits did.
  *
  * A seat's row is its number plus six, always. A seat that a table gives
  * up is blanked rather than deleted, because deleting the row would shift
@@ -30,8 +32,8 @@ import type {
 
 export const SEAT_TAB = "Seat assignments";
 export const SEAT_FIRST_ROW = 7;
-// Row 158 is seat 152, the last seat at T12.
-export const SEAT_LAST_ROW = 158;
+// Row 159 is seat 153, added at T8 after the renumbering.
+export const SEAT_LAST_ROW = 159;
 export const PARKING_FIRST_ROW = 161;
 // 50 holding rows. Seats freed by a table shrinking have to go somewhere,
 // and 20 filled up the first time Ashley reshuffled the room.

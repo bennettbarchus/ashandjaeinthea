@@ -9,8 +9,9 @@
  * room is a trapezoid: the window wall runs from the top-left corner down
  * to the right, and the right and bottom walls close it off.
  *
- * Seats are numbered with no gaps in seat order: the sweetheart table is
- * 1-2, then T01 through T12. Within a table they run the way the plan was
+ * Seats 1-152 are numbered with no gaps in seat order: the sweetheart table
+ * is 1-2, then T01 through T12. Seat 153 was added later at T8, beside seat
+ * 97, without renumbering. Within a table seats run the way the plan was
  * drawn — clockwise from just right of twelve o'clock on the rounds, top to
  * bottom down each side of the estate runs. The original printed chart
  * predates this numbering, so its labels no longer match; the geometry is
@@ -116,9 +117,9 @@ export const TABLES: TableGeometry[] = [
   // Each estate run is one long table seated down both sides. Each side's
   // seats are listed explicitly and spread evenly over the same length, so a
   // side with fewer seats sits a little wider apart: T7 seats ten a side,
-  // T8 eleven.
+  // T8 twelve on the left (seat 153 sits after 97) and eleven on the right.
   estate("T7", ESTATE_RECT_LEFT, [957, 1024], [range(67, 76), range(77, 86)]),
-  estate("T8", ESTATE_RECT_RIGHT, [1200, 1265], [range(87, 97), range(98, 108)]),
+  estate("T8", ESTATE_RECT_RIGHT, [1200, 1265], [[...range(87, 97), 153], range(98, 108)]),
   { kind: "round", id: "T9", cx: 1566, cy: 849, ring: 128, radius: 116, hole: 62, seats: range(109, 124) },
   { kind: "round", id: "T10", cx: 1891, cy: 849, ring: 68, radius: 55, seats: range(125, 134) },
   { kind: "round", id: "T11", cx: 1724, cy: 1129, ring: 64, radius: 51, seats: range(135, 143) },
