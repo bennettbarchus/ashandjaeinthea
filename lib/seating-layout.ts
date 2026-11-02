@@ -57,10 +57,18 @@ export type TableGeometry =
       rect: { x: number; y: number; width: number; height: number };
       /** x of each of the table's two seat columns, left then right. */
       columns: [number, number];
-      /** y of each column's first seat; the rest step down by `step`. */
+      /** y of each column's first seat. */
       seatY: number;
-      step: number;
-      /** Seat numbers down the left column, then down the right. */
+      /**
+       * Distance from a column's first seat to its last. Each column spreads
+       * its own seats evenly over this length, so a side that gives up a
+       * seat closes the gap instead of leaving a hole, and both sides still
+       * start and end level with each other.
+       */
+      span: number;
+      /** Seat numbers top to bottom, left column then right column. */
+      sides: [number[], number[]];
+      /** Every seat at the table, left column then right (derived from `sides`). */
       seats: number[];
     }
   | {
@@ -82,51 +90,37 @@ const range = (from: number, to: number) =>
 const ESTATE_RECT_LEFT = { x: 960, y: 682, width: 60, height: 508 };
 const ESTATE_RECT_RIGHT = { x: 1205, y: 682, width: 60, height: 508 };
 const ESTATE_FIRST_Y = 706;
-const ESTATE_STEP = 46;
+// Eleven seats 46 apart: the length every estate column is spread over.
+const ESTATE_SPAN = 10 * 46;
+
+function estate(
+  id: string,
+  rect: PlanBox,
+  columns: [number, number],
+  sides: [number[], number[]]
+): TableGeometry {
+  return { kind: "estate", id, rect, columns, seatY: ESTATE_FIRST_Y, span: ESTATE_SPAN, sides, seats: [...sides[0], ...sides[1]] };
+}
 
 export const TABLES: TableGeometry[] = [
-  // T01, T05 and T11 each gave up a seat (008, 048, 138) and seat nine;
-  // their circles shrink to match, the same size T02 had at nine.
+  // T01, T11 and T12 each gave up a seat (008, 138, 152) and seat nine;
+  // their circles shrink to match, the same size T02 had at nine. T05 gave
+  // up 048 too, then took it back for a tenth guest.
   { kind: "round", id: "T01", cx: 320, cy: 455, ring: 64, radius: 51, seats: [...range(1, 7), ...range(9, 10)] },
   { kind: "round", id: "T02", cx: 657, cy: 530, ring: 68, radius: 55, seats: range(11, 20) },
   { kind: "round", id: "T03", cx: 712, cy: 850, ring: 128, radius: 116, hole: 62, seats: range(21, 36) },
   { kind: "round", id: "T04", cx: 440, cy: 678, ring: 68, radius: 55, seats: range(37, 46) },
-  { kind: "round", id: "T05", cx: 540, cy: 1125, ring: 64, radius: 51, seats: [47, ...range(49, 56)] },
+  { kind: "round", id: "T05", cx: 540, cy: 1125, ring: 68, radius: 55, seats: range(47, 56) },
   { kind: "round", id: "T06", cx: 355, cy: 930, ring: 68, radius: 55, seats: range(57, 66) },
-  // Each estate run is one long table seated down both sides: 11 seats
-  // down its left column, then 11 down its right.
-  {
-    kind: "estate",
-    id: "T7",
-    rect: ESTATE_RECT_LEFT,
-    columns: [957, 1024],
-    seatY: ESTATE_FIRST_Y,
-    step: ESTATE_STEP,
-    seats: range(67, 88),
-  },
-  {
-    kind: "estate",
-    id: "T8",
-    rect: ESTATE_RECT_RIGHT,
-    columns: [1200, 1265],
-    seatY: ESTATE_FIRST_Y,
-    step: ESTATE_STEP,
-    seats: range(89, 110),
-  },
+  // Each estate run is one long table seated down both sides. T8's right
+  // side gave up seat 105, so its ten remaining seats spread out to fill
+  // the same length as the eleven opposite.
+  estate("T7", ESTATE_RECT_LEFT, [957, 1024], [range(67, 77), range(78, 88)]),
+  estate("T8", ESTATE_RECT_RIGHT, [1200, 1265], [range(89, 99), [...range(100, 104), ...range(106, 110)]]),
   { kind: "round", id: "T9", cx: 1566, cy: 849, ring: 128, radius: 116, hole: 62, seats: range(111, 126) },
   { kind: "round", id: "T10", cx: 1891, cy: 849, ring: 68, radius: 55, seats: range(127, 136) },
   { kind: "round", id: "T11", cx: 1724, cy: 1129, ring: 64, radius: 51, seats: [137, ...range(139, 146)] },
-  // The one 60" round. The circle is a little larger than the other
-  // ten-tops to take its tenth chair.
-  {
-    kind: "round",
-    id: "T12",
-    cx: 2008,
-    cy: 1071,
-    ring: 66,
-    radius: 52,
-    seats: range(147, 156),
-  },
+  { kind: "round", id: "T12", cx: 2008, cy: 1071, ring: 64, radius: 51, seats: [...range(147, 151), ...range(153, 156)] },
   {
     kind: "sweetheart",
     id: "ST",
@@ -159,6 +153,21 @@ function buildSeatPoints(): Map<number, SeatPoint> {
   const points = new Map<number, SeatPoint>();
 
   for (const table of TABLES) {
+    if (table.kind === "estate") {
+      table.sides.forEach((side, column) => {
+        const gap = side.length > 1 ? table.span / (side.length - 1) : 0;
+        side.forEach((seat, j) => {
+          points.set(seat, {
+            seat,
+            table: table.id,
+            x: table.columns[column],
+            y: table.seatY + j * gap,
+          });
+        });
+      });
+      continue;
+    }
+
     table.seats.forEach((seat, i) => {
       if (table.kind === "round") {
         // Seat 1 sits just clockwise of twelve o'clock, not on it, which is
@@ -170,18 +179,6 @@ function buildSeatPoints(): Map<number, SeatPoint> {
           table: table.id,
           x: table.cx + table.ring * Math.cos(angle),
           y: table.cy + table.ring * Math.sin(angle),
-        });
-        return;
-      }
-
-      if (table.kind === "estate") {
-        const perColumn = table.seats.length / 2;
-        const column = i < perColumn ? 0 : 1;
-        points.set(seat, {
-          seat,
-          table: table.id,
-          x: table.columns[column],
-          y: table.seatY + (i % perColumn) * table.step,
         });
         return;
       }
