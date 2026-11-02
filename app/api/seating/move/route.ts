@@ -11,6 +11,10 @@ const moveSchema = z
     // Optional only when parking a guest: the server picks the first free
     // parking row so two people clicking "park" don't race for the same one.
     toId: z.number().int().positive().optional(),
+    // The name the page was showing at the source. Optional here so a page
+    // built before this field existed gets a clear "reload" message from
+    // moveGuest instead of a schema error.
+    expectedName: z.string().max(200).optional(),
   })
   .refine((value) => value.toType === "parking" || value.toId !== undefined, {
     message: "A destination seat is required.",

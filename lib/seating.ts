@@ -2,23 +2,20 @@
  * Server-side model of the "Seat assignments" tab for the /seating tool.
  *
  * The tab is not a plain table: rows 1-5 are a title/summary block, row 6
- * holds the column headers, rows 7-164 are the numbered seats, and a
- * "PARKING LOT" block sits below with a header at row 166 and 50 holding
- * rows at 167-216. Columns A-C (seat number, table, seat-at-table) and
- * column H (a =IF(D…) status formula) are fixtures of the sheet — this
+ * holds the column headers, rows 7-158 are the 152 numbered seats in seat
+ * order (the sweetheart table first, at seats 1-2, then T01 through T12),
+ * and a "PARKING LOT" block sits below with a header at row 160 and 50
+ * holding rows at 161-210. Columns A-C (seat number, table, seat-at-table)
+ * and column H (a =IF(D…) status formula) are fixtures of the sheet — this
  * module only ever writes D:G, exactly as the manual edits did.
  *
  * A seat's row is its number plus six, always. A seat that a table gives
  * up is blanked rather than deleted, because deleting the row would shift
  * every seat below it onto the wrong one; such a row keeps its number but
- * has no table, and is refused as a destination. (T02 was briefly nine
- * seats this way before seat 020 was restored.) Seats 008, 018, 077, 088,
- * 138 and 152 are retired this way now, taking T01, T02, T11 and T12 down
- * to nine and T7 to twenty; their rows' status formula reads "Retired" once
- * column B is blank. Seats 048 and 105 were retired too, then restored when
- * T05 went back to ten and T8 to twenty-two: their table and seat-at-table
- * came back and their status formula returned to the plain Open/Assigned
- * form.
+ * has no table, its status formula reads "Retired", and it is refused as a
+ * destination. Seats were renumbered once with no gaps, after several
+ * tables had shrunk; if a table gives up a seat again, retire it this way
+ * rather than renumbering mid-flight.
  */
 
 import { readRange, writeCellsByRange } from "@/lib/google-sheets";
@@ -33,12 +30,12 @@ import type {
 
 export const SEAT_TAB = "Seat assignments";
 export const SEAT_FIRST_ROW = 7;
-// Row 164 is seat 158, the sweetheart table's second seat.
-export const SEAT_LAST_ROW = 164;
-export const PARKING_FIRST_ROW = 167;
+// Row 158 is seat 152, the last seat at T12.
+export const SEAT_LAST_ROW = 158;
+export const PARKING_FIRST_ROW = 161;
 // 50 holding rows. Seats freed by a table shrinking have to go somewhere,
 // and 20 filled up the first time Ashley reshuffled the room.
-export const PARKING_LAST_ROW = 216;
+export const PARKING_LAST_ROW = 210;
 
 /** Seat number (column A) for a given sheet row, and back again. */
 const seatNumberForRow = (row: number) => row - SEAT_FIRST_ROW + 1;
@@ -184,6 +181,13 @@ export class MoveError extends Error {
  * emptied or the destination filled — two people can have this tool open
  * at once, and the client's 60s polling means its view can be a minute
  * stale. An occupied destination is never overwritten.
+ *
+ * The client also sends the name it was showing at the source, and the
+ * move is refused unless that seat or slot still holds exactly that guest.
+ * Seat numbers and parking rows are positions, so a page drawn from an
+ * older sheet (or an older layout) could otherwise move whoever happens to
+ * be at that position now. A request with no name comes from a page built
+ * before this check and is refused with a prompt to reload.
  */
 export async function moveGuest(request: MoveRequest): Promise<MoveResponse> {
   const data = await getSeatingData();
@@ -195,6 +199,18 @@ export async function moveGuest(request: MoveRequest): Promise<MoveResponse> {
 
   if (!isOccupied(source.values)) {
     throw new MoveError(`${source.label} is already empty.`, 409);
+  }
+  if (request.expectedName === undefined) {
+    throw new MoveError(
+      "This page is out of date. Reload it before moving anyone.",
+      409
+    );
+  }
+  if (source.values.name.trim() !== request.expectedName.trim()) {
+    throw new MoveError(
+      `${source.label} now holds ${source.values.name}, not ${request.expectedName}. The chart has been refreshed — try again.`,
+      409
+    );
   }
 
   const destination =

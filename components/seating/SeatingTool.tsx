@@ -201,6 +201,7 @@ export function SeatingTool() {
       fromId: selection.kind === "seat" ? selection.seat : selection.row,
       toType: "seat",
       toId: seat.seat,
+      expectedName: selectedGuest ?? "",
     });
   }
 
@@ -221,7 +222,12 @@ export function SeatingTool() {
 
   function parkSelected() {
     if (selection?.kind !== "seat") return;
-    void move({ fromType: "seat", fromId: selection.seat, toType: "parking" });
+    void move({
+      fromType: "seat",
+      fromId: selection.seat,
+      toType: "parking",
+      expectedName: selectedGuest ?? "",
+    });
   }
 
   return (

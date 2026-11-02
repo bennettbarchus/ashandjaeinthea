@@ -9,10 +9,12 @@
  * room is a trapezoid: the window wall runs from the top-left corner down
  * to the right, and the right and bottom walls close it off.
  *
- * Seats are numbered the way the plan numbers them — clockwise from just
- * right of twelve o'clock on the rounds, top to bottom down each side of
- * the estate runs — so seat 1 here is the seat labelled 1 on the paper
- * chart taped to the wall.
+ * Seats are numbered with no gaps in seat order: the sweetheart table is
+ * 1-2, then T01 through T12. Within a table they run the way the plan was
+ * drawn — clockwise from just right of twelve o'clock on the rounds, top to
+ * bottom down each side of the estate runs. The original printed chart
+ * predates this numbering, so its labels no longer match; the geometry is
+ * unchanged.
  */
 
 export interface PlanBox {
@@ -103,26 +105,24 @@ function estate(
 }
 
 export const TABLES: TableGeometry[] = [
-  // T01, T02, T11 and T12 each gave up a seat (008, 018, 138, 152) and
-  // seat nine; their circles shrink to match. T05 gave up 048 too, then
-  // took it back for a tenth guest.
-  { kind: "round", id: "T01", cx: 320, cy: 455, ring: 64, radius: 51, seats: [...range(1, 7), ...range(9, 10)] },
-  { kind: "round", id: "T02", cx: 657, cy: 530, ring: 64, radius: 51, seats: [...range(11, 17), 19, 20] },
+  // T01, T02, T11 and T12 seat nine on a slightly smaller circle; the other
+  // small rounds seat ten.
+  { kind: "round", id: "T01", cx: 320, cy: 455, ring: 64, radius: 51, seats: range(3, 11) },
+  { kind: "round", id: "T02", cx: 657, cy: 530, ring: 64, radius: 51, seats: range(12, 20) },
   { kind: "round", id: "T03", cx: 712, cy: 850, ring: 128, radius: 116, hole: 62, seats: range(21, 36) },
   { kind: "round", id: "T04", cx: 440, cy: 678, ring: 68, radius: 55, seats: range(37, 46) },
   { kind: "round", id: "T05", cx: 540, cy: 1125, ring: 68, radius: 55, seats: range(47, 56) },
   { kind: "round", id: "T06", cx: 355, cy: 930, ring: 68, radius: 55, seats: range(57, 66) },
-  // Each estate run is one long table seated down both sides. A side that
-  // gives up a seat spreads its remaining seats over the same length, so
-  // each side's seats are listed explicitly rather than split in half. T7
-  // gave up 077 and 088 (the bottom seat of each side) and seats ten a side,
-  // a little wider apart than T8's eleven.
-  estate("T7", ESTATE_RECT_LEFT, [957, 1024], [range(67, 76), range(78, 87)]),
-  estate("T8", ESTATE_RECT_RIGHT, [1200, 1265], [range(89, 99), range(100, 110)]),
-  { kind: "round", id: "T9", cx: 1566, cy: 849, ring: 128, radius: 116, hole: 62, seats: range(111, 126) },
-  { kind: "round", id: "T10", cx: 1891, cy: 849, ring: 68, radius: 55, seats: range(127, 136) },
-  { kind: "round", id: "T11", cx: 1724, cy: 1129, ring: 64, radius: 51, seats: [137, ...range(139, 146)] },
-  { kind: "round", id: "T12", cx: 2008, cy: 1071, ring: 64, radius: 51, seats: [...range(147, 151), ...range(153, 156)] },
+  // Each estate run is one long table seated down both sides. Each side's
+  // seats are listed explicitly and spread evenly over the same length, so a
+  // side with fewer seats sits a little wider apart: T7 seats ten a side,
+  // T8 eleven.
+  estate("T7", ESTATE_RECT_LEFT, [957, 1024], [range(67, 76), range(77, 86)]),
+  estate("T8", ESTATE_RECT_RIGHT, [1200, 1265], [range(87, 97), range(98, 108)]),
+  { kind: "round", id: "T9", cx: 1566, cy: 849, ring: 128, radius: 116, hole: 62, seats: range(109, 124) },
+  { kind: "round", id: "T10", cx: 1891, cy: 849, ring: 68, radius: 55, seats: range(125, 134) },
+  { kind: "round", id: "T11", cx: 1724, cy: 1129, ring: 64, radius: 51, seats: range(135, 143) },
+  { kind: "round", id: "T12", cx: 2008, cy: 1071, ring: 64, radius: 51, seats: range(144, 152) },
   {
     kind: "sweetheart",
     id: "ST",
@@ -131,7 +131,7 @@ export const TABLES: TableGeometry[] = [
     width: 132,
     height: 60,
     rotation: 14,
-    seats: [157, 158],
+    seats: [1, 2],
   },
 ];
 
@@ -145,9 +145,9 @@ export interface SeatPoint {
 const RAD = Math.PI / 180;
 
 /**
- * Every seat's point on the plan, keyed by the seat number printed on the
- * chart. Built once at module load — the geometry never changes, only who
- * is sitting in it.
+ * Every seat's point on the plan, keyed by its seat number (column A of the
+ * Seat assignments tab). Built once at module load — the geometry never
+ * changes, only who is sitting in it.
  */
 export const SEAT_POINTS: Map<number, SeatPoint> = buildSeatPoints();
 
@@ -203,7 +203,7 @@ function buildSeatPoints(): Map<number, SeatPoint> {
 
 /**
  * Below this many screen pixels per plan unit a name is unreadable, so the
- * plan draws the printed chart's numbered dots instead of name cards.
+ * plan draws numbered dots instead of name cards.
  */
 export const NAME_THRESHOLD = 1.25;
 
