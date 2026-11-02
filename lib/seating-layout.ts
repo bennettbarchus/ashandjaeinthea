@@ -112,11 +112,12 @@ export const TABLES: TableGeometry[] = [
   { kind: "round", id: "T04", cx: 440, cy: 678, ring: 68, radius: 55, seats: range(37, 46) },
   { kind: "round", id: "T05", cx: 540, cy: 1125, ring: 68, radius: 55, seats: range(47, 56) },
   { kind: "round", id: "T06", cx: 355, cy: 930, ring: 68, radius: 55, seats: range(57, 66) },
-  // Each estate run is one long table seated down both sides, eleven to a
-  // side. A side that gives up a seat spreads its remaining seats over the
-  // same length (T8 did this while seat 105 was retired), so list each
-  // side's seats explicitly rather than splitting the run in half.
-  estate("T7", ESTATE_RECT_LEFT, [957, 1024], [range(67, 77), range(78, 88)]),
+  // Each estate run is one long table seated down both sides. A side that
+  // gives up a seat spreads its remaining seats over the same length, so
+  // each side's seats are listed explicitly rather than split in half. T7
+  // gave up 077 and 088 (the bottom seat of each side) and seats ten a side,
+  // a little wider apart than T8's eleven.
+  estate("T7", ESTATE_RECT_LEFT, [957, 1024], [range(67, 76), range(78, 87)]),
   estate("T8", ESTATE_RECT_RIGHT, [1200, 1265], [range(89, 99), range(100, 110)]),
   { kind: "round", id: "T9", cx: 1566, cy: 849, ring: 128, radius: 116, hole: 62, seats: range(111, 126) },
   { kind: "round", id: "T10", cx: 1891, cy: 849, ring: 68, radius: 55, seats: range(127, 136) },
